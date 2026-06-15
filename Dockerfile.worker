@@ -1,0 +1,19 @@
+# syntax=docker/dockerfile:1
+# ============================================================
+# Dockerfile.worker — CRON worker (แยกจาก Next.js)
+# รัน TypeScript ด้วย tsx — Token Service + Data Sync จะเพิ่มใน Sprint 2
+# ============================================================
+
+FROM node:20-alpine
+WORKDIR /app
+
+# ติดตั้ง deps ทั้งหมด (รวม tsx สำหรับรัน worker)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+CMD ["npm", "run", "worker"]

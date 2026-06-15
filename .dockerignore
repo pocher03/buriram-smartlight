@@ -1,0 +1,31 @@
+# ============================================================
+# .dockerignore — ลดขนาด build context + กันค่าลับเข้า image
+# ============================================================
+node_modules
+.next
+out
+build
+dist
+
+# Secrets (env inject ตอน runtime ผ่าน env_file เท่านั้น)
+.env
+.env.*
+!.env.example
+
+# Git & docs (ไม่จำเป็นใน image)
+.git
+.gitignore
+.dockerignore
+.claudeignore
+.claude
+docs
+*.md
+
+# Logs & misc
+*.log
+coverage
+.vscode
+.idea
+Dockerfile*
+docker-compose*.yml
+Caddyfile

@@ -1,0 +1,85 @@
+# ============================================================
+# docker-compose.yml — ศูนย์บัญชาการโคมไฟถนนอัจฉริยะ บุรีรัมย์
+# Services: postgres · app (Next.js) · worker (CRON) · caddy (Auto-HTTPS)
+#
+# การรัน (บน DO Droplet):
+#   1) cp .env.example .env.local แล้วเติมค่าจริง
+#   2) docker compose up -d --build
+#
+# หมายเหตุ: แต่ละ service โหลด env จาก .env.local (env_file) จึงไม่ต้องมี .env
+# แยกต่างหากสำหรับ variable substitution — เลี่ยง ${} ระดับ compose ทั้งหมด
+# ============================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bru-postgres
+    restart: unless-stopped
+    env_file: .env.local
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # $$ = escape เพื่อให้ตัวแปรถูก expand ใน shell ของ container (ไม่ใช่ compose)
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bru-app
+    restart: unless-stopped
+    env_file: .env.local
+    environment:
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # ไม่ map port ออก host — เข้าถึงผ่าน caddy เท่านั้น (กฎ NO DIRECT)
+    expose:
+      - "3000"
+    networks: [internal]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: bru-worker
+    restart: unless-stopped
+    env_file: .env.local
+    environment:
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [internal]
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: bru-caddy
+    restart: unless-stopped
+    # โหลด APP_DOMAIN / CADDY_ACME_EMAIL ให้ Caddyfile อ่านผ่าน {$VAR}
+    env_file: .env.local
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [internal]
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge
