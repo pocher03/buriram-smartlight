@@ -1,0 +1,114 @@
+/* ---- Web fonts (ต้องอยู่บนสุดก่อน @tailwind) ---- */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Light theme (corporate Google) */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 225 6% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 6% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 6% 13%;
+    --primary: 214 82% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 17% 98%;
+    --secondary-foreground: 225 6% 13%;
+    --muted: 210 17% 95%;
+    --muted-foreground: 213 5% 39%;
+    --accent: 214 100% 96%;
+    --accent-foreground: 214 82% 35%;
+    --destructive: 4 71% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 214 82% 51%;
+    --radius: 0.5rem;
+  }
+
+  /* Dark theme (ค่าเริ่มต้นของระบบ — ผูกกับ brand dark surfaces) */
+  .dark {
+    --background: 225 21% 7%;
+    --foreground: 216 12% 92%;
+    --card: 222 14% 14%;
+    --card-foreground: 216 12% 92%;
+    --popover: 222 14% 14%;
+    --popover-foreground: 216 12% 92%;
+    --primary: 214 82% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 16% 18%;
+    --secondary-foreground: 216 12% 92%;
+    --muted: 220 16% 18%;
+    --muted-foreground: 215 7% 63%;
+    --accent: 220 16% 18%;
+    --accent-foreground: 216 12% 92%;
+    --destructive: 4 71% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 223 16% 22%;
+    --input: 223 16% 22%;
+    --ring: 214 82% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    height: 100%;
+    /* กฎเหล็ก #2: Dashboard จบในจอเดียว — ห้าม body scroll */
+    overflow: hidden;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 13px;
+  }
+}
+
+/* Material Symbols Rounded helper */
+.ms {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+.ms-f {
+  font-variation-settings: "FILL" 1;
+}
+
+/* Scrollbar (เฉพาะ panel ที่อนุญาตให้ scroll ภายใน) */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a3f4b;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
