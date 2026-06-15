@@ -1,0 +1,41 @@
+# ============================================================
+# .claudeignore — ไฟล์/โฟลเดอร์ที่ Claude Code ห้ามอ่านหรือแก้ไข
+# ============================================================
+
+# Secrets (ห้ามอ่านเด็ดขาด)
+.env
+.env.*
+.env.local
+.env.production
+.env.staging
+
+# Dependencies (ไม่จำเป็น สิ้นเปลือง context)
+node_modules/
+.yarn/
+
+# Build Output (ไม่จำเป็น)
+.next/
+out/
+build/
+dist/
+coverage/
+
+# Logs (อ่านเฉพาะเมื่อ debug เท่านั้น)
+*.log
+logs/
+
+# Binary & Media
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.woff
+*.woff2
+*.ttf
+
+# Lock files (อย่าแก้ไข — ให้ package manager จัดการ)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

@@ -1,0 +1,59 @@
+# ============================================================
+# .gitignore — ศูนย์บัญชาการโคมไฟถนนอัจฉริยะ เทศบาลเมืองบุรีรัมย์
+# ⛔ ห้ามลบหรือแก้ไขโดยไม่ได้รับอนุมัติจาก Project Lead
+# ============================================================
+
+# --- Secrets & Environment (สำคัญที่สุด — ห้ามลบ) ---
+.env
+.env.*
+!.env.example
+
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# --- Next.js ---
+.next/
+out/
+build/
+dist/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
+
+# --- OS & Editor ---
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.vscode/*.code-workspace
+.idea/
+*.swp
+*.swo
+
+# --- Testing ---
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# --- Docker (local override เท่านั้น) ---
+docker-compose.override.yml
+
+# --- Database (local dev) ---
+*.db
+*.sqlite
+prisma/migrations/dev_*
+
+# --- TypeScript ---
+*.tsbuildinfo
+
+# --- Prisma ---
+prisma/dev.db
+prisma/dev.db-journal

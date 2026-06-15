@@ -1,0 +1,1895 @@
+{
+    "errorCode": 0,
+    "errorDesc": "None",
+    "data": {
+        "pageTotal": 52,
+        "startPage": 0,
+        "pageSize": 1,
+        "pageData": [
+            {
+                "id": 474122,
+                "name": "BRU-NEMA-001",
+                "thingsObjectAddr": "861556076301117",
+                "commList": [
+                    {
+                        "id": 474120,
+                        "addr": "861556076301117",
+                        "commModelId": 58,
+                        "registerPacket": "",
+                        "isDefault": true,
+                        "gatewayId": null,
+                        "gatewayWithCommunicationId": null,
+                        "gatewayName": null,
+                        "gatewayModelName": null,
+                        "gatewayAddr": null,
+                        "channelNo": null,
+                        "subObjectProtocol": null,
+                        "objectLastError": null,
+                        "controlLastError": null,
+                        "deliveryAddr": null,
+                        "loraComm": null,
+                        "extInfo": null
+                    }
+                ],
+                "modelId": 120,
+                "dataModelId": 143,
+                "modelName": "Lamp",
+                "onlineStatus": 0,
+                "enabled": true,
+                "updatedAt": "2026-06-12 06:47:41",
+                "createdAt": "2025-11-12 15:15:20",
+                "domain": "IMPACT",
+                "thingsServiceList": [
+                    {
+                        "id": 172,
+                        "name": "Dimming",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "AdjustLightBrightnessService",
+                        "extraKey": null,
+                        "description": "调光",
+                        "paramsDefList": [
+                            {
+                                "id": 231,
+                                "name": "brightness",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "brightness",
+                                "thingsRangeDto": {
+                                    "id": 1457,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 500,
+                        "name": "Current high limit modification",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "AdjustLightHighElectricService",
+                        "extraKey": null,
+                        "description": "电流高限值修改",
+                        "paramsDefList": [
+                            {
+                                "id": 600,
+                                "name": "Maximum current value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "electric",
+                                "thingsRangeDto": {
+                                    "id": 2701,
+                                    "max": "65.535",
+                                    "min": "0",
+                                    "skip": "0.001",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "安培 - A",
+                                    "type": "FLOAT"
+                                }
+                            },
+                            {
+                                "id": 599,
+                                "name": "Port (Fixture 1:1, Fixture 2:2)",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "port",
+                                "thingsRangeDto": {
+                                    "id": 2700,
+                                    "max": "2",
+                                    "min": "1",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 501,
+                        "name": "Current low limit modification",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "AdjustLightLowElectricService",
+                        "extraKey": null,
+                        "description": "电流低限值修改",
+                        "paramsDefList": [
+                            {
+                                "id": 602,
+                                "name": "Minimum current value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "electric",
+                                "thingsRangeDto": {
+                                    "id": 2703,
+                                    "max": "65.535",
+                                    "min": "0",
+                                    "skip": "0.001",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "安培 - A",
+                                    "type": "FLOAT"
+                                }
+                            },
+                            {
+                                "id": 601,
+                                "name": "Port (Fixture 1:1, Fixture 2:2)",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "port",
+                                "thingsRangeDto": {
+                                    "id": 2702,
+                                    "max": "2",
+                                    "min": "1",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 418,
+                        "name": "Set local rules to always be enabled",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "AdjustLightStrategyStatusService",
+                        "extraKey": null,
+                        "description": "本地规则使能总开关",
+                        "paramsDefList": [
+                            {
+                                "id": 498,
+                                "name": "Longitude and latitude strategy enablement",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "longitudeAndLatitudeStrategyEnabled",
+                                "thingsRangeDto": {
+                                    "id": 2368,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": [
+                                        {
+                                            "name": "true",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "name": "false",
+                                            "value": "0"
+                                        }
+                                    ],
+                                    "unit": null,
+                                    "type": "BOOLEAN"
+                                }
+                            },
+                            {
+                                "id": 499,
+                                "name": "Timing strategy enablement",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "timingStrategyEnabled",
+                                "thingsRangeDto": {
+                                    "id": 2369,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": [
+                                        {
+                                            "name": "true",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "name": "false",
+                                            "value": "0"
+                                        }
+                                    ],
+                                    "unit": null,
+                                    "type": "BOOLEAN"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 286,
+                        "name": "Clear electric energy statistics",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ClearEnergyStatisticsService",
+                        "extraKey": null,
+                        "description": "电能统计清零",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 287,
+                        "name": "Running time and restart times cleared",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ClearRuntimeAndRebootStatisticsService",
+                        "extraKey": null,
+                        "description": "运行时间及重启次数清零",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 171,
+                        "name": "Turn off the lights",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "CloseLightService",
+                        "extraKey": null,
+                        "description": "关灯",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 170,
+                        "name": "Turn on the light",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "OpenLightService",
+                        "extraKey": null,
+                        "description": "开灯",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 288,
+                        "name": "Query firmware version service",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "QueryFirmwareVersionService",
+                        "extraKey": null,
+                        "description": "查询固件版本服务",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 371,
+                        "name": "Query latitude and longitude (strategy)",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "QueryLightLgLaStrategyService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 339,
+                        "name": "Query power and running time",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "QueryLightRuntimeAndElectricEnergyService",
+                        "extraKey": null,
+                        "description": "查询电能和运行时间",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 169,
+                        "name": "Query status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "QueryLightStateService",
+                        "extraKey": null,
+                        "description": "查询状态",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 364,
+                        "name": "Query timing strategy",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "QueryLightTimingStrategyService",
+                        "extraKey": null,
+                        "description": "查询定时策略",
+                        "paramsDefList": [
+                            {
+                                "id": 391,
+                                "name": "Strategy number",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "id",
+                                "thingsRangeDto": {
+                                    "id": 2181,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 285,
+                        "name": "Read local time",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "QueryLocalTimeService",
+                        "extraKey": null,
+                        "description": "读取本地时间",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 168,
+                        "name": "Query forward reactive energy",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "QueryReactiveEnergyService",
+                        "extraKey": null,
+                        "description": "查询正向无功电能",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 465,
+                        "name": "Query the timing strategy master switch",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightAllTimingStrategiesStatusService",
+                        "extraKey": null,
+                        "description": "响应开关状态：status，0 - 关闭，1 - 开启",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 841,
+                        "name": "Read leakage value",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightElecLeakageValueService",
+                        "extraKey": null,
+                        "description": "读取漏电值",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 923,
+                        "name": "Read GPS information",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightGPSService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 538,
+                        "name": "Read light sensor switch status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightIlluminationStatusService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 558,
+                        "name": "Read light sensing strategy delay time",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightIlluminationStrategyDelayTimeService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 548,
+                        "name": "Read light sensing strategy (switching threshold)",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightIlluminationStrategyService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 2497,
+                        "name": "Read light illumination type",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightIlluminationTypeService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 493,
+                        "name": "Read light sensitivity value",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightIlluminationValue",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 973,
+                        "name": "Read the tilt angle value",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightTiltAngleValuesService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 1659,
+                        "name": "Read leakage voltage",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ReadLightVolLeakageValueService",
+                        "extraKey": null,
+                        "description": "读取漏电电压",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 374,
+                        "name": "Clear all policies",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "RemoveLightAllStrategiesService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 373,
+                        "name": "Delete latitude and longitude policy",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "RemoveLightLgLaStrategyService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 368,
+                        "name": "Delete timing policy",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "RemoveLightTimingStrategyService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 404,
+                                "name": "Strategy number",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "id",
+                                "thingsRangeDto": {
+                                    "id": 2194,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 809,
+                        "name": "Reset tilt state",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "ResetLightTiltStateService",
+                        "extraKey": null,
+                        "description": "修正相对零点",
+                        "paramsDefList": []
+                    },
+                    {
+                        "id": 466,
+                        "name": "Set the timing strategy master switch",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightAllTimingStrategiesStatusService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 574,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 2585,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 849,
+                        "name": "Set power outage alarm status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightBlackoutAlarmStatusService",
+                        "extraKey": null,
+                        "description": "设置断电告警状态",
+                        "paramsDefList": [
+                            {
+                                "id": 800,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 3049,
+                                    "max": "1",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 825,
+                        "name": "Set leakage alarm status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightElecLeakageAlarmStatusService",
+                        "extraKey": null,
+                        "description": "设置漏电告警状态",
+                        "paramsDefList": [
+                            {
+                                "id": 784,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 3033,
+                                    "max": "1",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 833,
+                        "name": "Set leakage alarm threshold",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightElecLeakageAlarmThresholdService",
+                        "extraKey": null,
+                        "description": "设置漏电告警阈值",
+                        "paramsDefList": [
+                            {
+                                "id": 792,
+                                "name": "Threshold (high limit of leakage)",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "threshold",
+                                "thingsRangeDto": {
+                                    "id": 3041,
+                                    "max": "65535",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "毫安 - mA",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 483,
+                        "name": "Set GPS switch status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightGPSStatusService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 589,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 2600,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 488,
+                        "name": "Set GPS time adjustment switch status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightGPSTimingStatusService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 594,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 2605,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 478,
+                        "name": "Set GPS type",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightGPSTypeService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 584,
+                                "name": "GPS type",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "type",
+                                "thingsRangeDto": {
+                                    "id": 2595,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 514,
+                        "name": "Voltage high limit modification",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightHighVoltageService",
+                        "extraKey": null,
+                        "description": "电压高限值修改",
+                        "paramsDefList": [
+                            {
+                                "id": 628,
+                                "name": "Maximum voltage value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "voltage",
+                                "thingsRangeDto": {
+                                    "id": 2729,
+                                    "max": "655.35",
+                                    "min": "0",
+                                    "skip": "0.01",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "伏特 - V",
+                                    "type": "FLOAT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 473,
+                        "name": "Set light sensor switch status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightIlluminationStatusService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 579,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 2590,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 553,
+                        "name": "Set light sensing policy delay time",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightIlluminationStrategyDelayTimeService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 682,
+                                "name": "delay",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "delayTime",
+                                "thingsRangeDto": {
+                                    "id": 2783,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 543,
+                        "name": "Set light sensing strategy (switch threshold)",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightIlluminationStrategyService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 676,
+                                "name": "Lights off threshold",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "closingValue",
+                                "thingsRangeDto": {
+                                    "id": 2777,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            },
+                            {
+                                "id": 675,
+                                "name": "Light on threshold",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "openingValue",
+                                "thingsRangeDto": {
+                                    "id": 2776,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2496,
+                        "name": "Set light illumination type",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightIlluminationTypeService",
+                        "extraKey": null,
+                        "description": "0 - 老版本， 1 - 新版本",
+                        "paramsDefList": [
+                            {
+                                "id": 2844,
+                                "name": "Illumination type",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "illuminationType",
+                                "thingsRangeDto": {
+                                    "id": 6029,
+                                    "max": "1",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 370,
+                        "name": "Set latitude and longitude (policy)",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightLgLaStrategyService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 407,
+                                "name": "latitude",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "latitude",
+                                "thingsRangeDto": {
+                                    "id": 2197,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "100",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 406,
+                                "name": "longitude",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "longitude",
+                                "thingsRangeDto": {
+                                    "id": 2196,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "100",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 409,
+                                "name": "sunrise offset",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sunriseOffset",
+                                "thingsRangeDto": {
+                                    "id": 2199,
+                                    "max": "1000",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            },
+                            {
+                                "id": 410,
+                                "name": "sunset offset",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sunsetOffset",
+                                "thingsRangeDto": {
+                                    "id": 2200,
+                                    "max": "1000",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            },
+                            {
+                                "id": 408,
+                                "name": "Time zone",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "timezone",
+                                "thingsRangeDto": {
+                                    "id": 2198,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "100",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 372,
+                        "name": "Set latitude and longitude policy status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightLgLaStrategyStatusService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 411,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 2201,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 515,
+                        "name": "Voltage low limit modification",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightLowVoltageService",
+                        "extraKey": null,
+                        "description": "电压低限值修改",
+                        "paramsDefList": [
+                            {
+                                "id": 630,
+                                "name": "Minimum voltage value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "voltage",
+                                "thingsRangeDto": {
+                                    "id": 2731,
+                                    "max": "655.35",
+                                    "min": "0",
+                                    "skip": "0.01",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "伏特 - V",
+                                    "type": "FLOAT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 801,
+                        "name": "Set tilt alarm angle value",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightTiltAlarmAngleValuesService",
+                        "extraKey": null,
+                        "description": "设置倾斜告警角度值",
+                        "paramsDefList": [
+                            {
+                                "id": 754,
+                                "name": "x-axis angle value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "xAngle",
+                                "thingsRangeDto": {
+                                    "id": 3003,
+                                    "max": "360",
+                                    "min": "0",
+                                    "skip": "0.01",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "",
+                                    "type": "FLOAT"
+                                }
+                            },
+                            {
+                                "id": 755,
+                                "name": "y-axis angle value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "yAngle",
+                                "thingsRangeDto": {
+                                    "id": 3004,
+                                    "max": "360",
+                                    "min": "0",
+                                    "skip": "0.01",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "",
+                                    "type": "FLOAT"
+                                }
+                            },
+                            {
+                                "id": 756,
+                                "name": "z-axis angle value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "zAngle",
+                                "thingsRangeDto": {
+                                    "id": 3005,
+                                    "max": "360",
+                                    "min": "0",
+                                    "skip": "0.01",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "",
+                                    "type": "FLOAT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 817,
+                        "name": "Set tilt alarm reporting time",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightTiltAlarmReportedTimeService",
+                        "extraKey": null,
+                        "description": "设置倾斜报警上报时间",
+                        "paramsDefList": [
+                            {
+                                "id": 776,
+                                "name": "time",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "time",
+                                "thingsRangeDto": {
+                                    "id": 3025,
+                                    "max": "65535",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 365,
+                        "name": "Create (update) timing policy",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightTimingStrategyService",
+                        "extraKey": null,
+                        "description": "创建（更新）定时策略",
+                        "paramsDefList": [
+                            {
+                                "id": 392,
+                                "name": "Strategy number",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "id",
+                                "thingsRangeDto": {
+                                    "id": 2182,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            },
+                            {
+                                "id": 396,
+                                "name": "Timing 1 execution function",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch1ExecFun",
+                                "thingsRangeDto": {
+                                    "id": 2186,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "100",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 397,
+                                "name": "Timing 1 execution function parameters",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch1ExecFunArgs",
+                                "thingsRangeDto": {
+                                    "id": 2187,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "100",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 395,
+                                "name": "Timing 1 execution line",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch1ExecLoop",
+                                "thingsRangeDto": {
+                                    "id": 2185,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            },
+                            {
+                                "id": 394,
+                                "name": "Timing 1 execution time",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch1ExecTime",
+                                "thingsRangeDto": {
+                                    "id": 2184,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "50",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 400,
+                                "name": "Timing 2 execution function",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch2ExecFun",
+                                "thingsRangeDto": {
+                                    "id": 2190,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "100",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 401,
+                                "name": "Timing 2 execution function parameters",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch2ExecFunArgs",
+                                "thingsRangeDto": {
+                                    "id": 2191,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "100",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 399,
+                                "name": "Timing 2 execution line",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch2ExecLoop",
+                                "thingsRangeDto": {
+                                    "id": 2189,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            },
+                            {
+                                "id": 398,
+                                "name": "Timing 2 execution time",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "sch2ExecTime",
+                                "thingsRangeDto": {
+                                    "id": 2188,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "50",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            },
+                            {
+                                "id": 393,
+                                "name": "Policy status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 2183,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 367,
+                        "name": "Set timing policy status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightTimingStrategyStatusService",
+                        "extraKey": null,
+                        "description": "",
+                        "paramsDefList": [
+                            {
+                                "id": 402,
+                                "name": "Strategy number",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "id",
+                                "thingsRangeDto": {
+                                    "id": 2192,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            },
+                            {
+                                "id": 403,
+                                "name": "Policy status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 2193,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 1660,
+                        "name": "Set leakage voltage alarm status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightVolLeakageAlarmStatusService",
+                        "extraKey": null,
+                        "description": "设置漏电电压告警状态",
+                        "paramsDefList": [
+                            {
+                                "id": 1764,
+                                "name": "state",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 4401,
+                                    "max": "1",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 1661,
+                        "name": "Set the leakage voltage alarm threshold",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightVolLeakageAlarmThresholdService",
+                        "extraKey": null,
+                        "description": "设置漏电电压告警阈值",
+                        "paramsDefList": [
+                            {
+                                "id": 1765,
+                                "name": "Leakage voltage threshold",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "threshold",
+                                "thingsRangeDto": {
+                                    "id": 4402,
+                                    "max": "655.35",
+                                    "min": "0",
+                                    "skip": "0.01",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "伏特 - V",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 962,
+                        "name": "Set flood alarm status",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLightWaterloggingAlarmStatusService",
+                        "extraKey": null,
+                        "description": "设置水浸告警状态",
+                        "paramsDefList": [
+                            {
+                                "id": 944,
+                                "name": "switch status",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "status",
+                                "thingsRangeDto": {
+                                    "id": 3437,
+                                    "max": "1",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 284,
+                        "name": "Set local time",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "SetLocalTimeService",
+                        "extraKey": null,
+                        "description": "设置本地时间",
+                        "paramsDefList": [
+                            {
+                                "id": 298,
+                                "name": "time",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "localTime",
+                                "thingsRangeDto": {
+                                    "id": 1931,
+                                    "max": null,
+                                    "min": null,
+                                    "skip": null,
+                                    "length": "20",
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": null,
+                                    "type": "STRING"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "thingsAttributeList": [
+                    {
+                        "id": 318,
+                        "name": "Voltage",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "voltage",
+                        "realValue": "223.28",
+                        "updatedAt": "2026-06-12 06:35:01",
+                        "thingsRangeDto": {
+                            "id": 1220,
+                            "max": "655.35",
+                            "min": "0",
+                            "skip": "0.01",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "伏特 - V",
+                            "type": "FLOAT"
+                        },
+                        "orderBy": 6000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 319,
+                        "name": "Switch",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "switchStatus",
+                        "realValue": "0",
+                        "updatedAt": "2026-06-12 06:35:01",
+                        "thingsRangeDto": {
+                            "id": 1221,
+                            "max": "1",
+                            "min": "0",
+                            "skip": "1",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "无",
+                            "type": "INT"
+                        },
+                        "orderBy": 3000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 320,
+                        "name": "Running time",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "runtime",
+                        "realValue": "144069",
+                        "updatedAt": "2026-06-12 06:10:29",
+                        "thingsRangeDto": {
+                            "id": 1222,
+                            "max": "429496729",
+                            "min": "0",
+                            "skip": "1",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "分钟 - min",
+                            "type": "INT"
+                        },
+                        "orderBy": 19000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 321,
+                        "name": "Frequency",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "frequency",
+                        "realValue": "50.00",
+                        "updatedAt": "2026-06-12 06:35:01",
+                        "thingsRangeDto": {
+                            "id": 1223,
+                            "max": "655.35",
+                            "min": "0",
+                            "skip": "0.01",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "赫兹 - Hz",
+                            "type": "FLOAT"
+                        },
+                        "orderBy": 15000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 322,
+                        "name": "Active energy",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "acte",
+                        "realValue": "237.00",
+                        "updatedAt": "2026-06-12 06:10:29",
+                        "thingsRangeDto": {
+                            "id": 1224,
+                            "max": "42949672.95",
+                            "min": "0",
+                            "skip": "0.01",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "千瓦时 - kW·h",
+                            "type": "FLOAT"
+                        },
+                        "orderBy": 12000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 323,
+                        "name": "Current",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "electricity",
+                        "realValue": "0.681",
+                        "updatedAt": "2026-06-12 06:35:01",
+                        "thingsRangeDto": {
+                            "id": 1225,
+                            "max": "65.535",
+                            "min": "0",
+                            "skip": "0.001",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "安培 - A",
+                            "type": "FLOAT"
+                        },
+                        "orderBy": 8000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 324,
+                        "name": "Active power",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "actp",
+                        "realValue": "149.20",
+                        "updatedAt": "2026-06-12 06:35:01",
+                        "thingsRangeDto": {
+                            "id": 1226,
+                            "max": "6553.5",
+                            "min": "0",
+                            "skip": "0.01",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "瓦特 - W",
+                            "type": "FLOAT"
+                        },
+                        "orderBy": 10000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 325,
+                        "name": "Brightness",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "brightness",
+                        "realValue": "100",
+                        "updatedAt": "2026-06-12 06:35:01",
+                        "thingsRangeDto": {
+                            "id": 1227,
+                            "max": "100",
+                            "min": "0",
+                            "skip": "1",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "无",
+                            "type": "INT"
+                        },
+                        "orderBy": 5000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 5372,
+                        "name": "IMSI",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "imsi",
+                        "realValue": "425016126621581",
+                        "updatedAt": "2026-06-11 19:05:11",
+                        "thingsRangeDto": {
+                            "id": 1963,
+                            "max": null,
+                            "min": null,
+                            "skip": null,
+                            "length": "15",
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": null,
+                            "type": "STRING"
+                        },
+                        "orderBy": 27000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 5374,
+                        "name": "SNR",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "snr",
+                        "realValue": "31",
+                        "updatedAt": "2026-06-12 06:47:41",
+                        "thingsRangeDto": {
+                            "id": 1961,
+                            "max": "127",
+                            "min": "-128",
+                            "skip": "1",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "无",
+                            "type": "INT"
+                        },
+                        "orderBy": 23000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 5375,
+                        "name": "Base station number",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "pci",
+                        "realValue": "334",
+                        "updatedAt": "2026-06-11 19:05:11",
+                        "thingsRangeDto": {
+                            "id": 1959,
+                            "max": "32767",
+                            "min": "-32768",
+                            "skip": "1",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "无",
+                            "type": "INT"
+                        },
+                        "orderBy": 20000,
+                        "attrCategory": null
+                    },
+                    {
+                        "id": 5715,
+                        "name": "illumination",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "illumination",
+                        "realValue": "0",
+                        "updatedAt": "2025-11-18 22:09:44",
+                        "thingsRangeDto": {
+                            "id": 3273,
+                            "max": "65535",
+                            "min": "0",
+                            "skip": "1",
+                            "length": null,
+                            "enumDetailList": null,
+                            "booleanDetailList": null,
+                            "unit": "照度 - Lux",
+                            "type": "INT"
+                        },
+                        "orderBy": null,
+                        "attrCategory": null
+                    }
+                ],
+                "divisionList": [
+                    {
+                        "id": 1889,
+                        "name": "บุรีรัมย์",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null
+                    }
+                ],
+                "groupList": [
+                    {
+                        "id": 1476,
+                        "name": "บุรีรัมย์",
+                        "thingsObjectId": 474122,
+                        "subObjectInfo": []
+                    }
+                ],
+                "objectAssociateObjectList": [
+                    {
+                        "id": 500200,
+                        "selfObjectId": 474122,
+                        "modelId": 180,
+                        "modelName": "Cat.1-V3 light controller",
+                        "objectId": 474086,
+                        "objectName": "BRU-NEMA-001",
+                        "commList": [
+                            {
+                                "id": 474084,
+                                "addr": "861556076301117",
+                                "commModelId": 95,
+                                "registerPacket": "",
+                                "isDefault": true,
+                                "gatewayId": null,
+                                "gatewayWithCommunicationId": null,
+                                "gatewayName": null,
+                                "gatewayModelName": null,
+                                "gatewayAddr": null,
+                                "channelNo": null,
+                                "subObjectProtocol": "",
+                                "objectLastError": null,
+                                "controlLastError": null,
+                                "deliveryAddr": "861556076301117",
+                                "loraComm": null,
+                                "extInfo": null
+                            }
+                        ],
+                        "internalModelType": 1501,
+                        "internalCategoryType": 4,
+                        "locationOrder": 1,
+                        "switchStatus": null,
+                        "thingsLocation": null,
+                        "onlineStatus": 0,
+                        "enabled": true,
+                        "groupNos": null
+                    }
+                ],
+                "objectAssociateMeterObjectList": [],
+                "objectAssociateLeakageObjectList": [],
+                "objectAssociateCableObjectList": [],
+                "objectAssociateGatewayObjectList": [],
+                "objectAssociateObjectList2": [],
+                "modelSlotAssociateObjectList": [],
+                "objectAssociateSensorObjectList": [],
+                "objectAssociateDoorLockObjectList": [],
+                "objectAssociateDoorMagnetObjectList": [],
+                "objectAssociateLightControlObjectList": [],
+                "lineNumbers": null,
+                "cableTheftNumber": null,
+                "subObjectInfo": null,
+                "groupNo": null,
+                "toiletStatus": null,
+                "doorLockStatus": null,
+                "doorMagnetStatus": null,
+                "repeaterStatus": null,
+                "attributes": {},
+                "usedLocationOrder": null,
+                "switchStatusList": [
+                    {
+                        "id": 319,
+                        "name": "Switch",
+                        "thingsObjectId": 474086,
+                        "subObjectInfo": null,
+                        "identify": "switchStatus",
+                        "locationOrder": 1,
+                        "switchStatus": 0
+                    }
+                ],
+                "internalModelType": 1102,
+                "internalCategoryType": 5,
+                "alarmStatus": true,
+                "alarmStatus1": true,
+                "alarmStatus2": false,
+                "alarmLevel1": 0,
+                "alarmLevel2": null,
+                "divisionId": null,
+                "groupId": null,
+                "groupName": null,
+                "thingsPhysical": null,
+                "thingsLocation": {
+                    "id": 474122,
+                    "latitude": 0.0,
+                    "longitude": 0.0,
+                    "altitude": 0.0,
+                    "sourceType": 0,
+                    "thingsObjectId": null
+                },
+                "productInfo": null,
+                "thingsObjectConfig": null,
+                "productInfoType": 0,
+                "isDelete": false,
+                "loop": null,
+                "categoryId": 64,
+                "modelIdentify": "energyLamp",
+                "scenePatternList": null,
+                "thingsAsset": {
+                    "id": 17533,
+                    "thingsObjectId": 474122,
+                    "objectName": null,
+                    "categoryType": 5,
+                    "assetStatus": 2,
+                    "assetNumber": "SZ6412020251114454793",
+                    "assetAttr": {
+                        "id": 26160,
+                        "assetId": 17533,
+                        "assetAttrInfo": "[{\"index\":1,\"isDisabled\":true,\"attr\":\"Manufacturer\",\"type\":1,\"content\":\"\"},{\"numberType\":\"$\",\"index\":2,\"isDisabled\":true,\"attr\":\"price\",\"type\":6,\"content\":0},{\"remindId\":[],\"index\":3,\"isDisabled\":true,\"attr\":\"Purchase Date\",\"type\":5,\"content\":\"\"},{\"remindId\":[],\"index\":4,\"isDisabled\":true,\"attr\":\"Installation Date\",\"type\":5,\"content\":\"\"},{\"remindId\":[],\"index\":5,\"isDisabled\":true,\"attr\":\"Expiration Date\",\"type\":5,\"content\":\"\"},{\"remindId\":[],\"index\":6,\"isDisabled\":true,\"attr\":\"Expiration of tariff\",\"type\":5,\"content\":\"\"},{\"remindId\":[],\"index\":7,\"isDisabled\":true,\"attr\":\"Service Life\",\"type\":5,\"content\":0},{\"index\":8,\"isDisabled\":true,\"attr\":\"Lamp Color\",\"type\":1,\"content\":\"\"},{\"index\":8,\"isDisabled\":true,\"attr\":\"c\",\"type\":1,\"content\":\"\"},{\"index\":8,\"isDisabled\":true,\"attr\":\"Main Circuit Power\",\"type\":1,\"content\":\"\"},{\"index\":8,\"isDisabled\":true,\"attr\":\"Auxiliary Circuit Power\",\"type\":1,\"content\":\"\"}]",
+                        "assetAttrInfoType": 1
+                    },
+                    "attrId": 26160
+                },
+                "qiniuMonitorDevice": null,
+                "existUnknownDevice": false,
+                "qiniuSpaceInfo": null,
+                "onbonScreenInfo": null,
+                "lightPoleSwitchStatus": 1
+            }
+        ]
+    }
+}

@@ -1,0 +1,436 @@
+ดึงข้อมูล (4)
+
+1.POST /mm/api/division/pandect/info — KPI ภาพรวม (การ์ดบนสุด)
+bady: {
+  "divisionId": 1889
+}
+
+output:
+{
+    "errorCode": 0,
+    "errorDesc": "None",
+    "data": {
+        "divisionPandect": [
+            {
+                "type": 1,
+                "name": "Smart Gateway",
+                "countNum": 0
+            },
+            {
+                "type": 3,
+                "name": "Lighting Pole",
+                "countNum": 0
+            },
+            {
+                "type": 4,
+                "name": "Smart Light Controller",
+                "countNum": 26
+            },
+            {
+                "type": 5,
+                "name": "Lighting Fixture",
+                "countNum": 26
+            },
+            {
+                "type": 6,
+                "name": "Power Distribution Control",
+                "countNum": 0
+            },
+            {
+                "type": 8,
+                "name": "Loop Control",
+                "countNum": 0
+            },
+            {
+                "type": 12,
+                "name": "Accessory Device",
+                "countNum": 0
+            },
+            {
+                "type": 20,
+                "name": "Solar Light ",
+                "countNum": 0
+            }
+        ],
+        "lightOnlineNum": 0,
+        "lightSwitchNum": 0,
+        "offLightSwitchNum": 0,
+        "lightSwitchTime": 660,
+        "lightOnlinePercent": "0.00",
+        "lightSwitchPercent": "0.00",
+        "lightTotal": 26,
+        "gatewayOnlineNum": 0,
+        "gatewayTotal": 0,
+        "gatewayOnlineRate": "0.00",
+        "loopSwitchNum": 0,
+        "loopTotal": 0,
+        "loopSwitchRate": "0.00",
+        "openLightPlanDTO": {
+            "onSunTime": "05:37:00",
+            "offSunTime": "18:37:00",
+            "openTime": "18:37:00",
+            "closeTime": "05:37:00",
+            "maxLux": 0,
+            "minLux": 0
+        },
+        "alarmNum": 26,
+        "processAlarmNum": 0,
+        "dealAlarmNum": 196,
+        "alarmTotal": 222,
+        "alarmInfos": [
+            {
+                "alarmNum": 26,
+                "name": "Offline",
+                "dealNum": 196,
+                "processNum": 0
+            }
+        ],
+        "vo": null,
+        "planEnergy": null,
+        "autualEnergy": "330.67",
+        "energyRate": null,
+        "objectOverview": true,
+        "lightControlOverview": true,
+        "gatewayOverview": true,
+        "alarmOverview": true,
+        "electricityPlan": true,
+        "comprehensiveMonitor": false,
+        "switchLampPlan": true,
+        "energyStatistics": true,
+        "showOrder": "[{\"img\": \"static/img/objectOverview.679cefba.svg\", \"key\": 1, \"name\": \"Equipment overview\", \"show\": true, \"value\": \"objectOverview\"}, {\"img\": \"static/img/lightControlOverview.9b324aff.svg\", \"key\": 2, \"name\": \"Light Control Overview\", \"show\": true, \"value\": \"lightControlOverview\"}, {\"img\": \"static/img/gatewayOverview.f3d36901.svg\", \"key\": 3, \"name\": \"Gateway overview\", \"show\": true, \"value\": \"gatewayOverview\"}, {\"img\": \"static/img/alarmOverview.fa383134.svg\", \"key\": 4, \"name\": \"Alarm overview\", \"show\": true, \"value\": \"alarmOverview\"}, {\"img\": \"static/img/energyStatistics.d09445c4.svg\", \"key\": 5, \"name\": \"Energy consumption statistics\", \"show\": true, \"value\": \"energyStatistics\"}, {\"img\": \"static/img/comprehensiveMonitor.9bac92b6.svg\", \"key\": 6, \"name\": \"Asset Overview\", \"show\": true, \"value\": \"assetStatistics\"}, {\"img\": \"static/img/switchLampPlan.b599ff04.svg\", \"key\": 7, \"name\": \"Today's Switching Lights Program\", \"show\": true, \"value\": \"switchLampPlan\"}, {\"img\": \"static/img/electricityPlan.f9af0740.svg\", \"key\": 8, \"name\": \"electricity plan\", \"show\": true, \"value\": \"electricityPlan\"}]",
+        "illuminationId": null
+    }
+}
+
+///
+
+2.POST /mm/api/things/object/page — อุปกรณ์ + telemetry (ต้องใส่ filterRequest: { fillThingsAttribute: true, fillThingsLocation: true })
+body:
+{
+  "divisionId": 1889,
+  "page": 0,
+  "size": 100,
+  "filterRequest": {
+    "fillThingsLocation": true,
+    "fillThingsAttribute": true
+  }
+}
+
+output:{
+    "errorCode": 0,
+    "errorDesc": "None",
+    "data": {
+        "pageTotal": 52,
+        "startPage": 0,
+        "pageSize": 100,
+        "pageData": [
+            {
+                "id": 474122,
+                "name": "BRU-NEMA-001",
+                "thingsObjectAddr": "861556076301117",
+                "commList": [
+                    {
+                        "id": 474120,
+                        "addr": "861556076301117",
+                        "commModelId": 58,
+                        "registerPacket": "",
+                        "isDefault": true,
+                        "gatewayId": null,
+                        "gatewayWithCommunicationId": null,
+                        "gatewayName": null,
+                        "gatewayModelName": null,
+                        "gatewayAddr": null,
+                        "channelNo": null,
+                        "subObjectProtocol": null,
+                        "objectLastError": null,
+                        "controlLastError": null,
+                        "deliveryAddr": null,
+                        "loraComm": null,
+                        "extInfo": null
+                    }
+                ],
+                "modelId": 120,
+                "dataModelId": 143,
+                "modelName": "Lamp",
+                "onlineStatus": 0,
+                "enabled": true,
+                "updatedAt": "2026-06-12 06:47:41",
+                "createdAt": "2025-11-12 15:15:20",
+                "domain": "IMPACT",
+                "thingsServiceList": [
+                    {
+                        "id": 172,
+                        "name": "Dimming",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "AdjustLightBrightnessService",
+                        "extraKey": null,
+                        "description": "调光",
+                        "paramsDefList": [
+                            {
+                                "id": 231,
+                                "name": "brightness",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "brightness",
+                                "thingsRangeDto": {
+                                    "id": 1457,
+                                    "max": "100",
+                                    "min": "0",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 500,
+                        "name": "Current high limit modification",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "AdjustLightHighElectricService",
+                        "extraKey": null,
+                        "description": "电流高限值修改",
+                        "paramsDefList": [
+                            {
+                                "id": 600,
+                                "name": "Maximum current value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "electric",
+                                "thingsRangeDto": {
+                                    "id": 2701,
+                                    "max": "65.535",
+                                    "min": "0",
+                                    "skip": "0.001",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "安培 - A",
+                                    "type": "FLOAT"
+                                }
+                            },
+                            {
+                                "id": 599,
+                                "name": "Port (Fixture 1:1, Fixture 2:2)",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "port",
+                                "thingsRangeDto": {
+                                    "id": 2700,
+                                    "max": "2",
+                                    "min": "1",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 501,
+                        "name": "Current low limit modification",
+                        "thingsObjectId": null,
+                        "subObjectInfo": null,
+                        "identify": "AdjustLightLowElectricService",
+                        "extraKey": null,
+                        "description": "电流低限值修改",
+                        "paramsDefList": [
+                            {
+                                "id": 602,
+                                "name": "Minimum current value",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "electric",
+                                "thingsRangeDto": {
+                                    "id": 2703,
+                                    "max": "65.535",
+                                    "min": "0",
+                                    "skip": "0.001",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "安培 - A",
+                                    "type": "FLOAT"
+                                }
+                            },
+                            {
+                                "id": 601,
+                                "name": "Port (Fixture 1:1, Fixture 2:2)",
+                                "thingsObjectId": null,
+                                "subObjectInfo": null,
+                                "identify": "port",
+                                "thingsRangeDto": {
+                                    "id": 2702,
+                                    "max": "2",
+                                    "min": "1",
+                                    "skip": "1",
+                                    "length": null,
+                                    "enumDetailList": null,
+                                    "booleanDetailList": null,
+                                    "unit": "无",
+                                    "type": "INT"
+                                }
+                            }
+                        ]
+                    },
+///
+3.GET /mm/api/internal/alarm/history/pagelist?DivisionId=1889&Page={n}&Size=100 — Log แจ้งเตือน + พิกัด(https://rulr-aiot.com/mm/api/internal/alarm/history/pagelist?DivisionId=1889&Page=0&Size=100)
+
+output: {
+    "errorCode": 0,
+    "errorDesc": "None",
+    "data": {
+        "pageTotal": 2702,
+        "startPage": 0,
+        "pageSize": 100,
+        "pageData": [
+            {
+                "id": 11541381,
+                "deviceName": "BRU-NEMA-022",
+                "thingsObjectAddr": "861556076309342",
+                "registerPacket": "",
+                "deviceCategoryName": "Smart Light Controller",
+                "deviceModelName": "Cat.1-V3 light controller",
+                "internalModelType": 1501,
+                "name": "Offline",
+                "alarmCategoryName": "Reminder",
+                "createdAt": "2026-06-12 06:59:00",
+                "createdAtStr": "2026-06-12 06:59:00",
+                "updatedAt": "2026-06-12 06:59:00",
+                "updatedAtStr": "2026-06-12 06:59:00",
+                "duration": "6 hours",
+                "alarmCount": "1",
+                "handleStatus": 0,
+                "handleType": null,
+                "handlerName": null,
+                "handleTime": null,
+                "handleTimeStr": null,
+                "alarmLevel": 0,
+                "thingsObjectId": 474111,
+                "alarmSource": "474111",
+                "alarmSourceType": 0,
+                "alarmType": 1,
+                "alarmCategoryId": 1,
+                "handleBy": null,
+                "notificationType": null,
+                "deviceCategoryId": 63,
+                "deviceModelId": 180,
+                "longitude": 103.112811,
+                "latitude": 14.990345,
+                "triggerConditions": null,
+                "realtimeValue": null,
+                "limitValue": null,
+                "locationOrder": null,
+                "unit": null,
+                "remark": null,
+                "alarmValue": null,
+                "divisionName": "บุรีรัมย์"
+            },
+///
+4.POST /mm/api/division/pandect/save/energy — พลังงาน (ทดสอบทั้ง type:0 รายวัน และ type:1 รายเดือน)
+: {
+    "errorCode": 0,
+    "errorDesc": "None",
+    "data": {
+        "errorCode": 0,
+        "errorDesc": "成功",
+        "data": {
+            "totalReduction": "-236.50",
+            "totalSaveEnergy": "-301.28",
+            "reductionList": [
+                {
+                    "secColumn": "0.00",
+                    "time": "2026-06-01",
+                    "firColumn": "0.00",
+                    "value": "0.00"
+                },
+                {
+                    "secColumn": "22.59",
+                    "time": "2026-06-02",
+                    "firColumn": "0.00",
+                    "value": "-22.59"
+                },
+                {
+                    "secColumn": "23.36",
+                    "time": "2026-06-03",
+                    "firColumn": "0.00",
+                    "value": "-23.36"
+                },
+                {
+                    "secColumn": "23.24",
+                    "time": "2026-06-04",
+                    "firColumn": "0.00",
+                    "value": "-23.24"
+                },
+                {
+                    "secColumn": "24.02",
+                    "time": "2026-06-05",
+                    "firColumn": "0.00",
+                    "value": "-24.02"
+                },
+                {
+                    "secColumn": "22.82",
+                    "time": "2026-06-06",
+                    "firColumn": "0.00",
+                    "value": "-22.82"
+                },
+                {
+                    "secColumn": "22.77",
+                    "time": "2026-06-07",
+                    "firColumn": "0.00",
+                    "value": "-22.77"
+                },
+                {
+                    "secColumn": "25.43",
+                    "time": "2026-06-08",
+                    "firColumn": "0.00",
+                    "value": "-25.43"
+                },
+                {
+                    "secColumn": "23.51",
+                    "time": "2026-06-09",
+                    "firColumn": "0.00",
+                    "value": "-23.51"
+                },
+///
+5.POST /os/api/auth/token — ขอ token 
+:body 
+{
+  "clientId": "faIh47....",
+  "clientSecret": "9dDU66bJ...."
+}
+
+output :{
+    "errorCode": 0,
+    "errorDesc": "None",
+    "data": {
+        "tokenType": "bearer",
+        "accessToken": "180f4d.......",
+        "refreshToken": "45f28......",
+        "expiresIn": 43199
+    }
+}
+
+6.POST /os/api/auth/refreshToken — ต่ออายุ (body: { refreshToken })
+:body
+
+: { clientId, refreshToken }
+:output 
+{
+    "errorCode": 0,
+    "errorDesc": "None",
+    "data": {
+        "tokenType": "bearer",
+        "accessToken": "c44e7464-9",
+        "refreshToken": "6c1e663",
+        "expiresIn": 43199
+    }
+}
