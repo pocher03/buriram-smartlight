@@ -86,6 +86,7 @@ repo/
 ├── .env.local                       ← Credentials จริง (gitignored ⛔)
 ├── .gitignore
 ├── .claudeignore
+├── buriram_v8_4.html
 ├── buriram_master_plan_v2.md    ← SSOT หลัก อ่านก่อนเขียนโค้ด
 └── docs/
     └── api-samples/                 ← ตัวอย่าง API response จริง

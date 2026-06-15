@@ -39,3 +39,6 @@ logs/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Visual reference (อ่านได้แต่ห้ามแก้)
+# docs/buriram_v8_4.html ← ไม่ต้อง ignore เพราะต้องการให้อ่าน

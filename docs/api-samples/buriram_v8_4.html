@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="th" class="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ศูนย์บริหารจัดการโคมไฟถนนอัจฉริยะ — เทศบาลเมืองบุรีรัมย์</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{
+  fontFamily:{sans:['"IBM Plex Sans Thai"','sans-serif']},
+  colors:{
+    blu:'#1a73e8','blu-lt':'#e8f0fe','blu-dk':'#1557b0',
+    grn:'#1e8e3e','grn-lt':'#e6f4ea',
+    red:'#d93025','red-lt':'#fce8e6',
+    yel:'#f9ab00','yel-lt':'#fef9e7',
+    prp:'#7c3aed','prp-lt':'#ede9fe',
+    sf:'#ffffff','sf-2':'#f8f9fa','sf-3':'#f1f3f4',
+    bdr:'#e0e0e0',t1:'#202124',t2:'#5f6368',t3:'#9aa0a6',
+    'dk-bg':'#0f1117','dk-sf':'#1e2128','dk-sf2':'#262b35','dk-bdr':'#2e3340','dk-t1':'#e8eaed','dk-t2':'#9aa0a6',
+  },
+  boxShadow:{
+    g1:'0 1px 3px rgba(60,64,67,.15),0 1px 2px rgba(60,64,67,.10)',
+    g2:'0 2px 6px rgba(60,64,67,.15),0 1px 3px rgba(60,64,67,.12)',
+    g3:'0 4px 16px rgba(60,64,67,.15)',
+    g4:'0 12px 40px rgba(26,115,232,.2),0 4px 12px rgba(26,115,232,.12)',
+  }
+}}}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:inherit;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-feature-settings:'liga';font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none}
+.ms-f{font-variation-settings:'FILL' 1}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:3px}
+.dark ::-webkit-scrollbar-thumb{background:#3a3f4b}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+.pulse{animation:pulse-dot 2s ease-in-out infinite}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.stagger>*{animation:fadeUp .42s ease both}
+.stagger>*:nth-child(1){animation-delay:.04s}.stagger>*:nth-child(2){animation-delay:.09s}
+.stagger>*:nth-child(3){animation-delay:.14s}.stagger>*:nth-child(4){animation-delay:.19s}
+.stagger>*:nth-child(5){animation-delay:.24s}.stagger>*:nth-child(6){animation-delay:.29s}
+@keyframes loginIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes loginOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.04)}}
+.login-in{animation:loginIn .55s cubic-bezier(.22,1,.36,1) both}
+.login-out{animation:loginOut .4s ease forwards}
+@keyframes bgFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+.bg-float{animation:bgFloat 8s ease-in-out infinite}
+.bg-float-slow{animation:bgFloat 12s ease-in-out infinite reverse}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-in{animation:modalIn .3s cubic-bezier(.22,1,.36,1) both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.dropdown-in{animation:slideDown .2s cubic-bezier(.22,1,.36,1) both}
+.pbar{height:4px;border-radius:2px;background:#e0e0e0;overflow:hidden}
+.dark .pbar{background:#2e3340}
+.pfill{height:100%;border-radius:2px;transition:width .7s cubic-bezier(.22,1,.36,1)}
+.tab-btn{transition:color .15s,border-color .15s,background .15s}
+.leaflet-popup-content-wrapper{border-radius:14px!important;padding:0!important;box-shadow:0 6px 24px rgba(60,64,67,.2)!important;overflow:hidden;border:1px solid #e0e0e0!important}
+.leaflet-popup-content{margin:0!important;min-width:228px!important}
+.leaflet-popup-tip-container{display:none!important}
+.leaflet-popup-close-button{top:10px!important;right:12px!important;color:rgba(255,255,255,.8)!important;font-size:18px!important}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%235f6368' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px!important;cursor:pointer}
+.dark select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%239aa0a6' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")}
+.dark .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.95) saturate(.8)}
+.dark .leaflet-popup-content-wrapper{background:#1e2128!important;border-color:#2e3340!important}
+html{transition:background .25s,color .25s}
+.sev-crit{color:#d93025}.sev-warn{color:#f9ab00}.sev-info{color:#1a73e8}.sev-ok{color:#1e8e3e}
+.kpi-card{transition:border-color .15s,box-shadow .15s,background .15s}
+.kpi-card:hover{box-shadow:0 2px 8px rgba(26,115,232,.14)}
+.btm-sec{border-right:1px solid #e0e0e0}
+.dark .btm-sec{border-right-color:#2e3340}
+.btm-sec:last-child{border-right:none}
+.login-input{width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;color:#202124;background:#f8f9fa;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.login-input:focus{border-color:#1a73e8;background:#fff;box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.login-input.error{border-color:#d93025;box-shadow:0 0 0 3px rgba(217,48,37,.10)}
+.login-btn{width:100%;padding:12px;background:#1a73e8;color:#fff;border:none;border-radius:10px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s,box-shadow .2s,transform .1s}
+.login-btn:hover{background:#1557b0;box-shadow:0 4px 16px rgba(26,115,232,.35)}
+.login-btn:active{transform:scale(.99)}
+.login-btn:disabled{background:#9aa0a6;cursor:not-allowed}
+.login-input-grn:focus{border-color:#1e8e3e!important;box-shadow:0 0 0 3px rgba(30,142,62,.12)!important}
+.login-btn-grn{background:#1e8e3e!important}
+.login-btn-grn:hover{background:#176c30!important;box-shadow:0 4px 16px rgba(30,142,62,.35)!important}
+@keyframes spin{to{transform:rotate(360deg)}}
+.msz-btn{display:flex;align-items:center;justify-content:center;width:24px;height:22px;border:none;background:transparent;color:#9aa0a6;cursor:pointer;border-radius:5px;transition:all .15s}
+.msz-btn:hover{color:#1e8e3e;background:rgba(30,142,62,.08)}
+.msz-on{background:#1e8e3e!important;color:#fff!important}
+.leg-dot{display:inline-block;width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.yr-btn{padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;border:1.5px solid;cursor:pointer;transition:all .15s}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center}
+.log-table{width:100%;border-collapse:collapse}
+.log-table th{font-size:10px;font-weight:700;color:#5f6368;text-transform:uppercase;letter-spacing:.8px;padding:10px 14px;background:#f8f9fa;border-bottom:2px solid #e0e0e0;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:1}
+.dark .log-table th{background:#262b35;border-bottom-color:#2e3340;color:#9aa0a6}
+.log-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0;font-size:11px;vertical-align:middle}
+.dark .log-table td{border-bottom-color:#2e3340}
+.log-table tr:hover td{background:#f8f9fa}
+.dark .log-table tr:hover td{background:#262b35}
+.log-table tr:last-child td{border-bottom:none}
+.filter-input{padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;color:#202124;background:#f8f9fa;outline:none;transition:border-color .2s,box-shadow .2s}
+.filter-input:focus{border-color:#1a73e8;box-shadow:0 0 0 2px rgba(26,115,232,.12)}
+.dark .filter-input{background:#262b35;color:#e8eaed;border-color:#2e3340}
+.export-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid;transition:all .15s}
+.profile-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid #e0e0e0;border-radius:14px;box-shadow:0 8px 28px rgba(60,64,67,.18);min-width:248px;z-index:1000;overflow:hidden}
+.dark .profile-menu{background:#1e2128;border-color:#2e3340}
+.profile-menu-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:background .15s;font-size:12px;color:#202124}
+.dark .profile-menu-item{color:#e8eaed}
+.profile-menu-item:hover{background:#f8f9fa}
+.dark .profile-menu-item:hover{background:#262b35}
+.profile-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1a73e8,#0d47a1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;border:2px solid rgba(255,255,255,.8);box-shadow:0 2px 8px rgba(26,115,232,.3);transition:box-shadow .15s}
+.profile-avatar:hover{box-shadow:0 4px 12px rgba(26,115,232,.4)}
+.sev-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.sev-badge.crit{background:#fce8e6;color:#d93025}
+.sev-badge.warn{background:#fef9e7;color:#f9ab00}
+.sev-badge.info{background:#e8f0fe;color:#1a73e8}
+.sev-badge.ok{background:#e6f4ea;color:#1e8e3e}
+.dark .sev-badge.crit{background:rgba(217,48,37,.15)}.dark .sev-badge.warn{background:rgba(249,171,0,.15)}
+.dark .sev-badge.info{background:rgba(26,115,232,.15)}.dark .sev-badge.ok{background:rgba(30,142,62,.15)}
+.pg-btn{width:30px;height:30px;border-radius:8px;border:1.5px solid #e0e0e0;background:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pg-btn:hover{border-color:#1a73e8;color:#1a73e8;background:#e8f0fe}
+.pg-btn.active{border-color:#1a73e8;background:#1a73e8;color:#fff}
+.dark .pg-btn{background:#262b35;border-color:#2e3340;color:#e8eaed}
+.dark .pg-btn.active{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.tor-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;background:#ede9fe;color:#7c3aed;border:1px solid rgba(124,58,237,.2)}
+</style>
+</head>
+<body class="bg-sf-2 text-t1 dark:bg-dk-bg dark:text-dk-t1 flex flex-col h-screen overflow-hidden">
+
+<!-- LOGIN -->
+<div id="login-screen" style="position:fixed;inset:0;z-index:9999;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:linear-gradient(145deg,#e6f4ea 0%,#f8fdf9 45%,#ffffff 100%);">
+    <div class="bg-float" style="position:absolute;top:-80px;left:-80px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(30,142,62,.16),transparent 70%);pointer-events:none;"></div>
+    <div class="bg-float-slow" style="position:absolute;bottom:-90px;right:-90px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(52,168,83,.12),transparent 70%);pointer-events:none;"></div>
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.04" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e8e3e" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#g)"/></svg>
+  </div>
+
+  <!-- Centered login card -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;">
+    <div class="login-in" style="width:100%;max-width:420px;">
+      <div style="background:#fff;border-radius:24px;padding:30px 34px 10px;transform:scale(0.90);box-shadow:0 12px 56px rgba(30,142,62,.16),0 2px 10px rgba(0,0,0,.06);border:1px solid #e8f0ea;">
+
+        <!-- Logo + brand -->
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="width:72px;height:72px;background:linear-gradient(135deg,#1e8e3e,#34a853);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 10px 32px rgba(30,142,62,.32);">
+            <span class="ms ms-f text-white" style="font-size:30px">lightbulb</span>
+          </div>
+          <h1 style="font-size:18px;font-weight:700;color:#202124;line-height:1.3;">ศูนย์บริหารจัดการโคมไฟถนนอัจฉริยะ</h1>
+          <p style="font-size:12px;color:#5f6368;margin-top:5px;">Smart Lighting Management Platform</p>
+        </div>
+
+        <!-- Error -->
+        <div id="login-error" style="display:none;align-items:center;gap:8px;padding:10px 13px;border-radius:10px;background:#fce8e6;border:1px solid rgba(217,48,37,.2);margin-bottom:16px;font-size:11px;color:#d93025;">
+          <span class="ms ms-f" style="font-size:15px">error</span>
+          <span id="login-err-msg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
+        </div>
+
+        <!-- Username -->
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:11px;font-weight:600;color:#5f6368;margin-bottom:6px;letter-spacing:.3px;">ชื่อผู้ใช้งาน</label>
+          <div style="position:relative;">
+            <span class="ms ms-f" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:17px;color:#9aa0a6;pointer-events:none;">person</span>
+            <input id="inp-user" class="login-input login-input-grn" type="text" value="admin" placeholder="กรอกชื่อผู้ใช้งาน" autocomplete="username" style="padding-left:40px;" onkeydown="if(event.key==='Enter')doLogin()"/>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:11px;font-weight:600;color:#5f6368;margin-bottom:6px;letter-spacing:.3px;">รหัสผ่าน</label>
+          <div style="position:relative;">
+            <span class="ms ms-f" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:17px;color:#9aa0a6;pointer-events:none;">lock</span>
+            <input id="inp-pass" class="login-input login-input-grn" type="password" value="admin123" placeholder="กรอกรหัสผ่าน" autocomplete="current-password" style="padding-left:40px;padding-right:44px;" onkeydown="if(event.key==='Enter')doLogin()"/>
+            <button onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;padding:2px;">
+              <span class="ms" id="pw-eye" style="font-size:17px;color:#9aa0a6;">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:#5f6368;user-select:none;">
+            <input type="checkbox" id="remember-me" style="width:15px;height:15px;accent-color:#1e8e3e;cursor:pointer;"/>
+            จดจำฉัน
+          </label>
+          <button onclick="alert('ระบบจะส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลที่ลงทะเบียนไว้')" style="border:none;background:none;cursor:pointer;font-size:12px;color:#1e8e3e;font-weight:600;">ลืมรหัสผ่าน?</button>
+        </div>
+
+        <!-- Login button -->
+        <button class="login-btn login-btn-grn" id="login-btn" onclick="doLogin()">
+          <span id="login-btn-text">เข้าสู่ระบบ</span>
+        </button>
+
+        <!-- Divider -->
+        <div style="display:flex;align-items:center;gap:12px;margin:14px 0;">
+        </div>
+
+        <!-- SSL + version -->
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#9aa0a6;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="ms ms-f" style="font-size:14px;color:#1e8e3e;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align:center;margin-top:20px;font-size:11px;color:#9aa0a6;">
+        พัฒนาโดย <strong style="color:#5f6368;">บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;" class="flex flex-col h-screen overflow-hidden">
+
+<!-- HEADER -->
+<header class="flex-shrink-0 h-14 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-4 gap-3 shadow-g1 z-50">
+  <div class="flex items-center gap-2.5 min-w-0 mr-2">
+    <div class="w-8 h-8 rounded-xl bg-blu flex items-center justify-center flex-shrink-0 shadow-g2">
+      <span class="ms ms-f text-white" style="font-size:18px">location_city</span>
+    </div>
+    <div class="min-w-0">
+      <div class="font-bold text-t1 dark:text-dk-t1 text-xs leading-tight truncate">ศูนย์บริหารจัดการโคมไฟถนนอัจฉริยะ</div>
+      <div class="text-t3 text-[9px] tracking-wide">เทศบาลเมืองบุรีรัมย์</div>
+    </div>
+  </div>
+  <div class="w-px h-7 bg-bdr dark:bg-dk-bdr mx-1 flex-shrink-0"></div>
+  <!-- จุด1: Zone selector -->
+  <div class="flex items-center gap-1.5 flex-shrink-0">
+    <span class="ms text-t3" style="font-size:15px">pin_drop</span>
+    <select id="zone-select" onchange="onZoneChange(this.value)" class="text-xs font-medium text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition">
+      <option value="all">ทุกโซน</option>
+      <option value="โซนศาลากลาง">โซนศาลากลาง</option>
+      <option value="โซนตลาดสด">โซนตลาดสด</option>
+      <option value="โซนถนนหลักเมือง">โซนถนนหลักเมือง</option>
+      <option value="โซนสวนสาธารณะ">โซนสวนสาธารณะ</option>
+      <option value="โซนชุมชน">โซนชุมชน</option>
+    </select>
+  </div>
+
+  <!-- จุด2: Center - Date / Time / Status -->
+  <div class="flex-1 flex items-center justify-center gap-2.5">
+    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
+      <span class="ms text-t3" style="font-size:14px">calendar_today</span>
+      <span class="text-xs font-medium text-t1 dark:text-dk-t1" id="header-date">--</span>
+    </div>
+    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
+      <span class="ms text-t3" style="font-size:14px">schedule</span>
+      <span class="text-sm font-bold text-blu tabular-nums" id="clock">--:--:--</span>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-1.5 bg-grn-lt dark:bg-grn/15 rounded-xl border border-grn/20">
+      <div class="w-2 h-2 rounded-full bg-grn pulse flex-shrink-0"></div>
+      <span class="text-[11px] font-semibold text-grn">ระบบทำงานปกติ</span>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2.5">
+    <!-- จุด4: Weather full (temp/humidity/PM2.5/CO2) -->
+    <div class="flex items-center gap-2.5 px-3 py-1.5 bg-gradient-to-r from-blu-lt to-sf-3 dark:from-blu/10 dark:to-dk-sf2 rounded-xl border border-blu/15">
+      <div class="flex items-center gap-1.5 pr-2.5 border-r border-bdr dark:border-dk-bdr">
+        <span style="font-size:22px">&#9925;</span>
+        <div>
+          <div class="text-sm font-bold text-blu leading-none" id="w-temp">30°C</div>
+          <div class="text-[8px] text-t3 leading-none mt-0.5" id="w-desc">มีเมฆบางส่วน</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <div class="text-center" title="ความชื้นสัมพัทธ์">
+          <div class="ms text-blu mx-auto" style="font-size:14px">water_drop</div>
+          <div class="text-[10px] font-bold text-t1 dark:text-dk-t1 leading-none" id="w-hum">65%</div>
+          <div class="text-[7px] text-t3 leading-none mt-0.5">ความชื้น</div>
+        </div>
+        <div class="text-center" title="ฝุ่นละออง PM2.5">
+          <div class="ms text-yel mx-auto" style="font-size:14px">blur_on</div>
+          <div class="text-[10px] font-bold text-t1 dark:text-dk-t1 leading-none" id="w-pm">38</div>
+          <div class="text-[7px] text-t3 leading-none mt-0.5">PM2.5</div>
+        </div>
+        <div class="text-center" title="คาร์บอนไดออกไซด์">
+          <div class="ms text-grn mx-auto" style="font-size:14px">co2</div>
+          <div class="text-[10px] font-bold text-t1 dark:text-dk-t1 leading-none" id="w-co2">412</div>
+          <div class="text-[7px] text-t3 leading-none mt-0.5">CO₂ ppm</div>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr text-t2 dark:text-dk-t2 hover:border-blu/40 transition text-xs font-medium">
+      <span class="ms" id="theme-icon" style="font-size:15px">light_mode</span><span id="theme-label">สว่าง</span>
+    </button>
+    <!-- Profile -->
+    <div class="relative" id="profile-wrap">
+      <div class="profile-avatar" onclick="toggleProfile()" title="โปรไฟล์">A</div>
+      <div id="profile-menu" class="profile-menu" style="display:none;">
+        <div style="padding:16px;border-bottom:1px solid #e0e0e0;" class="dark:border-dk-bdr">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1a73e8,#0d47a1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink:0;">A</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;" class="text-t1 dark:text-dk-t1">ผู้ดูแลระบบ (Admin)</div>
+              <div style="font-size:11px;" class="text-t3">admin@buriram.go.th</div>
+              <div style="display:flex;align-items:center;gap:4px;margin-top:3px;">
+                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#1e8e3e;"></span>
+                <span style="font-size:10px;color:#1e8e3e;font-weight:600;">ออนไลน์</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:10px 16px;border-bottom:1px solid #e0e0e0;" class="dark:border-dk-bdr">
+          <div style="font-size:10px;color:#9aa0a6;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px;">ข้อมูลการใช้งาน</div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;" class="text-t2 dark:text-dk-t2"><span>บทบาท</span><strong class="text-blu">Super Admin</strong></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;" class="text-t2 dark:text-dk-t2"><span>เข้าสู่ระบบล่าสุด</span><span id="last-login-time" class="text-t1 dark:text-dk-t1 font-medium tabular-nums">--:--:--</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;" class="text-t2 dark:text-dk-t2"><span>IP Address</span><span class="text-t1 dark:text-dk-t1 font-medium tabular-nums">192.168.1.10</span></div>
+        </div>
+        <div class="profile-menu-item" onclick="openProfileModal()">
+          <span class="ms ms-f text-blu" style="font-size:18px">manage_accounts</span>
+          <div><div style="font-size:12px;font-weight:500;">ตั้งค่าโปรไฟล์</div><div style="font-size:10px;" class="text-t3">เปลี่ยนรหัสผ่าน, ข้อมูลส่วนตัว</div></div>
+        </div>
+        <div class="profile-menu-item" onclick="openSessionModal();closeProfile()">
+          <span class="ms ms-f" style="font-size:18px;color:#1e8e3e">history</span>
+          <div><div style="font-size:12px;font-weight:500;">ประวัติ Session ของฉัน</div><div style="font-size:10px;" class="text-t3">Log การเข้าใช้งานของบัญชีนี้</div></div>
+        </div>
+        <div class="profile-menu-item" onclick="openAccessLogModal();closeProfile()">
+          <span class="ms ms-f" style="font-size:18px;color:#1a73e8">manage_search</span>
+          <div><div style="font-size:12px;font-weight:500;">บันทึกการเข้าใช้งานระบบ</div><div style="font-size:10px;" class="text-t3">ภาพรวมทุก Account ของเทศบาล</div></div>
+        </div>
+        <div style="border-top:1px solid #f0f0f0;" class="dark:border-dk-bdr">
+          <div class="profile-menu-item" onclick="doLogout()">
+            <span class="ms ms-f text-red" style="font-size:18px">logout</span>
+            <div><div style="font-size:12px;font-weight:600;color:#d93025;">ออกจากระบบ</div><div style="font-size:10px;color:#9aa0a6;">ยืนยันการ Logout</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="flex-1 min-h-0 flex flex-col overflow-hidden">
+  <div class="flex-1 min-h-0 grid overflow-hidden" id="main-grid" style="grid-template-columns:1fr 55% 1fr;transition:grid-template-columns .35s cubic-bezier(.4,0,.2,1);">
+
+    <!-- LEFT -->
+    <div class="flex flex-col overflow-hidden bg-sf dark:bg-dk-sf border-r border-bdr dark:border-dk-bdr">
+      <div class="flex-1 overflow-y-auto overflow-x-hidden p-3">
+        <div class="text-[9px] font-bold text-t3 uppercase tracking-widest mb-2 px-1">ภาพรวมอุปกรณ์</div>
+        <!-- Gauge ความพร้อมใช้งาน (semi-circle) -->
+        <div class="bg-sf-2 dark:bg-dk-sf2 rounded-xl p-3 border border-bdr/60 dark:border-dk-bdr mb-3">
+          <!-- Gauge ครึ่งวงกลม -->
+          <div style="position:relative;width:100%;height:110px;margin-bottom:6px;">
+            <canvas id="chart-donut" width="200" height="110" style="width:100%;height:110px;"></canvas>
+            <div style="position:absolute;left:0;right:0;bottom:6px;display:flex;flex-direction:column;align-items:center;pointer-events:none;">
+              <div class="text-3xl font-extrabold leading-none" id="donut-pct" style="color:#1e8e3e;">75.0%</div>
+              <div class="text-[10px] text-t3 mt-1 font-medium">อัตราความพร้อมใช้งาน</div>
+            </div>
+          </div>
+          <!-- legend 3 การ์ด -->
+          <div class="grid grid-cols-3 gap-1.5">
+            <div class="flex items-center gap-1.5 py-2 px-2 rounded-lg bg-grn-lt dark:bg-grn/10 border border-grn/15">
+              <span class="w-2 h-2 rounded-full bg-grn flex-shrink-0"></span>
+              <div class="min-w-0">
+                <div class="text-[8px] text-t3 leading-none">ออนไลน์</div>
+                <div class="text-sm font-bold text-grn tabular-nums leading-tight" id="donut-on">21</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 py-2 px-2 rounded-lg border" style="background:rgba(255,149,0,0.07);border-color:rgba(255,149,0,0.2);">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#f29900;"></span>
+              <div class="min-w-0">
+                <div class="text-[8px] text-t3 leading-none">มีปัญหา</div>
+                <div class="text-sm font-bold tabular-nums leading-tight" style="color:#f29900;" id="donut-alarm">5</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 py-2 px-2 rounded-lg bg-red-lt dark:bg-red/10 border border-red/15">
+              <span class="w-2 h-2 rounded-full bg-red flex-shrink-0"></span>
+              <div class="min-w-0">
+                <div class="text-[8px] text-t3 leading-none">ออฟไลน์</div>
+                <div class="text-sm font-bold text-red tabular-nums leading-tight" id="donut-off">3</div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-2 pt-2 border-t border-bdr/60 dark:border-dk-bdr">
+            <span class="text-[10px] text-t3">โคมไฟทั้งหมด </span><strong class="text-xs text-t1 dark:text-dk-t1" id="donut-total">30</strong><span class="text-[10px] text-t3"> ต้น</span>
+          </div>
+        </div>
+        <div class="stagger space-y-2 mb-4">
+          <div class="kpi-card flex items-center gap-2.5 p-2.5 rounded-xl bg-sf-2 dark:bg-dk-sf2 border border-bdr/60 dark:border-dk-bdr">
+            <div class="w-9 h-9 rounded-xl bg-blu-lt dark:bg-blu/15 flex items-center justify-center flex-shrink-0"><span class="ms ms-f text-blu" style="font-size:19px">streetview</span></div>
+            <div class="min-w-0 flex-1"><div class="text-[10px] text-t2 dark:text-dk-t2">โคมไฟทั้งหมด</div><div class="text-xl font-bold text-t1 dark:text-dk-t1 leading-tight" id="kpi-total">400</div></div>
+            <div class="text-[9px] text-t3 font-medium">โคม</div>
+          </div>
+          <div class="kpi-card flex items-center gap-2.5 p-2.5 rounded-xl bg-sf-2 dark:bg-dk-sf2 border border-bdr/60 dark:border-dk-bdr">
+            <div class="w-9 h-9 rounded-xl bg-grn-lt dark:bg-grn/15 flex items-center justify-center flex-shrink-0"><span class="ms ms-f text-grn" style="font-size:19px">check_circle</span></div>
+            <div class="min-w-0 flex-1"><div class="text-[10px] text-t2 dark:text-dk-t2">ออนไลน์</div><div class="text-xl font-bold text-grn leading-tight" id="kpi-online">395</div><div class="text-[9px] text-t3 mt-0.5" id="kpi-online-pct">98.75%</div></div>
+          </div>
+          <div class="kpi-card flex items-center gap-2.5 p-2.5 rounded-xl bg-sf-2 dark:bg-dk-sf2 border border-bdr/60 dark:border-dk-bdr">
+            <div class="w-9 h-9 rounded-xl bg-red-lt dark:bg-red/15 flex items-center justify-center flex-shrink-0"><span class="ms ms-f text-red" style="font-size:19px">cancel</span></div>
+            <div class="min-w-0 flex-1"><div class="text-[10px] text-t2 dark:text-dk-t2">ออฟไลน์</div><div class="text-xl font-bold text-red leading-tight" id="kpi-offline">5</div><div class="text-[9px] text-t3 mt-0.5" id="kpi-offline-pct">1.25%</div></div>
+          </div>
+
+          <!-- KPI โคมมีปัญหา / Alarm (สีส้ม) -->
+          <div class="kpi-card flex items-center gap-2.5 p-2.5 rounded-xl border border-orange-200/60 dark:border-yel/20" style="background:rgba(255,149,0,0.07);">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(255,149,0,0.15);">
+              <span class="ms ms-f" style="font-size:19px;color:#f29900;">warning</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[10px] font-medium" style="color:#f29900;">โคมมีปัญหา / Alarm</div>
+              <div class="text-xl font-bold leading-tight" style="color:#f29900;" id="kpi-alarm">5</div>
+              <div class="text-[9px] text-t3 mt-0.5">กระแส/แรงดันผิดปกติ</div>
+            </div>
+            <div class="flex flex-col items-end gap-0.5">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(255,149,0,0.18);color:#f29900;" id="kpi-alarm-pct">16.7%</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-[9px] font-bold text-t3 uppercase tracking-widest mb-2 px-1">สถานะงานซ่อมบำรุง</div>
+        <div class="space-y-1.5 mb-4">
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr hover:border-yel/40 transition"><div class="w-2 h-2 rounded-full bg-yel flex-shrink-0"></div><div class="flex-1 text-[11px] text-t1 dark:text-dk-t1 truncate">รอดำเนินการ</div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yel-lt dark:bg-yel/15 text-yel">2</span></div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr hover:border-blu/40 transition"><div class="w-2 h-2 rounded-full bg-blu flex-shrink-0"></div><div class="flex-1 text-[11px] text-t1 dark:text-dk-t1 truncate">กำลังดำเนินการ</div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blu-lt dark:bg-blu/15 text-blu">1</span></div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr hover:border-grn/40 transition"><div class="w-2 h-2 rounded-full bg-grn flex-shrink-0"></div><div class="flex-1 text-[11px] text-t1 dark:text-dk-t1 truncate">แล้วเสร็จ</div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-grn-lt dark:bg-grn/15 text-grn">8</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER MAP -->
+    <div class="relative overflow-hidden" id="map-wrap">
+      <div class="absolute top-0 left-0 right-0 h-10 bg-sf/95 dark:bg-dk-sf/95 backdrop-blur-sm border-b border-bdr dark:border-dk-bdr flex items-center px-3 gap-3 z-20">
+        <span class="ms ms-f text-blu" style="font-size:17px">map</span>
+        <span class="font-semibold text-t1 dark:text-dk-t1 text-xs">แผนที่โคมไฟอัจฉริยะ (Smart Map)</span>
+        <!-- ปุ่มปรับขนาดแผนที่ -->
+        <div class="flex items-center gap-1 ml-3 bg-sf-3 dark:bg-dk-sf2 rounded-lg p-0.5 border border-bdr dark:border-dk-bdr">
+          <button onclick="setMapSize('auto')" id="msz-auto" class="msz-btn msz-on" title="ปรับอัตโนมัติ"><span class="ms" style="font-size:14px">aspect_ratio</span></button>
+          <button onclick="setMapSize('md')" id="msz-md" class="msz-btn" title="แผนที่ปานกลาง"><span class="ms" style="font-size:14px">crop_din</span></button>
+          <button onclick="setMapSize('lg')" id="msz-lg" class="msz-btn" title="แผนที่ใหญ่"><span class="ms" style="font-size:14px">crop_free</span></button>
+        </div>
+        <div class="flex items-center gap-2.5 ml-auto text-[10px] text-t2 dark:text-dk-t2">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-grn inline-block"></span>ออนไลน์</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red inline-block"></span>ออฟไลน์</span>
+        </div>
+        <div class="text-[9px] text-t3 bg-sf-3 dark:bg-dk-sf2 px-2 py-1 rounded-full border border-bdr dark:border-dk-bdr">คลิก Marker เพื่อดูข้อมูล</div>
+      </div>
+      <div id="leaflet-map" style="position:absolute;inset:0;top:40px;z-index:1;"></div>
+    </div>
+
+    <!-- RIGHT: LOGS -->
+    <div class="flex flex-col overflow-hidden bg-sf dark:bg-dk-sf border-l border-bdr dark:border-dk-bdr">
+      <div class="flex-shrink-0 px-3 pt-3 pb-2 border-b border-bdr dark:border-dk-bdr">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="ms ms-f text-blu" style="font-size:16px">history</span>
+          <span class="font-semibold text-t1 dark:text-dk-t1 text-xs">ประวัติระบบและการแจ้งเตือน</span>
+          <button onclick="openAuditModal()" class="ml-auto text-[9px] font-semibold text-prp bg-prp-lt dark:bg-prp/15 px-2 py-1 rounded-lg border border-prp/25 hover:bg-prp/15 transition flex items-center gap-1">
+            <span class="ms ms-f" style="font-size:12px">open_in_full</span>ดูทั้งหมด
+          </button>
+        </div>
+        <select class="w-full text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition mb-2">
+          <option>วันนี้</option><option>3 วัน</option><option>5 วัน</option><option>7 วัน</option><option>30 วัน</option><option>90 วัน</option><option>กำหนดเอง</option>
+        </select>
+        <div class="flex gap-0.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl p-1">
+          <button class="tab-btn flex-1 text-[9px] font-medium py-1.5 px-1 rounded-lg text-center" id="tab-hw"  onclick="setTab('hw')">ฮาร์ดแวร์</button>
+          <button class="tab-btn flex-1 text-[9px] font-medium py-1.5 px-1 rounded-lg text-center" id="tab-cmd" onclick="setTab('cmd')">คำสั่งการ</button>
+          <button class="tab-btn flex-1 text-[9px] font-medium py-1.5 px-1 rounded-lg text-center" id="tab-cfg" onclick="setTab('cfg')">ตั้งค่าระบบ</button>
+        </div>
+      </div>
+      <div id="log-feed" class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="flex-shrink-0 bg-sf dark:bg-dk-sf border-t border-bdr dark:border-dk-bdr flex overflow-hidden" style="height:210px;">
+    <!-- Energy chart -->
+    <div class="btm-sec flex flex-col p-3" style="flex:1.8;min-width:0;">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="ms ms-f text-yel" style="font-size:15px">bolt</span>
+          <span class="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider">เปรียบเทียบการใช้พลังงาน (kWh)</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-1.5"><span class="leg-dot" style="background:#1a73e8;"></span><span class="text-[9px] text-t3 font-medium">ปีนี้</span></div>
+          <div class="flex items-center gap-1.5"><span class="leg-dot" style="background:rgba(30,142,62,.7);"></span><span class="text-[9px] text-t3 font-medium">ปีก่อน</span></div>
+          <div class="flex items-center gap-1.5"><span style="display:inline-block;width:20px;height:2.5px;border-radius:2px;background:#34a853;flex-shrink:0;"></span><span class="text-[9px] text-t3 font-medium">คาร์บอนเครดิต</span></div>
+          <!-- จุด3: period selector รายเดือน/สัปดาห์/วัน -->
+          <div class="flex items-center gap-1 ml-1">
+            <button id="pd-month" onclick="setPeriod('month')" class="yr-btn" style="border-color:#1a73e8;color:#1a73e8;background:#e8f0fe;">รายเดือน</button>
+            <button id="pd-week"  onclick="setPeriod('week')"  class="yr-btn" style="border-color:#e0e0e0;color:#9aa0a6;background:transparent;">รายสัปดาห์</button>
+            <button id="pd-day"   onclick="setPeriod('day')"   class="yr-btn" style="border-color:#e0e0e0;color:#9aa0a6;background:transparent;">รายวัน</button>
+          </div>
+          <!-- จุด3: ปุ่มขยาย -->
+          <button onclick="openEnergyModal()" class="yr-btn" style="border-color:#1e8e3e;color:#1e8e3e;background:#e6f4ea;display:flex;align-items:center;gap:3px;" title="ขยายกราฟ">
+            <span class="ms" style="font-size:13px">open_in_full</span>ขยาย
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 min-h-0"><canvas id="chart-energy"></canvas></div>
+    </div>
+    <!-- Savings -->
+    <div class="btm-sec flex flex-col justify-center gap-2 p-3" style="flex:.82;min-width:0;">
+      <div class="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider flex items-center gap-1.5 mb-1"><span class="ms ms-f" style="font-size:14px;color:#34a853">savings</span>ผลประหยัด</div>
+      <div class="bg-grn-lt dark:bg-grn/10 rounded-xl p-2.5 border border-grn/20">
+        <div class="text-[9px] text-grn font-medium mb-0.5">&#128176; เงินประหยัดสะสม</div>
+        <div class="text-xl font-bold text-grn leading-none">12,450 <span class="text-xs font-normal">บาท</span></div>
+        <div class="text-[9px] text-t3 mt-1">kWh &#215; 4.5 &#3647;</div>
+      </div>
+      <div class="bg-blu-lt dark:bg-blu/10 rounded-xl p-2.5 border border-blu/20">
+        <div class="text-[9px] text-blu font-medium mb-0.5">&#127807; ลดคาร์บอน CO&#8322;</div>
+        <div class="text-xl font-bold text-blu leading-none">1,380 <span class="text-xs font-normal">kg</span></div>
+        <div class="text-[9px] text-t3 mt-1">kWh &#215; 0.5 kg</div>
+      </div>
+    </div>
+    <!-- Top Fault -->
+    <div class="btm-sec flex flex-col p-3" style="flex:.78;min-width:0;">
+      <div class="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider flex items-center gap-1.5 mb-2"><span class="ms ms-f text-red" style="font-size:14px">report_problem</span>โซนปัญหาสูงสุด</div>
+      <div class="space-y-2 flex-1">
+        <div><div class="flex items-center justify-between mb-0.5"><div class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-md bg-red-lt dark:bg-red/15 text-red text-[9px] font-bold flex items-center justify-center flex-shrink-0">1</span><span class="text-[11px] font-medium text-t1 dark:text-dk-t1">โซนตลาดสด</span></div><span class="text-[10px] font-bold text-red">4 ครั้ง</span></div><div class="pbar"><div class="pfill bg-red" style="width:100%"></div></div></div>
+        <div><div class="flex items-center justify-between mb-0.5"><div class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-md bg-yel-lt dark:bg-yel/15 text-yel text-[9px] font-bold flex items-center justify-center flex-shrink-0">2</span><span class="text-[11px] font-medium text-t1 dark:text-dk-t1">ถนนหลักเมือง</span></div><span class="text-[10px] font-bold text-yel">3 ครั้ง</span></div><div class="pbar"><div class="pfill bg-yel" style="width:75%"></div></div></div>
+        <div><div class="flex items-center justify-between mb-0.5"><div class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-md bg-sf-3 dark:bg-dk-sf2 text-t3 text-[9px] font-bold flex items-center justify-center flex-shrink-0">3</span><span class="text-[11px] font-medium text-t1 dark:text-dk-t1">สวนสาธารณะ</span></div><span class="text-[10px] font-bold text-t2 dark:text-dk-t2">1 ครั้ง</span></div><div class="pbar"><div class="pfill bg-t3" style="width:25%"></div></div></div>
+      </div>
+    </div>
+    <!-- AI Insight -->
+    <div class="flex flex-col p-3" style="flex:.95;min-width:0;">
+      <div class="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider flex items-center gap-1.5 mb-2"><span class="ms ms-f text-blu" style="font-size:14px">psychology</span>AI Insight</div>
+      <div class="flex-1 bg-blu-lt dark:bg-blu/8 rounded-xl p-3 border border-blu/20 flex flex-col justify-between">
+        <div class="flex gap-2">
+          <span class="ms ms-f text-blu flex-shrink-0 mt-0.5" style="font-size:22px">smart_toy</span>
+          <p class="text-[11px] text-t2 dark:text-dk-t2 leading-relaxed"><strong class="text-t1 dark:text-dk-t1">AI วิเคราะห์:</strong> สัปดาห์นี้การใช้พลังงาน<span class="text-grn font-semibold">ลดลง 12%</span> ระบบทำงานเสถียร ไม่พบความเสี่ยงจากฮาร์ดแวร์หลัก</p>
+        </div>
+        <div class="mt-2 pt-2 border-t border-blu/15 dark:border-blu/20 space-y-1">
+          <div class="flex items-center gap-1.5 text-[10px] text-t2 dark:text-dk-t2"><span class="ms ms-f text-grn" style="font-size:13px">check_circle</span>ไม่พบการแจ้งเตือนรุนแรงใน 7 วันที่ผ่านมา</div>
+          <div class="flex items-center gap-1.5 text-[10px] text-t2 dark:text-dk-t2"><span class="ms ms-f text-yel" style="font-size:13px">warning</span>แนะนำตรวจสอบโซนตลาดสด (4 ครั้ง)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="flex-shrink-0 h-6 bg-sf-3 dark:bg-dk-sf border-t border-bdr dark:border-dk-bdr flex items-center px-4 gap-3 text-[10px] text-t3">
+  System Uptime: <strong class="text-grn ml-0.5">99.2%</strong>
+  <span class="mx-1">|</span>Last Sync: <strong class="text-t1 dark:text-dk-t1 ml-0.5 tabular-nums" id="last-sync">--:--:--</strong>
+  <div class="flex-1"></div>
+  พัฒนาโดย <strong class="text-t2 dark:text-dk-t2 ml-1">บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด</strong>
+  <span class="mx-1">|</span><strong class="text-grn">Cloud: ปกติ</strong><span class="mx-1">|</span>v1.0.0
+</div>
+</div><!-- end dashboard -->
+
+<!-- ENERGY EXPAND MODAL -->
+<div id="energy-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeEnergyModal()">
+  <div class="modal-in bg-sf dark:bg-dk-sf rounded-2xl shadow-g4 flex flex-col" style="width:90vw;max-width:1000px;height:78vh;overflow:hidden;border:1px solid #e0e0e0;" onclick="event.stopPropagation()">
+    <div class="flex-shrink-0 flex items-center gap-3 px-6 py-4 border-b border-bdr dark:border-dk-bdr">
+      <div class="w-9 h-9 rounded-xl bg-grn-lt dark:bg-grn/15 flex items-center justify-center flex-shrink-0">
+        <span class="ms ms-f text-grn" style="font-size:20px">bolt</span>
+      </div>
+      <div>
+        <div class="font-bold text-t1 dark:text-dk-t1 text-sm">รายงานการใช้พลังงานและคาร์บอนเครดิต</div>
+        <div class="text-[10px] text-t3 mt-0.5">เปรียบเทียบปีนี้กับปีก่อน พร้อมคาร์บอนเครดิตที่ประหยัดได้</div>
+      </div>
+      <div class="flex items-center gap-1 ml-4">
+        <button onclick="setPeriod('month')" class="yr-btn" id="pdb-month" style="border-color:#1a73e8;color:#1a73e8;background:#e8f0fe;">รายเดือน</button>
+        <button onclick="setPeriod('week')" class="yr-btn" id="pdb-week" style="border-color:#e0e0e0;color:#9aa0a6;background:transparent;">รายสัปดาห์</button>
+        <button onclick="setPeriod('day')" class="yr-btn" id="pdb-day" style="border-color:#e0e0e0;color:#9aa0a6;background:transparent;">รายวัน</button>
+      </div>
+      <div class="flex-1"></div>
+      <button onclick="closeEnergyModal()" class="w-8 h-8 rounded-xl bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr flex items-center justify-center hover:bg-red-lt hover:border-red/30 transition"><span class="ms text-t2" style="font-size:18px">close</span></button>
+    </div>
+    <!-- Summary -->
+    <div class="flex-shrink-0 flex border-b border-bdr dark:border-dk-bdr">
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center"><div class="text-lg font-bold text-blu" id="em-now">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">พลังงานปีนี้ (kWh)</div></div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center"><div class="text-lg font-bold text-grn" id="em-save">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">ประหยัดได้ (kWh)</div></div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center"><div class="text-lg font-bold text-grn" id="em-carbon">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">คาร์บอนเครดิต (kg CO₂)</div></div>
+      <div class="flex-1 px-5 py-3 text-center"><div class="text-lg font-bold text-yel" id="em-money">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">มูลค่าประหยัด (บาท)</div></div>
+    </div>
+    <div class="flex-1 min-h-0 p-5"><canvas id="chart-energy-big"></canvas></div>
+  </div>
+</div>
+
+<!-- AUDIT MODAL -->
+<div id="audit-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeAuditModal()">
+  <div class="modal-in bg-sf dark:bg-dk-sf rounded-2xl shadow-g4 flex flex-col" style="width:92vw;max-width:1100px;height:86vh;overflow:hidden;border:1px solid #e0e0e0;" onclick="event.stopPropagation()">
+    <!-- Modal header -->
+    <div class="flex-shrink-0 flex items-center gap-3 px-6 py-4 border-b border-bdr dark:border-dk-bdr">
+      <div class="w-9 h-9 rounded-xl bg-prp-lt dark:bg-prp/15 flex items-center justify-center flex-shrink-0">
+        <span class="ms ms-f" style="font-size:20px;color:#7c3aed">policy</span>
+      </div>
+      <div>
+        <div class="font-bold text-t1 dark:text-dk-t1 text-sm">บันทึกการตรวจสอบระบบ (System Audit Log)</div>
+        <div class="text-[10px] text-t3 mt-0.5">บันทึกข้อมูลจราจรทางคอมพิวเตอร์ &#8226; จัดเก็บตามระยะเวลาที่กฎหมายกำหนด &#8226; สำรองและจัดเก็บอัตโนมัติ</div>
+      </div>
+      <span class="tor-badge ml-2"><span class="ms ms-f" style="font-size:13px">verified_user</span>ตามมาตรฐานความปลอดภัย</span>
+      <div class="flex-1"></div>
+      <button onclick="exportCSV()" class="export-btn" style="border-color:#1e8e3e;color:#1e8e3e;background:#e6f4ea;"><span class="ms ms-f" style="font-size:15px">download</span>ส่งออก CSV</button>
+      <button onclick="exportPDF()" class="export-btn ml-2" style="border-color:#d93025;color:#d93025;background:#fce8e6;"><span class="ms ms-f" style="font-size:15px">picture_as_pdf</span>ส่งออก PDF</button>
+      <button onclick="closeAuditModal()" class="ml-3 w-8 h-8 rounded-xl bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr flex items-center justify-center hover:bg-red-lt hover:border-red/30 transition"><span class="ms text-t2" style="font-size:18px">close</span></button>
+    </div>
+    <!-- Summary KPIs -->
+    <div class="flex-shrink-0 flex border-b border-bdr dark:border-dk-bdr">
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center"><div class="text-lg font-bold text-t1 dark:text-dk-t1" id="au-total">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">รายการทั้งหมด</div></div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center"><div class="text-lg font-bold text-red" id="au-crit">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">เร่งด่วน</div></div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center"><div class="text-lg font-bold text-yel" id="au-warn">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">เฝ้าระวัง</div></div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center"><div class="text-lg font-bold text-grn" id="au-ok">0</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">ปกติ</div></div>
+      <div class="flex-1 px-5 py-3 text-center"><div class="text-lg font-bold text-prp">90</div><div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">วันที่จัดเก็บ</div></div>
+    </div>
+    <!-- Filter bar -->
+    <div class="flex-shrink-0 flex items-center gap-3 px-5 py-3 border-b border-bdr dark:border-dk-bdr bg-sf-2 dark:bg-dk-sf2 flex-wrap">
+      <div class="flex gap-1 bg-sf-3 dark:bg-dk-sf rounded-xl p-1 flex-shrink-0">
+        <button class="tab-btn text-[10px] font-medium py-1.5 px-3 rounded-lg" id="at-all" onclick="setAuditTab('all')">ทั้งหมด</button>
+        <button class="tab-btn text-[10px] font-medium py-1.5 px-3 rounded-lg" id="at-hw"  onclick="setAuditTab('hw')">ฮาร์ดแวร์</button>
+        <button class="tab-btn text-[10px] font-medium py-1.5 px-3 rounded-lg" id="at-cmd" onclick="setAuditTab('cmd')">คำสั่งการ</button>
+        <button class="tab-btn text-[10px] font-medium py-1.5 px-3 rounded-lg" id="at-cfg" onclick="setAuditTab('cfg')">ตั้งค่าระบบ</button>
+      </div>
+      <div class="w-px h-6 bg-bdr dark:bg-dk-bdr"></div>
+      <select id="af-range" class="filter-input text-[11px]" style="min-width:130px;" onchange="applyFilters()"><option value="all">ทุกช่วงเวลา</option><option value="7">7 วันล่าสุด</option><option value="30">30 วันล่าสุด</option><option value="90">90 วันล่าสุด</option><option value="180">6 เดือน (ทั้งหมด)</option></select>
+      <select id="af-sev" class="filter-input text-[11px]" style="min-width:130px;" onchange="applyFilters()"><option value="all">ทุกระดับ</option><option value="crit">เร่งด่วน</option><option value="warn">เฝ้าระวัง</option><option value="info">ทั่วไป</option><option value="ok">ปกติ</option></select>
+      <select id="af-user" class="filter-input text-[11px]" style="min-width:120px;" onchange="applyFilters()"><option value="all">ผู้ใช้ทั้งหมด</option><option value="admin">admin</option><option value="operator1">operator1</option><option value="system">ระบบอัตโนมัติ</option></select>
+      <div style="position:relative;flex:1;min-width:160px;">
+        <span class="ms" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:#9aa0a6;">search</span>
+        <input id="af-search" class="filter-input w-full" style="padding-left:32px;" type="text" placeholder="ค้นหา รหัสเสา, IP, เหตุการณ์&#8230;" oninput="applyFilters()"/>
+      </div>
+      <button onclick="clearFilters()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-bdr dark:border-dk-bdr text-t2 dark:text-dk-t2 text-[11px] hover:border-red/40 hover:text-red transition bg-sf dark:bg-dk-sf"><span class="ms" style="font-size:14px">filter_alt_off</span>ล้าง</button>
+      <div class="text-[10px] text-t3 flex-shrink-0">พบ <strong id="af-count" class="text-t1 dark:text-dk-t1">&#8212;</strong> รายการ</div>
+    </div>
+    <!-- Table -->
+    <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
+      <table class="log-table">
+        <thead><tr>
+          <th style="width:40px;">#</th>
+          <th style="width:155px;">วันเวลา</th>
+          <th style="width:100px;">ระดับ</th>
+          <th style="width:110px;">ประเภท</th>
+          <th>เหตุการณ์</th>
+          <th style="width:130px;">รายละเอียด</th>
+          <th style="width:90px;">ผู้ดำเนินการ</th>
+          <th style="width:120px;">IP Address</th>
+          <th style="width:90px;">Session ID</th>
+        </tr></thead>
+        <tbody id="audit-tbody"></tbody>
+      </table>
+    </div>
+    <!-- Pagination -->
+    <div class="flex-shrink-0 flex items-center justify-between px-5 py-3 border-t border-bdr dark:border-dk-bdr bg-sf-2 dark:bg-dk-sf2">
+      <div class="flex items-center gap-2 text-[10px] text-t3">
+        <span class="ms ms-f" style="font-size:14px;color:#7c3aed">storage</span>
+        จัดเก็บในระบบ <strong class="text-t1 dark:text-dk-t1 mx-1">6 เดือน</strong> &#8226; หลังจากนั้น
+        <span class="tor-badge mx-1">Backup &amp; Archive</span>
+        &#8594; เคลียร์ออกจาก Hot Storage อัตโนมัติ
+      </div>
+      <div class="flex items-center gap-1.5" id="pagination-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGOUT CONFIRM -->
+<div id="logout-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-in bg-sf dark:bg-dk-sf rounded-2xl shadow-g4 p-8 text-center" style="width:360px;border:1px solid #e0e0e0;" onclick="event.stopPropagation()">
+    <div class="w-14 h-14 rounded-full bg-red-lt dark:bg-red/15 flex items-center justify-center mx-auto mb-4"><span class="ms ms-f text-red" style="font-size:28px">logout</span></div>
+    <div class="font-bold text-t1 dark:text-dk-t1 text-base mb-2">ยืนยันออกจากระบบ?</div>
+    <div class="text-t2 dark:text-dk-t2 text-sm mb-6">Session ปัจจุบันจะถูกบันทึกในระบบ Audit Log เพื่อความปลอดภัย</div>
+    <div class="flex gap-3">
+      <button onclick="document.getElementById('logout-modal').style.display='none'" class="flex-1 py-2.5 rounded-xl border border-bdr dark:border-dk-bdr text-t2 dark:text-dk-t2 text-sm font-medium hover:bg-sf-2 dark:hover:bg-dk-sf2 transition">ยกเลิก</button>
+      <button onclick="confirmLogout()" class="flex-1 py-2.5 rounded-xl bg-red text-white text-sm font-semibold hover:opacity-90 transition">ออกจากระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE SETTINGS MODAL -->
+<div id="profile-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-in bg-sf dark:bg-dk-sf rounded-2xl shadow-g4 p-6" style="width:380px;border:1px solid #e0e0e0;" onclick="event.stopPropagation()">
+    <div class="flex items-center gap-3 mb-5">
+      <div class="w-10 h-10 rounded-xl bg-blu-lt dark:bg-blu/15 flex items-center justify-center"><span class="ms ms-f text-blu" style="font-size:20px">manage_accounts</span></div>
+      <div><div class="font-bold text-t1 dark:text-dk-t1">ตั้งค่าโปรไฟล์</div><div class="text-[10px] text-t3">ข้อมูลส่วนตัวและความปลอดภัย</div></div>
+      <button onclick="document.getElementById('profile-modal').style.display='none'" class="ml-auto w-7 h-7 rounded-lg bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr flex items-center justify-center"><span class="ms text-t2" style="font-size:16px">close</span></button>
+    </div>
+    <div class="space-y-0 divide-y divide-bdr/60 dark:divide-dk-bdr">
+      <div class="flex justify-between py-2.5 text-sm"><span class="text-t2 dark:text-dk-t2">ชื่อผู้ใช้</span><strong class="text-t1 dark:text-dk-t1">admin</strong></div>
+      <div class="flex justify-between py-2.5 text-sm"><span class="text-t2 dark:text-dk-t2">ชื่อ-นามสกุล</span><strong class="text-t1 dark:text-dk-t1">ผู้ดูแลระบบ</strong></div>
+      <div class="flex justify-between py-2.5 text-sm"><span class="text-t2 dark:text-dk-t2">อีเมล</span><strong class="text-t1 dark:text-dk-t1">admin@buriram.go.th</strong></div>
+      <div class="flex justify-between py-2.5 text-sm"><span class="text-t2 dark:text-dk-t2">บทบาท</span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blu-lt text-blu">Super Admin</span></div>
+      <div class="flex justify-between py-2.5 text-sm"><span class="text-t2 dark:text-dk-t2">เข้าสู่ระบบล่าสุด</span><strong id="pm-last-login" class="text-t1 dark:text-dk-t1 tabular-nums">&#8212;</strong></div>
+      <div class="flex justify-between py-2.5 text-sm"><span class="text-t2 dark:text-dk-t2">IP Address</span><strong class="text-t1 dark:text-dk-t1 tabular-nums">192.168.1.10</strong></div>
+    </div>
+    <div class="mt-5 p-3 bg-yel-lt dark:bg-yel/10 rounded-xl border border-yel/25 text-[11px] text-yel flex items-center gap-2">
+      <span class="ms ms-f" style="font-size:15px">info</span>
+      การเปลี่ยนแปลงโปรไฟล์จะถูกบันทึกในระบบ Audit Log เพื่อความปลอดภัย
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ──────────────────────────── MOCK DATA ────────────────────────────────────
+const MOCK={
+  poles:[
+    // โซนศาลากลาง (6 ต้น)
+    {id:'BRM-001',lat:15.0050,lng:103.095,status:'online', soc:92,  volt:220.5,curr:0.45,power:99.2, energy:238.4,zone:'โซนศาลากลาง'},
+    {id:'BRM-002',lat:15.0070,lng:103.097,status:'online', soc:87,  volt:221.2,curr:0.43,power:95.1, energy:228.2,zone:'โซนศาลากลาง'},
+    {id:'BRM-003',lat:15.0085,lng:103.093,status:'alarm',  soc:75,  volt:195.8,curr:0.72,power:141.0,energy:184.5,zone:'โซนศาลากลาง'},
+    {id:'BRM-004',lat:15.0030,lng:103.096,status:'online', soc:90,  volt:220.1,curr:0.44,power:96.8, energy:232.4,zone:'โซนศาลากลาง'},
+    {id:'BRM-005',lat:15.0060,lng:103.099,status:'alarm',  soc:68,  volt:198.3,curr:0.68,power:134.8,energy:178.6,zone:'โซนศาลากลาง'},
+    {id:'BRM-006',lat:15.0015,lng:103.094,status:'online', soc:95,  volt:220.8,curr:0.42,power:92.7, energy:222.6,zone:'โซนศาลากลาง'},
+    // โซนตลาดสด (6 ต้น)
+    {id:'BRM-007',lat:14.9980,lng:103.108,status:'online', soc:83,  volt:219.5,curr:0.46,power:100.9,energy:242.2,zone:'โซนตลาดสด'},
+    {id:'BRM-008',lat:14.9960,lng:103.110,status:'offline',soc:0,   volt:0,    curr:0,   power:0,    energy:0,    zone:'โซนตลาดสด'},
+    {id:'BRM-009',lat:14.9940,lng:103.106,status:'alarm',  soc:55,  volt:193.2,curr:0.75,power:144.9,energy:173.8,zone:'โซนตลาดสด'},
+    {id:'BRM-010',lat:14.9920,lng:103.112,status:'online', soc:88,  volt:220.3,curr:0.45,power:99.1, energy:237.9,zone:'โซนตลาดสด'},
+    {id:'BRM-011',lat:15.0000,lng:103.105,status:'offline',soc:12,  volt:180.1,curr:0.10,power:0,    energy:0,    zone:'โซนตลาดสด'},
+    {id:'BRM-012',lat:14.9970,lng:103.114,status:'online', soc:79,  volt:221.0,curr:0.44,power:97.2, energy:233.4,zone:'โซนตลาดสด'},
+    // โซนถนนหลักเมือง (6 ต้น)
+    {id:'BRM-013',lat:15.0100,lng:103.115,status:'online', soc:null,volt:219.8,curr:0.48,power:105.5,energy:253.2,zone:'โซนถนนหลักเมือง'},
+    {id:'BRM-014',lat:15.0120,lng:103.117,status:'alarm',  soc:72,  volt:196.4,curr:0.70,power:137.5,energy:180.2,zone:'โซนถนนหลักเมือง'},
+    {id:'BRM-015',lat:15.0140,lng:103.113,status:'online', soc:91,  volt:220.6,curr:0.43,power:94.9, energy:227.7,zone:'โซนถนนหลักเมือง'},
+    {id:'BRM-016',lat:15.0090,lng:103.119,status:'online', soc:84,  volt:221.3,curr:0.46,power:101.8,energy:244.4,zone:'โซนถนนหลักเมือง'},
+    {id:'BRM-017',lat:15.0160,lng:103.116,status:'online', soc:97,  volt:220.0,curr:0.42,power:92.4, energy:221.8,zone:'โซนถนนหลักเมือง'},
+    {id:'BRM-018',lat:15.0110,lng:103.121,status:'online', soc:86,  volt:219.7,curr:0.45,power:98.9, energy:237.3,zone:'โซนถนนหลักเมือง'},
+    // โซนสวนสาธารณะ (6 ต้น)
+    {id:'BRM-019',lat:15.0180,lng:103.098,status:'online', soc:78,  volt:222.1,curr:0.41,power:91.1, energy:218.5,zone:'โซนสวนสาธารณะ'},
+    {id:'BRM-020',lat:15.0200,lng:103.100,status:'alarm',  soc:61,  volt:194.7,curr:0.73,power:142.1,energy:175.2,zone:'โซนสวนสาธารณะ'},
+    {id:'BRM-021',lat:15.0220,lng:103.096,status:'online', soc:93,  volt:220.4,curr:0.44,power:97.0, energy:232.8,zone:'โซนสวนสาธารณะ'},
+    {id:'BRM-022',lat:15.0170,lng:103.102,status:'online', soc:82,  volt:221.5,curr:0.43,power:95.2, energy:228.5,zone:'โซนสวนสาธารณะ'},
+    {id:'BRM-023',lat:15.0240,lng:103.099,status:'online', soc:76,  volt:219.9,curr:0.47,power:103.4,energy:248.2,zone:'โซนสวนสาธารณะ'},
+    {id:'BRM-024',lat:15.0190,lng:103.104,status:'online', soc:89,  volt:220.7,curr:0.42,power:92.7, energy:222.5,zone:'โซนสวนสาธารณะ'},
+    // โซนชุมชน (6 ต้น)
+    {id:'BRM-025',lat:14.9880,lng:103.118,status:'online', soc:71,  volt:218.5,curr:0.50,power:109.3,energy:262.2,zone:'โซนชุมชน'},
+    {id:'BRM-026',lat:14.9860,lng:103.120,status:'alarm',  soc:65,  volt:197.1,curr:0.69,power:136.0,energy:176.4,zone:'โซนชุมชน'},
+    {id:'BRM-027',lat:14.9840,lng:103.116,status:'online', soc:88,  volt:220.2,curr:0.45,power:99.1, energy:237.8,zone:'โซนชุมชน'},
+    {id:'BRM-028',lat:14.9900,lng:103.122,status:'online', soc:94,  volt:221.8,curr:0.41,power:90.9, energy:218.2,zone:'โซนชุมชน'},
+    {id:'BRM-029',lat:14.9920,lng:103.119,status:'online', soc:80,  volt:219.6,curr:0.46,power:101.0,energy:242.5,zone:'โซนชุมชน'},
+    {id:'BRM-030',lat:14.9870,lng:103.124,status:'offline',soc:0,   volt:0,    curr:0,   power:0,    energy:0,    zone:'โซนชุมชน'},
+  ],
+  logs:{
+    hw:[
+      // สถานะ alarm (ออนไลน์แต่ค่าผิดปกติ) — สีส้มบนแผนที่
+      {sev:'warn',icon:'bolt',           title:'กระแสไฟฟ้าสูงผิดปกติ',  detail:'BRM-003 · โซนศาลากลาง · 0.72A (ปกติ 0.45A)',  time:'13:25', handleStatus:0, alarmLevel:1},
+      {sev:'warn',icon:'bolt',           title:'แรงดันไฟฟ้าต่ำผิดปกติ', detail:'BRM-005 · โซนศาลากลาง · 198.3V',               time:'13:18', handleStatus:0, alarmLevel:1},
+      {sev:'crit',icon:'error',          title:'แรงดันไฟฟ้าผิดปกติ',    detail:'BRM-009 · โซนตลาดสด · 193.2V',                 time:'13:10', handleStatus:0, alarmLevel:2},
+      {sev:'warn',icon:'warning',        title:'SOC ต่ำกว่าเกณฑ์',      detail:'BRM-020 · โซนสวนสาธารณะ · SOC 61%',            time:'12:55', handleStatus:0, alarmLevel:1},
+      {sev:'warn',icon:'bolt',           title:'กระแสไฟฟ้าสูงผิดปกติ',  detail:'BRM-014 · โซนถนนหลักเมือง · 0.70A',            time:'12:40', handleStatus:1, alarmLevel:1},
+      {sev:'warn',icon:'bolt',           title:'กระแสไฟฟ้าสูงผิดปกติ',  detail:'BRM-026 · โซนชุมชน · 0.69A',                   time:'12:30', handleStatus:1, alarmLevel:1},
+      // ออฟไลน์
+      {sev:'crit',icon:'power_off',      title:'โคมไฟออฟไลน์',           detail:'BRM-008 · โซนตลาดสด',                           time:'12:15', handleStatus:1, alarmLevel:2},
+      {sev:'crit',icon:'power_off',      title:'โคมไฟออฟไลน์',           detail:'BRM-011 · โซนตลาดสด',                           time:'11:50', handleStatus:2, alarmLevel:2},
+      {sev:'crit',icon:'power_off',      title:'โคมไฟออฟไลน์',           detail:'BRM-030 · โซนชุมชน',                             time:'11:30', handleStatus:2, alarmLevel:2},
+      // แก้ไขแล้ว
+      {sev:'ok',  icon:'check_circle',   title:'สื่อสารกลับมาปกติ',     detail:'Gateway โซนสวนสาธารณะ',                          time:'10:45', handleStatus:2, alarmLevel:0},
+      {sev:'warn',icon:'battery_alert',  title:'แบตเตอรี่เสื่อมสภาพ',   detail:'BRM-011 · SOH 78%',                              time:'10:10', handleStatus:2, alarmLevel:1},
+      {sev:'info',icon:'thermostat',     title:'อุณหภูมิสูงผิดปกติ',    detail:'BRM-026 · 68°C (แก้ไขแล้ว)',                     time:'09:30', handleStatus:2, alarmLevel:0},
+    ],
+    cmd:[
+      {sev:'info',icon:'sync',          title:'ซิงค์การตั้งค่า',     detail:'ทุกโซน',                   time:'13:05', user:'admin'},
+      {sev:'info',icon:'schedule_send', title:'อัปเดตตารางเปิด-ปิด', detail:'โซนตลาดสด',                time:'12:00', user:'admin'},
+      {sev:'ok',  icon:'task_alt',      title:'อัปเดต Firmware สำเร็จ', detail:'Pole BRM-003 v2.1.4',    time:'11:40', user:'operator1'},
+      {sev:'warn',icon:'update',        title:'อัปเดตล้มเหลว (ลองใหม่)', detail:'Pole BRM-009 (x2)',     time:'11:35', user:'operator1'},
+      {sev:'info',icon:'cloud_upload',  title:'อัปโหลดบันทึก',       detail:'45 รายการ',                time:'10:30', user:'system'},
+      {sev:'ok',  icon:'done_all',      title:'ซิงค์ครบทุกอุปกรณ์',  detail:'ทั้งหมด 26 ต้น',           time:'08:00', user:'system'},
+    ],
+    cfg:[
+      {sev:'info',icon:'settings',      title:'แก้ไขค่า Threshold',   detail:'แรงดันขั้นต่ำ 195V',       time:'12:55', user:'admin'},
+      {sev:'info',icon:'notifications', title:'แก้ไขกฎแจ้งเตือน',    detail:'SOC < 20% → วิกฤต',       time:'11:30', user:'admin'},
+      {sev:'ok',  icon:'save',          title:'สำรองค่าตั้งค่าสำเร็จ', detail:'Snapshot #448',          time:'09:00', user:'supervisor1'},
+      {sev:'warn',icon:'restore',       title:'ย้อนคืนค่าตั้งค่า',   detail:'โซนสวนสาธารณะ v2.0',       time:'08:45', user:'supervisor1'},
+    ],
+    acc:[
+      // วันนี้ — Session ปัจจุบัน
+      {sev:'ok',  icon:'login',           title:'เข้าสู่ระบบสำเร็จ',    detail:'admin · 192.168.1.10 · Chrome/Windows',      time:'08:44', user:'admin'},
+      {sev:'ok',  icon:'login',           title:'เข้าสู่ระบบสำเร็จ',    detail:'supervisor01 · 192.168.1.22 · Chrome/macOS',  time:'08:51', user:'supervisor01'},
+      {sev:'info',icon:'pageview',        title:'เปิดดู Dashboard',       detail:'supervisor01 · ดูแผนที่ + KPI',              time:'08:52', user:'supervisor01'},
+      {sev:'ok',  icon:'login',           title:'เข้าสู่ระบบสำเร็จ',    detail:'operator1 · 192.168.1.35 · Firefox/Windows', time:'09:05', user:'operator1'},
+      {sev:'crit',icon:'gpp_bad',         title:'เข้าระบบล้มเหลว',       detail:'unknown · 103.28.65.xx · รหัสผ่านผิด 3 ครั้ง',time:'09:12', user:'unknown'},
+      {sev:'info',icon:'download',        title:'ส่งออกรายงาน CSV',       detail:'operator1 · Log ฮาร์ดแวร์ 30 วัน',          time:'09:30', user:'operator1'},
+      {sev:'ok',  icon:'logout',          title:'ออกจากระบบ',             detail:'operator1 · Session 47 นาที',                time:'09:52', user:'operator1'},
+      {sev:'info',icon:'pageview',        title:'เปิดดู Audit Log',       detail:'supervisor01 · กรอง 7 วันล่าสุด',           time:'10:15', user:'supervisor01'},
+      {sev:'info',icon:'picture_as_pdf',  title:'ส่งออกรายงาน PDF',       detail:'supervisor01 · รายงานพลังงานรายเดือน',      time:'10:32', user:'supervisor01'},
+      {sev:'ok',  icon:'login',           title:'เข้าสู่ระบบสำเร็จ',    detail:'viewer01 · 10.0.0.15 · Mobile/iOS',         time:'11:00', user:'viewer01'},
+      {sev:'ok',  icon:'logout',          title:'ออกจากระบบ',             detail:'supervisor01 · Session 1 ชม. 42 นาที',      time:'12:17', user:'supervisor01'},
+      {sev:'crit',icon:'gpp_bad',         title:'เข้าระบบล้มเหลว',       detail:'unknown · 58.137.xx.xx · IP ต่างประเทศ',    time:'12:44', user:'unknown'},
+      {sev:'ok',  icon:'login',           title:'เข้าสู่ระบบสำเร็จ',    detail:'admin · 192.168.1.10 · ต่อ Session ใหม่',   time:'13:00', user:'admin'},
+    ],
+  },
+  months:['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'],
+  energy2567:[8420,7980,8650,8200,7750,8100,8800,9100,8550,8300,7900,8600],
+  energy2566:[9200,8800,9400,9100,8600,9000,9500,9800,9200,9000,8700,9400],
+  weeks:['สัปดาห์ 1','สัปดาห์ 2','สัปดาห์ 3','สัปดาห์ 4'],
+  weekNow:[2050,1980,2120,2080],
+  weekPrev:[2280,2200,2350,2270],
+  days:['จ.','อ.','พ.','พฤ.','ศ.','ส.','อา.'],
+  dayNow:[295,310,288,302,315,330,308],
+  dayPrev:[330,345,320,338,350,365,340],
+  tempData:[26,25,24,26,29,32,31,30,29,28,27,26,26,27,29,30,32,31,30,29,28,27,26,27],
+  humData: [72,73,75,74,70,65,64,65,66,68,70,71,72,70,68,65,63,64,66,68,70,72,74,73],
+};
+
+// ──────────────────────────── AUDIT LOG DATA ────────────────────────────────
+function genAuditLogs(){
+  const types={
+    hw: ['แรงดันไฟฟ้าผิดปกติ','โคมไฟดับ/ออฟไลน์','แบตเตอรี่ต่ำกว่าเกณฑ์','ขาดการเชื่อมต่อ','แบตเตอรี่เสื่อมสภาพ','อุณหภูมิสูงเกินกำหนด','กระแสไฟฟ้าผิดปกติ','อุปกรณ์ขัดข้อง'],
+    cmd:['ปรับปรุงการตั้งค่า','อัปเดตซอฟต์แวร์โคม','ปรับเวลาเปิด-ปิดไฟ','บันทึกข้อมูลขึ้นระบบ','ซิงค์ข้อมูลทุกอุปกรณ์','นำการตั้งค่าไปใช้'],
+    acc:['เข้าสู่ระบบสำเร็จ','ออกจากระบบ','เข้าระบบไม่สำเร็จ','ส่งออกรายงาน','เปิดดูแดชบอร์ด','ดาวน์โหลดบันทึก','เปลี่ยนรหัสผ่าน'],
+    cfg:['แก้ไขการตั้งค่าระบบ','แก้ไขกฎการแจ้งเตือน','สำรองข้อมูลสำเร็จ','ย้อนคืนค่าตั้งค่า','ปรับค่าเกณฑ์เตือน','แก้ไขสิทธิ์ผู้ใช้งาน'],
+  };
+  const sevMap={
+    hw: ['crit','crit','warn','crit','warn','warn','info','crit'],
+    cmd:['info','ok','info','info','ok','ok'],
+    acc:['ok','ok','crit','info','info','info','ok'],
+    cfg:['info','info','ok','warn','info','warn'],
+  };
+  const users=['admin','operator1','system','operator1','admin','system'];
+  const ips  =['192.168.1.10','192.168.1.22','192.168.1.10','103.12.45.67','192.168.1.10','10.0.0.1'];
+  const poles=['BRM-001','BRM-002','BRM-003','BRM-004','BRM-005','BRM-006','BRM-007','BRM-008','BRM-009','BRM-010','BRM-011','BRM-012'];
+  const zones=['โซนศาลากลาง','โซนตลาดสด','โซนถนนหลักเมือง','โซนสวนสาธารณะ','โซนชุมชน'];
+  const tabKeys=['hw','hw','hw','cmd','cmd','acc','acc','cfg'];
+  const rows=[];
+  const now=new Date();
+  for(let i=0;i<120;i++){
+    const d=new Date(now);
+    d.setDate(d.getDate()-Math.floor(i*0.75));
+    d.setHours(Math.floor(Math.random()*24),Math.floor(Math.random()*60),Math.floor(Math.random()*60));
+    const tk=tabKeys[i%tabKeys.length];
+    const ei=i%types[tk].length;
+    const sv=sevMap[tk][ei%sevMap[tk].length];
+    const ui=i%users.length;
+    const pid=poles[i%poles.length];
+    const zn=zones[i%zones.length];
+    const thlabel={hw:'ฮาร์ดแวร์',cmd:'คำสั่งการ',acc:'การเข้าใช้งาน',cfg:'ตั้งค่าระบบ'}[tk];
+    rows.push({
+      id:120-i, dt:d,
+      dtStr:d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toTimeString().slice(0,8),
+      sev:sv, tab:tk, type:thlabel,
+      event:types[tk][ei],
+      detail:tk==='hw'?`โคม ${pid} · ${zn}`:tk==='cmd'?`ผู้ดำเนินการ: ${users[ui]} · ${zn}`:tk==='acc'?`${ips[ui]}`:`ผู้ดำเนินการ: ${users[ui]}`,
+      user:users[ui], ip:ips[ui],
+      session:`SID-${String(8000-i).padStart(4,'0')}`,
+    });
+  }
+  return rows.sort((a,b)=>b.dt-a.dt);
+}
+
+const ALL_AUDIT=genAuditLogs();
+let filteredAudit=[...ALL_AUDIT], auditTabState='all', auditPage=1;
+const PAGE_SIZE=15;
+
+// ──────────────────────────── LOGIN ────────────────────────────────────────
+let loginAttempts=0, loginTime=null;
+
+function togglePw(){
+  const pw=document.getElementById('inp-pass'),eye=document.getElementById('pw-eye');
+  pw.type=pw.type==='password'?'text':'password';
+  eye.textContent=pw.type==='text'?'visibility_off':'visibility';
+}
+
+function doLogin(){
+  const u=document.getElementById('inp-user').value.trim();
+  const p=document.getElementById('inp-pass').value.trim();
+  const err=document.getElementById('login-error');
+  const btn=document.getElementById('login-btn');
+  if(u==='admin'&&p==='admin123'){
+    loginTime=new Date();
+    btn.disabled=true;
+    document.getElementById('login-btn-text').textContent='กำลังเข้าสู่ระบบ…';
+    document.getElementById('login-screen').classList.add('login-out');
+    setTimeout(()=>{
+      document.getElementById('login-screen').style.display='none';
+      const db=document.getElementById('dashboard'); db.style.display='flex';
+      initDashboard();
+    },420);
+  } else {
+    loginAttempts++;
+    document.getElementById('login-err-msg').textContent=
+      loginAttempts>=3?`ล็อกบัญชีชั่วคราว (${loginAttempts} ครั้ง) รอ 30 วินาที`:'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+    err.style.display='flex';
+    document.getElementById('inp-pass').classList.add('error');
+    setTimeout(()=>document.getElementById('inp-pass').classList.remove('error'),1800);
+    if(loginAttempts>=3){
+      btn.disabled=true; btn.textContent='ล็อก 30 วินาที';
+      setTimeout(()=>{btn.disabled=false;btn.textContent='เข้าสู่ระบบ';loginAttempts=0;err.style.display='none';},30000);
+    }
+  }
+}
+
+// ──────────────────────────── THEME ────────────────────────────────────────
+let isDark=false;
+function toggleTheme(){
+  isDark=!isDark;
+  document.documentElement.classList.toggle('dark',isDark);
+  document.getElementById('theme-icon').textContent=isDark?'dark_mode':'light_mode';
+  document.getElementById('theme-label').textContent=isDark?'มืด':'สว่าง';
+  updateChartTheme();
+}
+
+// ──────────────────────────── CLOCK ────────────────────────────────────────
+function tick(){
+  const now=new Date();
+  const h=now.toTimeString().slice(0,8);
+  ['clock','last-sync'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=h;});
+  const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const hd=document.getElementById('header-date');
+  if(hd)hd.textContent=`${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
+}
+tick(); setInterval(tick,1000);
+
+// ──────────────────────────── PROFILE DROPDOWN ─────────────────────────────
+let profileOpen=false;
+function toggleProfile(){
+  profileOpen=!profileOpen;
+  const m=document.getElementById('profile-menu');
+  m.style.display=profileOpen?'block':'none';
+  if(profileOpen) m.classList.add('dropdown-in');
+}
+function closeProfile(){ profileOpen=false; document.getElementById('profile-menu').style.display='none'; }
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('profile-wrap');
+  if(wrap&&!wrap.contains(e.target)) closeProfile();
+});
+function openProfileModal(){
+  closeProfile();
+  if(loginTime){
+    const s=loginTime.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+loginTime.toTimeString().slice(0,8);
+    const pm=document.getElementById('pm-last-login'); if(pm)pm.textContent=s;
+    const ll=document.getElementById('last-login-time'); if(ll)ll.textContent=loginTime.toTimeString().slice(0,8);
+  }
+  document.getElementById('profile-modal').style.display='flex';
+}
+
+// ──────────────────────────── LOGOUT ───────────────────────────────────────
+function doLogout(){ closeProfile(); document.getElementById('logout-modal').style.display='flex'; }
+function confirmLogout(){
+  document.getElementById('logout-modal').style.display='none';
+  Object.values(charts).forEach(c=>{if(c)c.destroy();}); charts={};
+  if(leafletMap){leafletMap.remove();leafletMap=null;}
+  document.getElementById('dashboard').style.display='none';
+  const ls=document.getElementById('login-screen');
+  ls.style.display='block'; ls.classList.remove('login-out');
+  document.getElementById('inp-pass').value='';
+  document.getElementById('login-btn').disabled=false;
+  document.getElementById('login-btn-text').textContent='เข้าสู่ระบบ';
+  document.getElementById('login-error').style.display='none';
+  loginAttempts=0;
+}
+
+// ──────────────────────────── AUDIT MODAL ──────────────────────────────────
+function openAuditModal(){
+  filteredAudit=[...ALL_AUDIT]; auditPage=1;
+  // คำนวณสรุปจริงจากข้อมูล
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('au-total',ALL_AUDIT.length);
+  set('au-crit',ALL_AUDIT.filter(r=>r.sev==='crit').length);
+  set('au-warn',ALL_AUDIT.filter(r=>r.sev==='warn').length);
+  set('au-ok',ALL_AUDIT.filter(r=>r.sev==='ok'||r.sev==='info').length);
+  setAuditTab('all');
+  document.getElementById('audit-modal').style.display='flex';
+}
+function closeAuditModal(){ document.getElementById('audit-modal').style.display='none'; }
+
+// ปรับขนาดแผนที่ (ค่าเริ่มต้น: อัตโนมัติ ปรับตามจอ)
+let curMapSize='auto';
+const MAP_COLS={ md:'1fr 600px 1fr', lg:'1fr 760px 1fr', auto:'1fr 55% 1fr' };
+function setMapSize(sz){
+  curMapSize=sz;
+  const grid=document.getElementById('main-grid');
+  if(grid) grid.style.gridTemplateColumns=MAP_COLS[sz];
+  ['md','lg','auto'].forEach(s=>{
+    const b=document.getElementById('msz-'+s);
+    if(b){ b.classList.toggle('msz-on', s===sz); }
+  });
+  // ปรับขนาด Leaflet หลัง transition เสร็จ
+  setTimeout(()=>{ if(leafletMap) leafletMap.invalidateSize(); }, 380);
+}
+
+function setAuditTab(tab){
+  auditTabState=tab; auditPage=1;
+  ['all','hw','cmd','acc','cfg'].forEach(t=>{
+    const b=document.getElementById('at-'+t); if(!b)return;
+    if(t===tab){b.classList.add('bg-sf','text-prp','shadow-g1','font-semibold');b.classList.remove('text-t3');}
+    else{b.classList.remove('bg-sf','text-prp','shadow-g1','font-semibold');b.classList.add('text-t3');}
+  });
+  applyFilters();
+}
+
+function applyFilters(){
+  const range=(document.getElementById('af-range')||{}).value||'all';
+  const sev  =(document.getElementById('af-sev')||{}).value  ||'all';
+  const user =(document.getElementById('af-user')||{}).value ||'all';
+  const srch =((document.getElementById('af-search')||{}).value||'').toLowerCase().trim();
+  const now=new Date();
+  filteredAudit=ALL_AUDIT.filter(r=>{
+    if(auditTabState!=='all'&&r.tab!==auditTabState)return false;
+    if(range!=='all'&&(now-r.dt)/(1000*86400)>parseInt(range))return false;
+    if(sev!=='all'&&r.sev!==sev)return false;
+    if(user!=='all'&&r.user!==user)return false;
+    if(srch&&!`${r.event}${r.detail}${r.user}${r.ip}${r.session}`.toLowerCase().includes(srch))return false;
+    return true;
+  });
+  auditPage=1; renderAuditTable();
+}
+
+function clearFilters(){
+  ['af-range','af-sev','af-user'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='all';});
+  const s=document.getElementById('af-search');if(s)s.value='';
+  filteredAudit=auditTabState==='all'?[...ALL_AUDIT]:ALL_AUDIT.filter(r=>r.tab===auditTabState);
+  auditPage=1; renderAuditTable();
+}
+
+const sevLabel={crit:'เร่งด่วน',warn:'เฝ้าระวัง',info:'ทั่วไป',ok:'ปกติ'};
+const sevIcon ={crit:'error',warn:'warning',info:'info',ok:'check_circle'};
+
+function renderAuditTable(){
+  const count=filteredAudit.length;
+  const el=document.getElementById('af-count'); if(el)el.textContent=count.toLocaleString();
+  const total=Math.max(1,Math.ceil(count/PAGE_SIZE));
+  if(auditPage>total)auditPage=total;
+  const slice=filteredAudit.slice((auditPage-1)*PAGE_SIZE, auditPage*PAGE_SIZE);
+  const tbody=document.getElementById('audit-tbody'); if(!tbody)return;
+  if(!slice.length){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:#9aa0a6;font-size:12px;">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>';
+    document.getElementById('pagination-wrap').innerHTML=''; return;
+  }
+  tbody.innerHTML=slice.map((r,i)=>`
+    <tr>
+      <td class="text-t3 tabular-nums text-center" style="font-size:10px;">${(auditPage-1)*PAGE_SIZE+i+1}</td>
+      <td class="tabular-nums text-t2 dark:text-dk-t2" style="font-size:10px;white-space:nowrap;">${r.dtStr}</td>
+      <td><span class="sev-badge ${r.sev}"><span class="ms ms-f" style="font-size:12px">${sevIcon[r.sev]}</span>${sevLabel[r.sev]}</span></td>
+      <td style="font-size:10px;color:#9aa0a6;white-space:nowrap;">${r.type}</td>
+      <td class="text-t1 dark:text-dk-t1 font-medium" style="font-size:12px;">${r.event}</td>
+      <td class="text-t2 dark:text-dk-t2" style="font-size:11px;">${r.detail}</td>
+      <td style="font-size:11px;"><strong class="text-t1 dark:text-dk-t1">${r.user}</strong></td>
+      <td class="tabular-nums text-t2 dark:text-dk-t2" style="font-size:10px;">${r.ip}</td>
+      <td class="tabular-nums text-t3" style="font-size:9px;">${r.session}</td>
+    </tr>`).join('');
+  // Pagination
+  const pg=document.getElementById('pagination-wrap'); if(!pg)return;
+  const st=Math.max(1,auditPage-2),en=Math.min(total,st+4);
+  let h=`<button class="pg-btn" onclick="gotoPage(${auditPage-1})" ${auditPage===1?'disabled style="opacity:.4;cursor:not-allowed"':''}><span class="ms" style="font-size:14px">chevron_left</span></button>`;
+  for(let p=st;p<=en;p++) h+=`<button class="pg-btn ${p===auditPage?'active':''}" onclick="gotoPage(${p})">${p}</button>`;
+  if(en<total) h+=`<span style="font-size:12px;color:#9aa0a6;padding:0 4px;">&#8230;${total}</span>`;
+  h+=`<button class="pg-btn" onclick="gotoPage(${auditPage+1})" ${auditPage===total?'disabled style="opacity:.4;cursor:not-allowed"':''}><span class="ms" style="font-size:14px">chevron_right</span></button>`;
+  h+=`<span style="font-size:10px;color:#9aa0a6;margin-left:8px;">หน้า ${auditPage}/${total} (${count.toLocaleString()} รายการ)</span>`;
+  pg.innerHTML=h;
+}
+
+function gotoPage(p){
+  const max=Math.ceil(filteredAudit.length/PAGE_SIZE)||1;
+  if(p<1||p>max)return; auditPage=p; renderAuditTable();
+}
+
+function exportCSV(){
+  const hdr='#,วันเวลา,ระดับ,ประเภท,เหตุการณ์,รายละเอียด,ผู้ดำเนินการ,IP Address,Session ID';
+  const rows=filteredAudit.map((r,i)=>`${i+1},"${r.dtStr}",${sevLabel[r.sev]},${r.type},"${r.event}","${r.detail}",${r.user},${r.ip},${r.session}`);
+  const csv='\uFEFF'+hdr+'\n'+rows.join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='AuditLog_BRM_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+}
+function exportPDF(){ alert('Export PDF: ฟีเจอร์นี้จะเรียก Backend สร้าง PDF รายงาน\nข้อมูล '+filteredAudit.length+' รายการ พร้อม Export'); }
+
+// ──────────────────────────── SIDEBAR LOGS ─────────────────────────────────
+const sevCls={crit:'sev-crit',warn:'sev-warn',info:'sev-info',ok:'sev-ok'};
+function renderLogs(tab){
+  const feed=document.getElementById('log-feed'); if(!feed)return;
+  const data=MOCK.logs[tab]||[];
+  feed.innerHTML=data.map(l=>{
+    // จุด5: แสดงผู้ดำเนินการชัดเจนสำหรับ tab คำสั่ง/ตั้งค่า/เข้าใช้งาน
+    const showUser = (tab==='cmd'||tab==='cfg'||tab==='acc') && l.user;
+    const userBadge = showUser
+      ? `<span class="inline-flex items-center gap-1 text-[9px] text-blu bg-blu-lt dark:bg-blu/15 px-1.5 py-0.5 rounded-md mt-1"><span class="ms" style="font-size:11px">person</span>${l.user}</span>`
+      : '';
+    return `
+    <div class="flex gap-2.5 px-3 py-2 border-b border-bdr/60 dark:border-dk-bdr hover:bg-sf-2 dark:hover:bg-dk-sf2 transition-colors cursor-default">
+      <span class="ms ms-f ${sevCls[l.sev]} flex-shrink-0 mt-0.5" style="font-size:17px">${l.icon}</span>
+      <div class="flex-1 min-w-0">
+        <div class="font-medium text-t1 dark:text-dk-t1 text-xs truncate">${l.title}</div>
+        <div class="text-[10px] text-t3 mt-0.5 truncate">${l.detail}</div>
+        ${userBadge}
+      </div>
+      <div class="text-[10px] text-t3 flex-shrink-0 tabular-nums mt-0.5">${l.time}</div>
+    </div>`;
+  }).join('');
+}
+function setTab(tab){
+  ['hw','cmd','cfg','acc'].forEach(t=>{
+    const b=document.getElementById('tab-'+t); if(!b)return;
+    if(t===tab){b.classList.add('bg-sf','dark:bg-dk-sf','text-blu','shadow-g1','font-semibold');b.classList.remove('text-t3','dark:text-dk-t2');}
+    else{b.classList.remove('bg-sf','dark:bg-dk-sf','text-blu','shadow-g1','font-semibold');b.classList.add('text-t3','dark:text-dk-t2');}
+  });
+  renderLogs(tab);
+}
+
+// ──────────────────────────── MAP ──────────────────────────────────────────
+let leafletMap=null;
+function initMap(){
+  if(leafletMap)return;
+  poleMarkers=[];
+  leafletMap=L.map('leaflet-map',{center:[15.000,103.102],zoom:14,zoomControl:true,attributionControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(leafletMap);
+  const col=s=>s==='online'?'#1e8e3e':s==='alarm'?'#f29900':'#d93025';
+  const sh =s=>s==='online'?'rgba(30,142,62,.35)':s==='alarm'?'rgba(242,153,0,.35)':'rgba(217,48,37,.35)';
+  // ① + ③ lbl แสดง "มีปัญหา" สำหรับ alarm / ② SOC แสดง -- เสมอ
+  const lbl=s=>s==='online'?'ออนไลน์':s==='alarm'?'มีปัญหา':'ออฟไลน์';
+  const bg =s=>s==='online'?'#e6f4ea':s==='alarm'?'#fff3e0':'#fce8e6';
+  const fV =(v,u)=>(!v&&v!==0)||v===0?'--':v+u;
+  MOCK.poles.forEach(p=>{
+    const icon=L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:${col(p.status)};border:2.5px solid #fff;box-shadow:0 0 0 4px ${sh(p.status)},0 2px 6px rgba(0,0,0,.25);cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='scale(1.4)'" onmouseout="this.style.transform='scale(1)'"></div>`,iconSize:[18,18],iconAnchor:[9,9],popupAnchor:[0,-12]});
+    // ① เพิ่ม W + kWh | ② SOC = -- | ③ lbl มีปัญหา
+    const popup=`<div style="font-family:'IBM Plex Sans Thai',sans-serif;min-width:240px;"><div style="background:${col(p.status)};padding:12px 14px 10px;border-radius:14px 14px 0 0;"><div style="color:#fff;font-size:13px;font-weight:700;">${p.id}</div><div style="color:rgba(255,255,255,.78);font-size:10px;margin-top:2px">${p.zone}</div></div><div style="padding:12px 14px;background:#fff;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:11px;color:#5f6368">สถานะ</span><span style="padding:2px 10px;border-radius:100px;font-size:10px;font-weight:700;background:${bg(p.status)};color:${col(p.status)}">${lbl(p.status)}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"><div style="background:#f8f9fa;border-radius:8px;padding:8px 10px;grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:9px;color:#9aa0a6;margin-bottom:2px">สถานะแบตเตอรี่ (SOC)</div><div style="font-size:15px;font-weight:700;color:#9aa0a6">--</div></div><div style="font-size:9px;color:#bdbdbd;font-style:italic;">รอ Phase ถัดไป</div></div><div style="background:#f8f9fa;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#9aa0a6">แรงดันไฟฟ้า (V)</div><div style="font-size:15px;font-weight:700;color:#202124">${fV(p.volt,'')}</div></div><div style="background:#f8f9fa;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#9aa0a6">กระแสไฟฟ้า (A)</div><div style="font-size:15px;font-weight:700;color:#202124">${fV(p.curr,'')}</div></div><div style="background:#f8f9fa;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#9aa0a6">กำลังไฟฟ้า (W)</div><div style="font-size:15px;font-weight:700;color:#202124">${fV(p.power,'')}</div></div><div style="background:#f8f9fa;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#9aa0a6">พลังงานสะสม (kWh)</div><div style="font-size:15px;font-weight:700;color:#202124">${fV(p.energy,'')}</div></div></div></div></div>`;
+    const mk=L.marker([p.lat,p.lng],{icon}).addTo(leafletMap).bindPopup(popup,{maxWidth:260});
+    mk._zone=p.zone; mk._latlng2=[p.lat,p.lng];
+    poleMarkers.push(mk);
+  });
+}
+
+// จุด1: กรองโคมตามโซนที่เลือก
+let poleMarkers=[];
+function onZoneChange(zone){
+  if(!leafletMap)return;
+  const pts=[];
+  poleMarkers.forEach(mk=>{
+    const show = zone==='all' || mk._zone===zone;
+    if(show){ if(!leafletMap.hasLayer(mk))mk.addTo(leafletMap); pts.push(mk._latlng2); }
+    else { if(leafletMap.hasLayer(mk))leafletMap.removeLayer(mk); }
+  });
+  // ซูมไปยังโซนที่เลือก
+  if(zone!=='all' && pts.length>0){ leafletMap.fitBounds(pts,{padding:[60,60],maxZoom:16}); }
+  else { leafletMap.setView([15.000,103.102],14); }
+}
+
+// ──────────────────────────── CHARTS ───────────────────────────────────────
+const C={blu:'#1a73e8',grn:'#1e8e3e',yel:'#f9ab00',grid:()=>isDark?'#2e3340':'#f0f0f0',tick:()=>isDark?'#6b7280':'#9aa0a6'};
+let charts={},yrView='all';
+
+let energyPeriod='month';
+function getPeriodData(){
+  if(energyPeriod==='week')  return {labels:MOCK.weeks, now:MOCK.weekNow, prev:MOCK.weekPrev, unit:'สัปดาห์'};
+  if(energyPeriod==='day')   return {labels:MOCK.days,  now:MOCK.dayNow,  prev:MOCK.dayPrev,  unit:'วัน'};
+  return {labels:MOCK.months, now:MOCK.energy2567, prev:MOCK.energy2566, unit:'เดือน'};
+}
+
+function buildEnergyChart(targetId){
+  const id=targetId||'chart-energy';
+  const el=document.getElementById(id); if(!el)return;
+  const ctx=el.getContext('2d');
+  const {labels,now,prev}=getPeriodData();
+  // คาร์บอนเครดิต = พลังงานที่ประหยัดได้ (prev-now) × 0.5 kg CO2 ÷ 1000 (ตัน) — แสดงเป็น kg
+  const carbon=now.map((v,i)=>+(Math.max(prev[i]-v,0)*0.5).toFixed(0));
+  const key=id+'_'+energyPeriod;
+  if(charts[id]){charts[id].destroy();delete charts[id];}
+  charts[id]=new Chart(ctx,{
+    data:{labels,datasets:[
+      {type:'bar',label:'ปีนี้',data:now,backgroundColor:'rgba(26,115,232,.82)',hoverBackgroundColor:'#1a73e8',borderRadius:5,borderSkipped:false,yAxisID:'yKwh',order:2},
+      {type:'bar',label:'ปีก่อน',data:prev,backgroundColor:'rgba(30,142,62,.55)',hoverBackgroundColor:'rgba(30,142,62,.85)',borderRadius:5,borderSkipped:false,yAxisID:'yKwh',order:2},
+      {type:'line',label:'คาร์บอนเครดิต (kg CO₂)',data:carbon,borderColor:'#34a853',backgroundColor:'rgba(52,168,83,.08)',borderWidth:2.4,fill:true,tension:.4,pointRadius:3.5,pointBackgroundColor:'#34a853',pointBorderColor:'#fff',pointBorderWidth:1.5,yAxisID:'yCarbon',order:1},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:isDark?'#262b35':'#fff',titleColor:isDark?'#e8eaed':'#202124',bodyColor:isDark?'#9aa0a6':'#5f6368',borderColor:isDark?'#2e3340':'#e0e0e0',borderWidth:1,padding:10,cornerRadius:10,
+        callbacks:{label:c=>c.dataset.type==='line'?` คาร์บอนเครดิต: ${c.parsed.y.toLocaleString()} kg CO₂`:` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} kWh`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10,weight:'500'},color:C.tick()},border:{display:false}},
+        yKwh:{type:'linear',position:'left',grid:{color:C.grid()},ticks:{font:{size:9},color:C.tick(),callback:v=>v.toLocaleString()},border:{display:false},title:{display:true,text:'kWh',font:{size:9},color:C.tick()}},
+        yCarbon:{type:'linear',position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:9},color:'#34a853',callback:v=>v+'kg'},border:{display:false},title:{display:true,text:'คาร์บอนเครดิต',font:{size:9},color:'#34a853'}},
+      }
+    }
+  });
+}
+
+function setPeriod(p){
+  energyPeriod=p;
+  ['month','week','day'].forEach(x=>{
+    [['pd-','#1a73e8'],['pdb-','#1a73e8']].forEach(([pre])=>{
+      const b=document.getElementById(pre+x);if(!b)return;
+      b.style.borderColor=x===p?'#1a73e8':'#e0e0e0';
+      b.style.color=x===p?'#1a73e8':'#9aa0a6';
+      b.style.background=x===p?'#e8f0fe':'transparent';
+    });
+  });
+  buildEnergyChart('chart-energy');
+  if(document.getElementById('energy-modal').style.display==='flex'){ buildEnergyChart('chart-energy-big'); updateEnergyModalKPI(); }
+}
+
+function updateEnergyModalKPI(){
+  const {now,prev}=getPeriodData();
+  const sumNow=now.reduce((a,b)=>a+b,0);
+  const sumPrev=prev.reduce((a,b)=>a+b,0);
+  const saved=Math.max(sumPrev-sumNow,0);
+  const carbon=Math.round(saved*0.5);
+  const money=Math.round(saved*4.5);
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v.toLocaleString();};
+  set('em-now',sumNow); set('em-save',saved); set('em-carbon',carbon); set('em-money',money);
+}
+
+// จุด3: ปุ่มขยายกราฟ popup
+function openEnergyModal(){
+  document.getElementById('energy-modal').style.display='flex';
+  updateEnergyModalKPI();
+  setTimeout(()=>buildEnergyChart('chart-energy-big'),50);
+}
+function closeEnergyModal(){
+  document.getElementById('energy-modal').style.display='none';
+  if(charts['chart-energy-big']){charts['chart-energy-big'].destroy();delete charts['chart-energy-big'];}
+}
+
+// จุด3: Donut chart ภาพรวมออนไลน์/ออฟไลน์
+// ── คำนวณ KPI การแจ้งเตือนจาก logs.hw จริง ──────────────────────────────
+function updateAlarmKPI(){
+  const hw = MOCK.logs.hw;
+  const total    = hw.length;
+  const open     = hw.filter(l=>l.handleStatus===0).length;
+  const progress = hw.filter(l=>l.handleStatus===1).length;
+  const done     = hw.filter(l=>l.handleStatus===2).length;
+  const high     = hw.filter(l=>l.alarmLevel===2).length;  // ความเสี่ยงสูง
+  const mid      = hw.filter(l=>l.alarmLevel===1).length;  // รุนแรง
+  const low      = hw.filter(l=>l.alarmLevel===0).length;  // ปกติ
+  const unread   = open + progress;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('kpi-alarm-total',    total);
+  set('kpi-alarm-open',     open);
+  set('kpi-alarm-progress', progress);
+  set('kpi-alarm-done',     done);
+  set('kpi-alarm-high',     high);
+  set('kpi-alarm-mid',      mid);
+  set('kpi-alarm-low',      low);
+  set('alarm-unread-badge', unread > 0 ? `${unread} ใหม่` : 'ไม่มีใหม่');
+  // เปลี่ยนสี badge เป็นเทาถ้าไม่มีรายการใหม่
+  const badge = document.getElementById('alarm-unread-badge');
+  if(badge) badge.style.color = unread > 0 ? '' : 'var(--c-t3,#80868b)';
+  const dot = badge?.previousElementSibling;
+  if(dot) dot.style.display = unread > 0 ? '' : 'none';
+}
+
+function buildDonut(){
+  const on   =MOCK.poles.filter(p=>p.status==='online').length;
+  const off  =MOCK.poles.filter(p=>p.status==='offline').length;
+  const alarm=MOCK.poles.filter(p=>p.status==='alarm').length;
+  const total=MOCK.poles.length;
+  const pctNum=total>0?(on/total)*100:0;
+  const pct=pctNum.toFixed(1);
+  const offPct=(off/total*100).toFixed(1);
+  const alarmPct=(alarm/total*100).toFixed(1);
+  // สีตามระดับ: >=90 เขียว, >=70 เหลือง, <70 แดง
+  const gColor = pctNum>=90?'#1e8e3e':pctNum>=70?'#f9ab00':'#ea4335';
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('donut-pct',pct+'%'); set('donut-on',on); set('donut-off',off); set('donut-total',total); set('donut-alarm',alarm);
+  set('kpi-total',total); set('kpi-online',on); set('kpi-offline',off);
+  set('kpi-online-pct',pct+'%'); set('kpi-offline-pct',offPct+'%');
+  set('kpi-alarm',alarm); set('kpi-alarm-pct',alarmPct+'%');
+  // เปลี่ยนสีตัวเลข % กลาง gauge ตามระดับ
+  const pe=document.getElementById('donut-pct'); if(pe)pe.style.color=gColor;
+  const el=document.getElementById('chart-donut'); if(!el)return;
+  if(charts.donut){charts.donut.destroy();delete charts.donut;}
+  charts.donut=new Chart(el.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['ออนไลน์','มีปัญหา','ออฟไลน์'],datasets:[{data:[on,alarm,off],
+      backgroundColor:['#1e8e3e','#f29900','#ea4335'],
+      borderColor:isDark?'#1e2128':'#fff',borderWidth:2,
+      circumference:180,rotation:270,borderRadius:[6,2,6]}]},
+    options:{responsive:false,maintainAspectRatio:false,cutout:'72%',
+      plugins:{legend:{display:false},tooltip:{enabled:false}},
+      animation:{animateRotate:true,duration:1000,easing:'easeOutCubic'}}
+  });
+}
+
+// จุด4: ดึงข้อมูลสภาพอากาศจริงจาก Open-Meteo (ฟรี ไม่ต้อง API key) ตามพิกัดบุรีรัมย์
+async function fetchWeather(){
+  // บุรีรัมย์: lat 14.99, lng 103.10
+  const lat=14.99, lng=103.10;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  try{
+    // อากาศ + ความชื้น
+    const wRes=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code`);
+    const w=await wRes.json();
+    if(w.current){
+      set('w-temp',Math.round(w.current.temperature_2m)+'°C');
+      set('w-hum',w.current.relative_humidity_2m+'%');
+      const codes={0:'ท้องฟ้าแจ่มใส',1:'มีเมฆเล็กน้อย',2:'มีเมฆบางส่วน',3:'มีเมฆมาก',45:'หมอก',
+        51:'ฝนปรอย',61:'ฝนตก',63:'ฝนตกปานกลาง',65:'ฝนตกหนัก',80:'ฝนตกเป็นช่วง',95:'พายุฝนฟ้าคะนอง'};
+      set('w-desc',codes[w.current.weather_code]||'มีเมฆบางส่วน');
+    }
+    // คุณภาพอากาศ PM2.5 + CO2
+    const aRes=await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=pm2_5,carbon_dioxide`);
+    const a=await aRes.json();
+    if(a.current){
+      if(a.current.pm2_5!=null)set('w-pm',Math.round(a.current.pm2_5));
+      if(a.current.carbon_dioxide!=null)set('w-co2',Math.round(a.current.carbon_dioxide));
+    }
+  }catch(e){
+    // Null-safe: ใช้ค่า mock เดิมหากดึงไม่ได้
+    console.warn('Weather fetch failed, using mock values');
+  }
+}
+
+function updateChartTheme(){
+  Object.values(charts).forEach(ch=>{
+    if(!ch)return;
+    const sc=ch.options.scales;
+    if(sc?.x){sc.x.ticks.color=C.tick()}
+    if(sc?.yKwh){sc.yKwh.ticks.color=C.tick();sc.yKwh.grid.color=C.grid();if(sc.yKwh.title)sc.yKwh.title.color=C.tick()}
+    if(sc?.yPct){sc.yPct.grid.color=C.grid()}
+    if(sc?.yCarbon){sc.yCarbon.grid.color=C.grid()}
+    if(sc?.y){sc.y.ticks.color=C.tick();sc.y.grid.color=C.grid()}
+    if(ch.options.plugins?.tooltip)Object.assign(ch.options.plugins.tooltip,{backgroundColor:isDark?'#262b35':'#fff',titleColor:isDark?'#e8eaed':'#202124',bodyColor:isDark?'#9aa0a6':'#5f6368',borderColor:isDark?'#2e3340':'#e0e0e0'});
+    ch.update('none');
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ACCESS LOG MODAL (ภาพรวมเทศบาล) — TOR ๔.๗.๒–๔.๗.๓
+// ══════════════════════════════════════════════════════════
+
+// Mock data Dashboard log (PostgreSQL เรา)
+const MOCK_DASH_LOG = [
+  {time:'09/06/69 08:44',user:'admin',      ip:'192.168.1.10', action:'เข้าสู่ระบบสำเร็จ',   detail:'Chrome/Windows',           status:'ok'},
+  {time:'09/06/69 08:51',user:'supervisor01',ip:'192.168.1.22',action:'เข้าสู่ระบบสำเร็จ',   detail:'Chrome/macOS',             status:'ok'},
+  {time:'09/06/69 08:52',user:'supervisor01',ip:'192.168.1.22',action:'เปิดดู Dashboard',     detail:'ดูแผนที่ + KPI ภาพรวม',   status:'info'},
+  {time:'09/06/69 09:05',user:'operator1',  ip:'192.168.1.35', action:'เข้าสู่ระบบสำเร็จ',   detail:'Firefox/Windows',          status:'ok'},
+  {time:'09/06/69 09:12',user:'unknown',    ip:'103.28.65.214',action:'เข้าระบบล้มเหลว',      detail:'รหัสผ่านผิด 3 ครั้ง',     status:'crit'},
+  {time:'09/06/69 09:30',user:'operator1',  ip:'192.168.1.35', action:'ส่งออกรายงาน CSV',     detail:'Log ฮาร์ดแวร์ 30 วัน',    status:'info'},
+  {time:'09/06/69 09:52',user:'operator1',  ip:'192.168.1.35', action:'ออกจากระบบ',           detail:'Session 47 นาที',          status:'ok'},
+  {time:'09/06/69 10:15',user:'supervisor01',ip:'192.168.1.22',action:'เปิดดู Audit Log',     detail:'กรอง 7 วันล่าสุด',        status:'info'},
+  {time:'09/06/69 10:32',user:'supervisor01',ip:'192.168.1.22',action:'ส่งออกรายงาน PDF',     detail:'รายงานพลังงานรายเดือน',   status:'info'},
+  {time:'09/06/69 11:00',user:'viewer01',   ip:'10.0.0.15',    action:'เข้าสู่ระบบสำเร็จ',   detail:'Mobile/iOS',               status:'ok'},
+  {time:'09/06/69 12:17',user:'supervisor01',ip:'192.168.1.22',action:'ออกจากระบบ',           detail:'Session 1 ชม. 26 นาที',   status:'ok'},
+  {time:'09/06/69 12:44',user:'unknown',    ip:'58.137.22.180',action:'เข้าระบบล้มเหลว',      detail:'IP ต่างประเทศ (สิงคโปร์)', status:'crit'},
+  {time:'09/06/69 13:00',user:'admin',      ip:'192.168.1.10', action:'ต่ออายุ Session',       detail:'Token refresh สำเร็จ',     status:'ok'},
+  // ย้อนหลัง 3 วัน
+  {time:'08/06/69 14:22',user:'admin',      ip:'192.168.1.10', action:'เข้าสู่ระบบสำเร็จ',   detail:'Chrome/Windows',           status:'ok'},
+  {time:'08/06/69 15:44',user:'operator1',  ip:'192.168.1.35', action:'เข้าสู่ระบบสำเร็จ',   detail:'Chrome/Windows',           status:'ok'},
+  {time:'08/06/69 16:30',user:'operator1',  ip:'192.168.1.35', action:'ส่งออกรายงาน CSV',     detail:'Log ฮาร์ดแวร์ 7 วัน',     status:'info'},
+  {time:'08/06/69 17:05',user:'operator1',  ip:'192.168.1.35', action:'ออกจากระบบ',           detail:'Session 1 ชม. 21 นาที',   status:'ok'},
+  {time:'07/06/69 09:00',user:'admin',      ip:'192.168.1.10', action:'เข้าสู่ระบบสำเร็จ',   detail:'Chrome/Windows',           status:'ok'},
+  {time:'07/06/69 09:45',user:'supervisor01',ip:'192.168.1.22',action:'เข้าสู่ระบบสำเร็จ',   detail:'Chrome/macOS',             status:'ok'},
+  {time:'07/06/69 11:30',user:'unknown',    ip:'45.156.xx.xx', action:'เข้าระบบล้มเหลว',      detail:'รหัสผ่านผิด 5 ครั้ง (Lock)',status:'crit'},
+];
+
+function openAccessLogModal(){
+  document.getElementById('access-log-modal').style.display='flex';
+  renderAccessLog();
+}
+function closeAccessLogModal(){
+  document.getElementById('access-log-modal').style.display='none';
+}
+
+function renderAccessLog(){
+  const userF  =(document.getElementById('al-user')?.value)||'all';
+  const searchF=(document.getElementById('al-search')?.value||'').toLowerCase();
+  const filtered=MOCK_DASH_LOG.filter(r=>{
+    if(userF!=='all'&&r.user!==userF)return false;
+    if(searchF&&!JSON.stringify(r).toLowerCase().includes(searchF))return false;
+    return true;
+  });
+  const kv=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  kv('al-total',  MOCK_DASH_LOG.length);
+  kv('al-success',MOCK_DASH_LOG.filter(r=>r.action.includes('สำเร็จ')).length);
+  kv('al-fail',   MOCK_DASH_LOG.filter(r=>r.status==='crit').length);
+  kv('al-active', 3);
+  kv('al-count',  filtered.length);
+  const alBg   ={ok:'#e6f4ea',info:'#e8f0fe',crit:'#fce8e6',warn:'#fff8e1'};
+  const alColor={ok:'#1e8e3e',info:'#1a73e8',crit:'#d93025',warn:'#f29900'};
+  const alLabel={ok:'ปกติ',  info:'ข้อมูล', crit:'เร่งด่วน',warn:'เฝ้าระวัง'};
+  const tbody=document.getElementById('al-tbody');
+  tbody.innerHTML=filtered.map(r=>`
+    <tr style="border-bottom:1px solid #f1f3f4;transition:background .1s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+      <td style="padding:9px 16px;font-family:var(--font-mono,monospace);font-size:10px;color:#5f6368;white-space:nowrap;">${r.time}</td>
+      <td style="padding:9px 12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#1a73e8;flex-shrink:0;">${r.user==='unknown'?'?':r.user.charAt(0).toUpperCase()}</div>
+          <span style="font-size:11px;font-weight:500;color:#202124;">${r.user}</span>
+        </div>
+      </td>
+      <td style="padding:9px 12px;font-family:monospace;font-size:10px;color:#5f6368;">${r.ip||'—'}</td>
+      <td style="padding:9px 12px;font-size:11px;font-weight:500;color:#202124;">${r.action}</td>
+      <td style="padding:9px 12px;font-size:10px;color:#5f6368;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.detail||'—'}</td>
+      <td style="padding:9px 12px;text-align:center;">
+        <span style="padding:2px 8px;border-radius:100px;font-size:9px;font-weight:700;background:${alBg[r.status]||alBg.info};color:${alColor[r.status]||alColor.info};">
+          ${alLabel[r.status]||r.status}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function exportAccessCSV(){
+  const data=MOCK_DASH_LOG;
+  const rows=[['เวลา','ผู้ใช้','IP','การกระทำ','รายละเอียด','สถานะ'],...data.map(r=>[r.time,r.user,r.ip||'',r.action,r.detail||'',r.status])];
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`access_log_dashboard_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+// ══════════════════════════════════════════════════════════
+// SESSION MODAL (ของตัวเอง) — TOR ๔.๗.๓
+// ══════════════════════════════════════════════════════════
+function openSessionModal(){
+  document.getElementById('session-modal').style.display='flex';
+  const myLogs=MOCK_DASH_LOG.filter(r=>r.user==='admin'); // filter by current user
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('sm-username','admin');
+  set('sm-ok',  myLogs.filter(r=>r.status==='ok'&&r.action.includes('สำเร็จ')).length);
+  set('sm-fail',myLogs.filter(r=>r.status==='crit').length);
+  set('sm-last',myLogs.find(r=>r.action.includes('เข้าสู่ระบบสำเร็จ'))?.time||'--');
+  const smColor={ok:'#1e8e3e',info:'#1a73e8',crit:'#d93025'};
+  const smLabel={ok:'ปกติ',info:'ข้อมูล',crit:'ล้มเหลว'};
+  const smBg={ok:'#e6f4ea',info:'#e8f0fe',crit:'#fce8e6'};
+  const tbody=document.getElementById('sm-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=myLogs.map(r=>`
+    <tr style="border-bottom:1px solid #f1f3f4;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+      <td style="padding:9px 16px;font-family:monospace;font-size:10px;color:#5f6368;white-space:nowrap;">${r.time}</td>
+      <td style="padding:9px 12px;font-family:monospace;font-size:10px;color:#5f6368;">${r.ip||'—'}</td>
+      <td style="padding:9px 12px;font-size:11px;color:#202124;">${r.action} <span style="color:#9aa0a6;font-size:10px;">${r.detail}</span></td>
+      <td style="padding:9px 12px;text-align:center;">
+        <span style="padding:2px 8px;border-radius:100px;font-size:9px;font-weight:700;background:${smBg[r.status]||smBg.info};color:${smColor[r.status]||smColor.info};">
+          ${smLabel[r.status]||r.status}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+function closeSessionModal(){
+  document.getElementById('session-modal').style.display='none';
+}
+
+// ──────────────────────────── INIT ─────────────────────────────────────────
+function initDashboard(){
+  if(loginTime){
+    const s=loginTime.toTimeString().slice(0,8);
+    const ll=document.getElementById('last-login-time'); if(ll)ll.textContent=s;
+  }
+  setTab('hw');
+  requestAnimationFrame(()=>{ initMap(); buildDonut(); buildEnergyChart('chart-energy'); updateAlarmKPI(); });
+  fetchWeather();
+  setInterval(fetchWeather, 600000); // refresh ทุก 10 นาที
+}
+</script>
+
+<!-- ═══ ACCESS LOG MODAL (ภาพรวมเทศบาล) ═══ -->
+<div id="access-log-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeAccessLogModal()">
+  <div class="modal-in bg-sf dark:bg-dk-sf rounded-2xl shadow-g4 flex flex-col" style="width:88vw;max-width:1000px;height:84vh;overflow:hidden;border:1px solid #e0e0e0;" onclick="event.stopPropagation()">
+    <!-- Header -->
+    <div class="flex-shrink-0 flex items-center gap-3 px-6 py-4 border-b border-bdr dark:border-dk-bdr">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#e8f0fe;">
+        <span class="ms ms-f" style="font-size:20px;color:#1a73e8">manage_search</span>
+      </div>
+      <div>
+        <div class="font-bold text-t1 dark:text-dk-t1 text-sm">บันทึกการเข้าใช้งาน Dashboard (ภาพรวมเทศบาล)</div>
+        <div class="text-[10px] text-t3 mt-0.5">ข้อมูลจราจรทางคอมพิวเตอร์ · READ-ONLY</div>
+      </div>
+      <div class="flex items-center gap-1.5 ml-2 px-3 py-1 rounded-full text-[9px] font-semibold" style="background:#e6f4ea;color:#1e8e3e;border:1px solid #b7dfbe;">
+        <span class="ms ms-f" style="font-size:12px">verified_user</span>ตามมาตรฐานความปลอดภัย
+      </div>
+      <div class="flex-1"></div>
+      <button onclick="exportAccessCSV()" class="export-btn" style="border-color:#1a73e8;color:#1a73e8;background:#e8f0fe;">
+        <span class="ms ms-f" style="font-size:15px">download</span>ส่งออก CSV
+      </button>
+      <button onclick="closeAccessLogModal()" class="ml-3 w-8 h-8 rounded-xl bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr flex items-center justify-center hover:bg-red-lt hover:border-red/30 transition">
+        <span class="ms text-t2" style="font-size:18px">close</span>
+      </button>
+    </div>
+    <!-- KPI Summary -->
+    <div class="flex-shrink-0 flex border-b border-bdr dark:border-dk-bdr">
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center">
+        <div class="text-lg font-bold text-blu" id="al-total">0</div>
+        <div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">ทั้งหมดวันนี้</div>
+      </div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center">
+        <div class="text-lg font-bold text-grn" id="al-success">0</div>
+        <div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">เข้าสู่ระบบสำเร็จ</div>
+      </div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center">
+        <div class="text-lg font-bold text-red" id="al-fail">0</div>
+        <div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">เข้าระบบล้มเหลว</div>
+      </div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center">
+        <div class="text-lg font-bold text-t1 dark:text-dk-t1" id="al-active">0</div>
+        <div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">Session ที่ใช้งานอยู่</div>
+      </div>
+      <div class="flex-1 px-5 py-3 text-center">
+        <div class="text-lg font-bold text-prp">90</div>
+        <div class="text-[9px] text-t3 uppercase tracking-wider mt-0.5">วันที่จัดเก็บ</div>
+      </div>
+    </div>
+    <!-- Filter bar -->
+    <div class="flex-shrink-0 flex items-center gap-3 px-5 py-2 border-b border-bdr dark:border-dk-bdr bg-sf-2 dark:bg-dk-sf2">
+      <!-- Time filter -->
+      <select id="al-range" class="filter-input text-[11px]" style="min-width:130px;" onchange="renderAccessLog()">
+        <option value="today">วันนี้</option>
+        <option value="3">3 วันล่าสุด</option>
+        <option value="7">7 วันล่าสุด</option>
+        <option value="30">30 วันล่าสุด</option>
+        <option value="90">90 วันล่าสุด</option>
+      </select>
+      <!-- User filter -->
+      <select id="al-user" class="filter-input text-[11px]" style="min-width:120px;" onchange="renderAccessLog()">
+        <option value="all">ผู้ใช้ทั้งหมด</option>
+        <option value="admin">admin</option>
+        <option value="supervisor01">supervisor01</option>
+        <option value="operator1">operator1</option>
+        <option value="viewer01">viewer01</option>
+      </select>
+      <div style="position:relative;flex:1;min-width:160px;">
+        <span class="ms" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:#9aa0a6;">search</span>
+        <input id="al-search" class="filter-input w-full" style="padding-left:32px;" type="text" placeholder="ค้นหา IP, ชื่อผู้ใช้, การกระทำ…" oninput="renderAccessLog()"/>
+      </div>
+    </div>
+    <!-- Table -->
+    <div class="flex-1 overflow-auto" style="min-height:0;" class="scrollbar-thin">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead style="position:sticky;top:0;z-index:5;">
+          <tr style="background:#f8fafc;border-bottom:2px solid #e8eaed;">
+            <th style="padding:10px 16px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">เวลา</th>
+            <th style="padding:10px 12px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">ผู้ใช้งาน</th>
+            <th style="padding:10px 12px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">IP Address</th>
+            <th style="padding:10px 12px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">การกระทำ</th>
+            <th style="padding:10px 12px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">รายละเอียด</th>
+            <th style="padding:10px 12px;text-align:center;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody id="al-tbody"></tbody>
+      </table>
+    </div>
+    <div class="flex-shrink-0 px-5 py-2 border-t border-bdr dark:border-dk-bdr bg-sf-2 dark:bg-dk-sf2 flex items-center justify-between">
+      <div class="text-[10px] text-t3">READ-ONLY · บันทึกนี้ไม่สามารถแก้ไขหรือลบได้</div>
+      <div class="text-[10px] text-t3">รวม <span id="al-count" class="font-bold text-blu">0</span> รายการ</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SESSION MODAL (ของตัวเอง) ═══ -->
+<div id="session-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeSessionModal()">
+  <div class="modal-in bg-sf dark:bg-dk-sf rounded-2xl shadow-g4 flex flex-col" style="width:600px;max-width:96vw;max-height:80vh;overflow:hidden;border:1px solid #e0e0e0;" onclick="event.stopPropagation()">
+    <div class="flex-shrink-0 flex items-center gap-3 px-6 py-4 border-b border-bdr dark:border-dk-bdr">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#e6f4ea;">
+        <span class="ms ms-f" style="font-size:20px;color:#1e8e3e">history</span>
+      </div>
+      <div>
+        <div class="font-bold text-t1 dark:text-dk-t1 text-sm">ประวัติ Session ของฉัน</div>
+        <div class="text-[10px] text-t3 mt-0.5">เฉพาะบัญชี <span id="sm-username" class="font-semibold text-blu">admin</span> · READ-ONLY</div>
+      </div>
+      <div class="flex-1"></div>
+      <button onclick="closeSessionModal()" class="w-8 h-8 rounded-xl bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr flex items-center justify-center hover:bg-red-lt transition">
+        <span class="ms text-t2" style="font-size:18px">close</span>
+      </button>
+    </div>
+    <!-- Stats -->
+    <div class="flex-shrink-0 flex border-b border-bdr dark:border-dk-bdr">
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center">
+        <div class="text-base font-bold text-grn" id="sm-ok">0</div>
+        <div class="text-[9px] text-t3 mt-0.5">เข้าสำเร็จ</div>
+      </div>
+      <div class="flex-1 px-5 py-3 border-r border-bdr dark:border-dk-bdr text-center">
+        <div class="text-base font-bold text-red" id="sm-fail">0</div>
+        <div class="text-[9px] text-t3 mt-0.5">ล้มเหลว</div>
+      </div>
+      <div class="flex-1 px-5 py-3 text-center">
+        <div class="text-base font-bold text-blu" id="sm-last">--:--</div>
+        <div class="text-[9px] text-t3 mt-0.5">ครั้งล่าสุด</div>
+      </div>
+    </div>
+    <div class="flex-1 overflow-auto scrollbar-thin" style="min-height:0;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead style="position:sticky;top:0;z-index:5;">
+          <tr style="background:#f8fafc;border-bottom:2px solid #e8eaed;">
+            <th style="padding:9px 16px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">เวลา</th>
+            <th style="padding:9px 12px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">IP Address</th>
+            <th style="padding:9px 12px;text-align:left;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">การกระทำ</th>
+            <th style="padding:9px 12px;text-align:center;font-size:9px;font-weight:700;color:#80868b;letter-spacing:.08em;text-transform:uppercase;">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody id="sm-tbody"></tbody>
+      </table>
+    </div>
+    <div class="flex-shrink-0 px-5 py-2 border-t border-bdr dark:border-dk-bdr text-center text-[10px] text-t3">
+      READ-ONLY
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
