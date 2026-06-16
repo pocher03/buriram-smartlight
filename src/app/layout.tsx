@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
+import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
   title: "ศูนย์บัญชาการโคมไฟถนนอัจฉริยะ — เทศบาลเมืองบุรีรัมย์",
@@ -18,10 +20,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // กฎ: Dark mode เป็นค่าเริ่มต้น (toggle Light/Dark จะเพิ่มใน Sprint 1)
+  // กฎ UI #9: Dark mode เป็นค่าเริ่มต้น — สลับ Light/Dark ผ่าน next-themes (class)
   return (
-    <html lang="th" className="dark" suppressHydrationWarning>
-      <body>{children}</body>
+    <html lang="th" suppressHydrationWarning>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

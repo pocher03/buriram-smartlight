@@ -14,6 +14,12 @@ const liveAdapter: DataAdapter = {
   async getZones() {
     throw new Error(NOT_READY);
   },
+  async getDashboard() {
+    throw new Error(NOT_READY);
+  },
+  async getEnergy() {
+    throw new Error(NOT_READY);
+  },
 };
 
 export default liveAdapter;

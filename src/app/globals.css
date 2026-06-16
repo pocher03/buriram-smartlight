@@ -112,3 +112,142 @@
     text-wrap: balance;
   }
 }
+
+/* Leaflet — ปรับ tile เป็นโทนมืดเมื่อ dark mode + popup สไตล์การ์ด */
+.dark .leaflet-tile {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.95) saturate(0.8);
+}
+.leaflet-container {
+  background: #e5e3df;
+  font-family: "IBM Plex Sans Thai", sans-serif;
+}
+.dark .leaflet-container {
+  background: #0f1117;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 14px !important;
+  padding: 0 !important;
+  box-shadow: 0 6px 24px rgba(60, 64, 67, 0.2) !important;
+  overflow: hidden;
+  border: 1px solid #e0e0e0 !important;
+}
+.dark .leaflet-popup-content-wrapper {
+  background: #1e2128 !important;
+  border-color: #2e3340 !important;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+  min-width: 220px !important;
+}
+.leaflet-popup-tip-container {
+  display: none !important;
+}
+
+/* Stagger fade-up (port จาก reference) */
+.stagger > * {
+  animation: fade-up 0.42s ease both;
+}
+.dropdown-in {
+  animation: slideDown 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Progress bar (Top fault) */
+.pbar {
+  height: 4px;
+  border-radius: 2px;
+  background: #e0e0e0;
+  overflow: hidden;
+}
+.dark .pbar {
+  background: #2e3340;
+}
+.pfill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ───────── Login screen (port จาก buriram_v8_4.html) ───────── */
+@keyframes loginIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.login-in {
+  animation: loginIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes bgFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+.bg-float {
+  animation: bgFloat 8s ease-in-out infinite;
+}
+.login-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: "IBM Plex Sans Thai", sans-serif;
+  font-size: 13px;
+  color: #202124;
+  background: #f8f9fa;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.login-input:focus {
+  border-color: #1a73e8;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+}
+.login-input-grn:focus {
+  border-color: #1e8e3e !important;
+  box-shadow: 0 0 0 3px rgba(30, 142, 62, 0.12) !important;
+}
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: "IBM Plex Sans Thai", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+.login-btn:active {
+  transform: scale(0.99);
+}
+.login-btn:disabled {
+  background: #9aa0a6;
+  cursor: not-allowed;
+}
+.login-btn-grn {
+  background: #1e8e3e !important;
+}
+.login-btn-grn:hover {
+  background: #176c30 !important;
+  box-shadow: 0 4px 16px rgba(30, 142, 62, 0.35) !important;
+}
