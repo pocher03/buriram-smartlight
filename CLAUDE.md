@@ -3,9 +3,12 @@
 
 > **Claude Code:** อ่านไฟล์นี้ให้จบก่อนเขียนโค้ดทุกบรรทัด จากนั้นอ่าน `buriram_master_plan_v2.md`
 
-**Sprint ปัจจุบัน:** Sprint 2 ✅ เสร็จสมบูรณ์ (deploy สำเร็จบน Droplet จริง — 
-token/kpi/objects/alarms/energy/weather ผ่านครบ 6/6 jobs) 
-→ พร้อมเริ่ม Sprint 3 (Auth + RBAC)
+**Sprint ปัจจุบัน:** Sprint 3 ✅ เสร็จ (code) — Auth.js v5 Credentials + bcrypt, RBAC 2 role
+(admin ผูก projectId / super_admin isCrossProject auto-redirect บุรีรัมย์ Phase 1),
+middleware กัน route, access_logs APPEND-ONLY (login/fail/logout/select_project),
+ล็อกบัญชี 30 วิ หลังผิด 3 ครั้ง, seed 3 บัญชี — build ผ่าน
+⏳ ค้างบน Droplet: ตั้ง AUTH_SECRET ใน .env.local + รัน `npm run db:seed` (ดูคำสั่งท้าย session)
+→ ถัดไป Sprint 4 (Analytics + Export + UAT; "ลืมรหัสผ่าน" เลื่อนมาที่นี่)
 ---
 
 ## 🔴 กฎเหล็ก (ห้ามละเมิดเด็ดขาด — ทุกข้อมีผลทางกฎหมายและความปลอดภัย)
