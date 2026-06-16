@@ -1,0 +1,242 @@
+// Prisma schema — ศูนย์บัญชาการโคมไฟถนนอัจฉริยะ เทศบาลเมืองบุรีรัมย์
+// อ้างอิง master plan ข้อ 6 (Database Schema)
+// ⚠️ alarm_logs + access_logs = APPEND-ONLY (เพิกถอน UPDATE/DELETE ระดับ DB role
+//    ดู prisma/sql/append_only_grants.sql ที่ต้องรันหลัง migrate)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────── Enums ─────────
+enum Role {
+  admin
+  super_admin
+}
+
+enum DeviceType {
+  controller
+  solar
+}
+
+enum AlarmLevel {
+  crit
+  warn
+  info
+  ok
+}
+
+enum HandleStatus {
+  pending
+  processing
+  done
+}
+
+enum EnergyType {
+  daily
+  monthly
+}
+
+// ───────── Core ─────────
+model Project {
+  id         String   @id // เช่น "buriram"
+  name       String
+  divisionId Int      @unique @map("division_id") // 1889
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  zones      Zone[]
+  devices    Device[]
+  users      User[]
+
+  @@map("projects")
+}
+
+model Zone {
+  id        String  @id
+  projectId String  @map("project_id")
+  name      String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  devices   Device[]
+
+  @@index([projectId])
+  @@map("zones")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  username       String    @unique
+  passwordHash   String    @map("password_hash")
+  name           String
+  email          String    @unique
+  role           Role      @default(admin)
+  isCrossProject Boolean   @default(false) @map("is_cross_project") // เช็คสิทธิ์ด้วย flag
+  projectId      String?   @map("project_id") // super_admin = null (ข้ามโครงการ)
+  failedAttempts Int       @default(0) @map("failed_attempts")
+  lockedUntil    DateTime? @map("locked_until") // ล็อกบัญชีหลังผิด 3 ครั้ง
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  project        Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  resetTokens    PasswordResetToken[]
+
+  @@index([projectId])
+  @@map("users")
+}
+
+model Device {
+  id              String     @id @default(uuid())
+  // ตัวระบุจากต้นทาง — objectId ของ Lamp object (field "id" ใน object/page)
+  rulrObjectId    BigInt     @unique @map("rulr_object_id")
+  // ⚠️ ค่าวัด (telemetry) ผูกด้วย thingsObjectId ไม่ใช่ rulrObjectId
+  thingsObjectId  BigInt?    @map("things_object_id")
+  thingsObjectAddr String?   @map("things_object_addr")
+  name            String     @unique // BRU-NEMA-001
+  modelName       String?    @map("model_name")
+  deviceType      DeviceType @default(controller) @map("device_type")
+  projectId       String     @map("project_id")
+  zoneId          String?    @map("zone_id")
+  lat             Float? // null = ไม่มีพิกัด (null-safe / ไม่ปักหมุด) — backfill จาก alarm log
+  lng             Float?
+  locationSource  String?    @map("location_source") // 'alarm' | 'estimated'
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  zone            Zone?      @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  telemetry       TelemetrySnapshot[]
+
+  @@index([projectId])
+  @@index([zoneId])
+  @@map("devices")
+}
+
+model TelemetrySnapshot {
+  id           BigInt   @id @default(autoincrement())
+  deviceId     String   @map("device_id")
+  voltage      Float? // V
+  electricity  Float? // A
+  actp         Float? // W
+  acte         Float? // kWh สะสม
+  frequency    Float? // Hz
+  switchStatus Int?     @map("switch_status") // 0/1
+  onlineStatus Int?     @map("online_status") // 0/1 (ยึดตรงๆ)
+  brightness   Int? // %
+  illumination Int? // Lux
+  runtime      Int? // นาที
+  snr          Int?
+  soc          Int? // % แบตเตอรี่ (solar เท่านั้น; controller = null)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, createdAt])
+  @@index([createdAt])
+  @@map("telemetry_snapshots")
+}
+
+// APPEND-ONLY (ห้าม UPDATE/DELETE — บังคับระดับ DB role)
+model AlarmLog {
+  id           BigInt       @id @default(autoincrement())
+  rulrAlarmId  BigInt       @unique @map("rulr_alarm_id") // กัน insert ซ้ำ (delta sync)
+  deviceName   String       @map("device_name")
+  name         String // เช่น "Offline"
+  alarmLevel   AlarmLevel   @default(info) @map("alarm_level")
+  handleStatus HandleStatus @default(pending) @map("handle_status")
+  divisionName String?      @map("division_name")
+  longitude    Float?
+  latitude     Float?
+  createdAt    DateTime     @map("created_at") // createdAtStr จากต้นทาง (UTC)
+  insertedAt   DateTime     @default(now()) @map("inserted_at")
+
+  @@index([createdAt])
+  @@map("alarm_logs")
+}
+
+model EnergyStat {
+  id        BigInt     @id @default(autoincrement())
+  projectId String     @map("project_id")
+  type      EnergyType
+  period    String // "2026-06-01" (daily) | "2026-06" (monthly)
+  energyNow Float?     @map("energy_now") // kWh ปีนี้
+  energyPrev Float?    @map("energy_prev") // kWh ปีก่อน
+  saveEnergy Float?    @map("save_energy")
+  reduction Float?
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  @@unique([projectId, type, period])
+  @@index([projectId, type])
+  @@map("energy_stats")
+}
+
+model FaultAggregate {
+  id        BigInt   @id @default(autoincrement())
+  projectId String   @map("project_id")
+  zoneName  String   @map("zone_name")
+  count     Int
+  rank      Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([projectId])
+  @@map("fault_aggregates")
+}
+
+model WeatherCache {
+  id        Int      @id @default(autoincrement())
+  projectId String   @map("project_id")
+  temp      Float?
+  description String?
+  humidity  Int?
+  pm25      Int?
+  co2       Int?
+  fetchedAt DateTime @default(now()) @map("fetched_at")
+
+  @@index([projectId])
+  @@map("weather_cache")
+}
+
+// APPEND-ONLY (ห้าม UPDATE/DELETE — TOR ๔.๗.๒–๔.๗.๓)
+model AccessLog {
+  id            BigInt   @id @default(autoincrement())
+  userId        String?  @map("user_id")
+  username      String?
+  action        String // login | logout | login_failed | select_project ...
+  activeProjectId String? @map("active_project_id")
+  ip            String?
+  userAgent     String?  @map("user_agent")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([userId])
+  @@map("access_logs")
+}
+
+// Worker เท่านั้น — accessToken/refreshToken (singleton ต่อ provider)
+model TokenStore {
+  id            Int      @id @default(autoincrement())
+  provider      String   @unique @default("rulr")
+  accessToken   String   @map("access_token")
+  refreshToken  String?  @map("refresh_token")
+  tokenType     String   @default("bearer") @map("token_type")
+  expiresAt     DateTime @map("expires_at") // เวลา accessToken หมดอายุ (UTC)
+  refreshExpiresAt DateTime? @map("refresh_expires_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("token_store")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at") // หมดอายุ 30 นาที
+  usedAt    DateTime? @map("used_at") // ใช้ครั้งเดียว
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
