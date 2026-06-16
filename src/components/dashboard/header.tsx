@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 import type { Zone } from "@/lib/mock-data";
 import type { WeatherInfo } from "@/lib/types";
+import type { DashboardUser } from "./dashboard";
 import { display } from "@/lib/null-safe";
+import { logoutAction } from "@/app/(dashboard)/actions";
 
 interface HeaderProps {
   zones: Zone[];
   selectedZone: string;
   onZoneChange: (zone: string) => void;
   weather: WeatherInfo;
+  user: DashboardUser;
 }
 
 /** นาฬิกา/วันที่ — แสดงเวลาไทย (Asia/Bangkok) อัปเดตทุกวินาที */
@@ -25,13 +27,18 @@ function useClock() {
   return now;
 }
 
-export function Header({ zones, selectedZone, onZoneChange, weather }: HeaderProps) {
+export function Header({ zones, selectedZone, onZoneChange, weather, user }: HeaderProps) {
   const now = useClock();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const router = useRouter();
   useEffect(() => setMounted(true), []);
+
+  const roleLabel =
+    user.role === "super_admin"
+      ? "ผู้ดูแลระบบส่วนกลาง (Super Admin)"
+      : "ผู้ดูแลระบบเทศบาล (Admin)";
+  const avatarChar = (user.name?.trim()?.[0] ?? "A").toUpperCase();
 
   const dateStr = now
     ? now.toLocaleDateString("th-TH", {
@@ -173,25 +180,28 @@ export function Header({ zones, selectedZone, onZoneChange, weather }: HeaderPro
             onClick={() => setProfileOpen((v) => !v)}
             title="โปรไฟล์"
           >
-            A
+            {avatarChar}
           </div>
           {profileOpen && (
             <div className="dropdown-in absolute top-[calc(100%+8px)] right-0 bg-sf dark:bg-dk-sf border border-bdr dark:border-dk-bdr rounded-2xl shadow-g3 min-w-[240px] z-[1000] overflow-hidden">
               <div className="p-4 border-b border-bdr dark:border-dk-bdr">
-                <div className="text-[13px] font-bold text-t1 dark:text-dk-t1">
-                  ผู้ดูแลระบบ (Admin)
+                <div className="text-[13px] font-bold text-t1 dark:text-dk-t1 truncate">
+                  {user.name}
                 </div>
-                <div className="text-[11px] text-t3">admin@buriram.go.th</div>
+                <div className="text-[10px] text-t3 mt-0.5">{roleLabel}</div>
+                <div className="text-[11px] text-t3 truncate">{user.email}</div>
               </div>
-              <div
-                className="flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition"
-                onClick={() => router.push("/login")}
-              >
-                <span className="ms ms-f text-red" style={{ fontSize: 18 }}>
-                  logout
-                </span>
-                <span className="text-[12px] font-semibold text-red">ออกจากระบบ</span>
-              </div>
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left"
+                >
+                  <span className="ms ms-f text-red" style={{ fontSize: 18 }}>
+                    logout
+                  </span>
+                  <span className="text-[12px] font-semibold text-red">ออกจากระบบ</span>
+                </button>
+              </form>
             </div>
           )}
         </div>

@@ -11,8 +11,16 @@ import { MapPanel } from "./map-panel";
 import { LogsPanel } from "./logs-panel";
 import { BottomRow } from "./bottom-row";
 
+export interface DashboardUser {
+  name: string;
+  email: string;
+  role: "admin" | "super_admin";
+  isCrossProject: boolean;
+}
+
 interface DashboardProps {
   source: "mock" | "live";
+  user: DashboardUser;
   zones: Zone[];
   data: DashboardData;
   energy: Record<EnergyPeriod, EnergySeries>;
@@ -32,7 +40,7 @@ function kpiFromDevices(devices: DashboardData["devices"], base: Kpi): Kpi {
   };
 }
 
-export function Dashboard({ source, zones, data, energy }: DashboardProps) {
+export function Dashboard({ source, user, zones, data, energy }: DashboardProps) {
   const [selectedZone, setSelectedZone] = useState("all");
   const [period, setPeriod] = useState<EnergyPeriod>("month");
 
@@ -74,6 +82,7 @@ export function Dashboard({ source, zones, data, energy }: DashboardProps) {
         selectedZone={selectedZone}
         onZoneChange={setSelectedZone}
         weather={data.weather}
+        user={user}
       />
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">

@@ -1,26 +1,16 @@
 "use client";
 
-// Login (Sprint 1) — Mock redirect เท่านั้น ยังไม่ต่อ Auth.js จริง (จะทำใน Sprint 3)
-// ⚠️ READ-ONLY: ไม่มีการสั่งการฮาร์ดแวร์
+// Login (Sprint 3) — เชื่อม Auth.js จริงผ่าน Server Action (loginAction)
+// ⚠️ READ-ONLY: ไม่มีการสั่งการฮาร์ดแวร์ | UI เดิมจาก Sprint 1 (ไม่สร้างใหม่)
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useFormState, useFormStatus } from "react-dom";
+import { loginAction, type LoginState } from "./actions";
+
+const initialState: LoginState = { error: null };
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [user, setUser] = useState("admin");
-  const [pass, setPass] = useState("admin123");
   const [showPw, setShowPw] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const doLogin = () => {
-    setLoading(true);
-    // Mock: เข้าสู่ระบบทันที (การยืนยันตัวตนจริงอยู่ใน Sprint 3)
-    router.push("/");
-  };
-
-  const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") doLogin();
-  };
+  const [state, formAction] = useFormState(loginAction, initialState);
 
   return (
     <div className="fixed inset-0 overflow-hidden">
@@ -55,7 +45,8 @@ export default function LoginPage() {
 
       <div className="absolute inset-0 flex items-center justify-center p-6">
         <div className="login-in w-full" style={{ maxWidth: 420 }}>
-          <div
+          <form
+            action={formAction}
             style={{
               background: "#fff",
               borderRadius: 24,
@@ -90,26 +81,24 @@ export default function LoginPage() {
 
             <Field label="ชื่อผู้ใช้งาน" icon="person">
               <input
+                name="username"
                 className="login-input login-input-grn"
                 style={{ paddingLeft: 40 }}
-                value={user}
-                onChange={(e) => setUser(e.target.value)}
-                onKeyDown={onKey}
                 placeholder="กรอกชื่อผู้ใช้งาน"
                 autoComplete="username"
+                required
               />
             </Field>
 
             <Field label="รหัสผ่าน" icon="lock">
               <input
+                name="password"
                 className="login-input login-input-grn"
                 style={{ paddingLeft: 40, paddingRight: 44 }}
                 type={showPw ? "text" : "password"}
-                value={pass}
-                onChange={(e) => setPass(e.target.value)}
-                onKeyDown={onKey}
                 placeholder="กรอกรหัสผ่าน"
                 autoComplete="current-password"
+                required
               />
               <button
                 type="button"
@@ -129,19 +118,35 @@ export default function LoginPage() {
               </button>
             </Field>
 
-            <button
-              className="login-btn login-btn-grn"
-              onClick={doLogin}
-              disabled={loading}
-              style={{ marginTop: 8 }}
-            >
-              {loading ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
-            </button>
+            {state.error && (
+              <div
+                role="alert"
+                style={{
+                  background: "#fce8e6",
+                  border: "1px solid #f4c7c3",
+                  color: "#c5221f",
+                  borderRadius: 10,
+                  padding: "9px 12px",
+                  fontSize: 12,
+                  marginBottom: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span className="ms ms-f" style={{ fontSize: 16 }}>
+                  error
+                </span>
+                <span>{state.error}</span>
+              </div>
+            )}
+
+            <SubmitButton />
 
             <p style={{ fontSize: 10, color: "#9aa0a6", textAlign: "center", marginTop: 14 }}>
-              โหมดสาธิต — ระบบยืนยันตัวตนจริงจะเปิดใช้งานใน Sprint 3
+              ระบบยืนยันตัวตน บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด
             </p>
-          </div>
+          </form>
 
           <div style={{ textAlign: "center", marginTop: 20, fontSize: 11, color: "#9aa0a6" }}>
             พัฒนาโดย{" "}
@@ -150,6 +155,20 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      className="login-btn login-btn-grn"
+      disabled={pending}
+      style={{ marginTop: 8 }}
+    >
+      {pending ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
+    </button>
   );
 }
 

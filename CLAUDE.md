@@ -1,8 +1,11 @@
 # CLAUDE.md — ศูนย์บัญชาการโคมไฟถนนอัจฉริยะ เทศบาลเมืองบุรีรัมย์
 **บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด** | SSOT v1.1 | อัปเดต: 15 มิถุนายน 2569
 
-> **Claude Code:** อ่านไฟล์นี้ให้จบก่อนเขียนโค้ดทุกบรรทัด จากนั้นอ่าน `docs/buriram_master_plan_v2.md`
+> **Claude Code:** อ่านไฟล์นี้ให้จบก่อนเขียนโค้ดทุกบรรทัด จากนั้นอ่าน `buriram_master_plan_v2.md`
 
+**Sprint ปัจจุบัน:** Sprint 2 ✅ เสร็จสมบูรณ์ (deploy สำเร็จบน Droplet จริง — 
+token/kpi/objects/alarms/energy/weather ผ่านครบ 6/6 jobs) 
+→ พร้อมเริ่ม Sprint 3 (Auth + RBAC)
 ---
 
 ## 🔴 กฎเหล็ก (ห้ามละเมิดเด็ดขาด — ทุกข้อมีผลทางกฎหมายและความปลอดภัย)
@@ -184,7 +187,15 @@ export const DEVICE_PROFILES = {
 □ Prisma queries ใช้ parameterized (ไม่มี string concat)
 □ ไม่มีการ expose divisionId หรือ clientId ใน Frontend bundle
 ```
+## 🐛 บั๊กที่เจอจริงตอน Deploy Sprint 2 (ห้ามทำผิดซ้ำ)
 
+| ปัญหา | สาเหตุ | วิธีแก้ |
+|---|---|---|
+| RULR gateway ตอบ 401 ทั้งที่ credential ถูก | Node fetch/undici ไม่ใส่ `User-Agent` header ให้อัตโนมัติ (curl ใส่ให้) gateway ปฏิเสธ request ที่ไม่มี User-Agent | ทุก fetch ไปยัง rulr-aiot.com ต้องมี header `User-Agent` + `Accept: application/json` เสมอ |
+| Prisma Client "did not initialize" ใน worker container | Dockerfile.worker copy `package.json` → `npm ci` → ค่อย copy `prisma/` ทีหลัง ทำให้ `postinstall` (prisma generate) รันก่อนมี schema | ต้อง `COPY prisma ./prisma` และ `RUN npx prisma generate` **ก่อน** `COPY . .` เสมอใน Dockerfile ที่ใช้ Prisma |
+| ตารางใหม่ (เช่น kpi_snapshots) สร้างแล้วแต่ worker ยังบอกว่าไม่มีตาราง | `docker compose restart`/`up -d` ไม่ recreate container จริงถ้า config ไม่เปลี่ยน → connection เก่ายังไม่เห็นตารางใหม่ | ใช้ `docker compose up -d --force-recreate <service>` หลัง migrate ตารางใหม่เสมอ |
+| DATABASE_URL ที่ใช้จริงผิดจากแผน | `.env.local` ไม่ได้ตั้ง `POSTGRES_USER`/`POSTGRES_DB` → Postgres ใช้ default = `postgres`/`postgres` ไม่ใช่ `buriram`/`buriram_db` | **DATABASE_URL จริงบน Droplet คือ** `postgresql://postgres:PASSWORD@postgres:5432/postgres` — ใช้ค่านี้เสมอ ไม่ใช่ตามแผนเดิม |
+| Droplet อยู่ branch ผิด ทำให้ pull ดูเหมือนสำเร็จแต่ไม่ได้โค้ดใหม่ | repo บน Droplet checkout เป็น `master` แต่ GitHub ใช้ `main` | เช็ค `git branch` ก่อนเชื่อ `git pull` ทุกครั้งบน Droplet |
 ---
 
 ## ✅ Definition of Done ต่อ Sprint
