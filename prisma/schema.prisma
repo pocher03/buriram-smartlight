@@ -214,6 +214,25 @@ model AccessLog {
   @@map("access_logs")
 }
 
+// ภาพรวม KPI จาก /mm/api/division/pandect/info (singleton ต่อโครงการ)
+// เก็บเฉพาะค่าที่ derive จาก telemetry ไม่ได้ (แผนเปิด/ปิดไฟ, ยอดรวมต้นทาง)
+model KpiSnapshot {
+  projectId       String   @id @map("project_id")
+  lightTotal      Int?     @map("light_total")
+  lightOnlineNum  Int?     @map("light_online_num")
+  lightSwitchNum  Int?     @map("light_switch_num")
+  alarmNum        Int?     @map("alarm_num")
+  processAlarmNum Int?     @map("process_alarm_num")
+  dealAlarmNum    Int?     @map("deal_alarm_num")
+  alarmTotal      Int?     @map("alarm_total")
+  autualEnergy    Float?   @map("autual_energy") // kWh สะสม (สะกดตามต้นทาง)
+  openTime        String?  @map("open_time")  // แผนเปิดไฟ "18:37:00"
+  closeTime       String?  @map("close_time") // แผนปิดไฟ "05:37:00"
+  fetchedAt       DateTime @updatedAt @map("fetched_at")
+
+  @@map("kpi_snapshots")
+}
+
 // Worker เท่านั้น — accessToken/refreshToken (singleton ต่อ provider)
 model TokenStore {
   id            Int      @id @default(autoincrement())

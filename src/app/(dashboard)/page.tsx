@@ -3,6 +3,9 @@
 import { getAdapter } from "@/lib/adapters";
 import { Dashboard } from "@/components/dashboard/dashboard";
 
+// live adapter อ่าน DB ทุก request → ห้าม static render ตอน build (กัน build-time DB call)
+export const dynamic = "force-dynamic";
+
 const PROJECT_ID = "buriram";
 
 export default async function DashboardPage() {

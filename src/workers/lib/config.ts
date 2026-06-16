@@ -29,3 +29,13 @@ export function getRulrConfig(): RulrConfig {
 export const PROJECT_ID = "buriram";
 export const SYNC_CRON = process.env.SYNC_CRON ?? "*/30 * * * *"; // ทุก 30 นาที
 export const TOKEN_CRON = process.env.TOKEN_CRON ?? "0 * * * *"; // เช็ค token ทุกชั่วโมง
+
+/** พิกัดอ้างอิงเทศบาล (สำหรับ OpenWeather) */
+export function getWeatherCoords(): { lat: number; lng: number } {
+  return {
+    lat: Number(process.env.WEATHER_LAT ?? "14.992892"),
+    lng: Number(process.env.WEATHER_LNG ?? "103.113694"),
+  };
+}
+
+export const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY ?? "";
