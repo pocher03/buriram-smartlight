@@ -23,6 +23,9 @@ async function call<T>(
     method,
     headers: {
       Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      // gateway ตอบ 401 ถ้าไม่มี User-Agent (Node fetch ไม่ใส่ให้ default)
+      "User-Agent": "buriram-smartlight-worker/1.0",
       ...(body ? { "Content-Type": "application/json" } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,

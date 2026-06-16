@@ -33,7 +33,12 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   const cfg = getRulrConfig();
   const res = await fetch(`${cfg.baseUrl}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      // gateway ของ rulr ตอบ 401 ถ้าไม่มี User-Agent (Node fetch/undici ไม่ใส่ให้ default) — curl ใส่ให้เอง
+      "User-Agent": "buriram-smartlight-worker/1.0",
+    },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
