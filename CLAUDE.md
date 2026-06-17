@@ -138,7 +138,7 @@ src/
 
 ---
 
-## 🚦 Data Source Adapter Pattern (บังคับใช้ตั้งแต่ Sprint 1)
+## Data Source Adapter Pattern (บังคับใช้ตั้งแต่ Sprint 1)
 
 ```typescript
 // src/lib/adapters/index.ts
@@ -155,7 +155,7 @@ export default adapter;
 
 ---
 
-## 🔀 Device Type Profiles (ห้าม hardcode — อ้างอิงจากนี้เท่านั้น)
+## Device Type Profiles (ห้าม hardcode — อ้างอิงจากนี้เท่านั้น)
 
 ```typescript
 // src/lib/device-profiles.ts

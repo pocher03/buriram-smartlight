@@ -90,7 +90,7 @@ export function Dashboard({ source, user, zones, data, energy }: DashboardProps)
           className="flex-1 min-h-0 grid overflow-hidden"
           style={{ gridTemplateColumns: "1fr 55% 1fr" }}
         >
-          <KpiColumn kpi={kpi} maintenance={data.maintenance} />
+          <KpiColumn kpi={kpi} maintenance={data.maintenance} devices={devices} />
           <MapPanel devices={devices} />
           <LogsPanel alarms={alarms} />
         </div>
