@@ -80,36 +80,6 @@ export function KpiColumn({ kpi, maintenance }: KpiColumnProps) {
               <div className="text-[9px] text-t3 mt-0.5">{pctOf(kpi.lightOfflineNum, total)}</div>
             </div>
           </div>
-
-          {/* โคมมีปัญหา / Alarm */}
-          <div
-            className="kpi-card flex items-center gap-2.5 p-2.5 rounded-xl border dark:border-yel/20"
-            style={{ background: "rgba(255,149,0,0.07)", borderColor: "rgba(255,149,0,0.2)" }}
-          >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(255,149,0,0.15)" }}
-            >
-              <span className="ms ms-f" style={{ fontSize: 19, color: "#f29900" }}>
-                warning
-              </span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-medium" style={{ color: "#f29900" }}>
-                โคมมีปัญหา / Alarm
-              </div>
-              <div className="text-xl font-bold leading-tight" style={{ color: "#f29900" }}>
-                {display(kpi.alarmNum)}
-              </div>
-              <div className="text-[9px] text-t3 mt-0.5">กระแส/แรงดันผิดปกติ</div>
-            </div>
-            <span
-              className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-              style={{ background: "rgba(255,149,0,0.18)", color: "#f29900" }}
-            >
-              {pctOf(alarm, total)}
-            </span>
-          </div>
         </div>
 
         {/* งานซ่อมบำรุง */}
