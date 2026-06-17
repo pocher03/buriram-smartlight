@@ -111,9 +111,16 @@ return (
           </div>
         </div>
 
-        พัฒนาโดย
-        <strong className="text-t2 dark:text-dk-t2">บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด</strong>
-        <span className="mx-1">|</span>v1.0.0
+        {/* ตัวดันเนื้อหาเครดิตให้ไปอยู่ขวาสุด (Spacer) */}
+        <div className="flex-1" />
+
+        {/* เครดิตด้านขวา (ใช้ ml-auto เพื่อดันกล่องนี้ไปชิดขวาสุดเสมอ) */}
+        <div className="ml-auto flex items-center gap-1">
+          พัฒนาโดย
+          <strong className="text-t2 dark:text-dk-t2">บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด</strong>
+          <span className="mx-1">|</span>v1.0.0
+        </div>
+        
       </div>
     </div>
   );
