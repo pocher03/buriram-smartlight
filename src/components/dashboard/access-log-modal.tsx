@@ -49,6 +49,49 @@ function isFail(action: string): boolean {
   return action === "login_failed";
 }
 
+/** หนีอักขระพิเศษสำหรับ CSV (ครอบด้วย "..." และ escape เครื่องหมายคำพูด) */
+function csvCell(v: string): string {
+  return `"${v.replace(/"/g, '""')}"`;
+}
+
+/** สร้าง CSV จากรายการที่แสดงอยู่ แล้วสั่งดาวน์โหลด (BOM เพื่อให้ Excel อ่านไทยถูก) */
+function exportCsv(variant: Variant, items: LogItem[]): void {
+  const header =
+    variant === "all"
+      ? ["เวลา", "ผู้ใช้งาน", "การกระทำ", "โครงการ", "IP", "ผลลัพธ์"]
+      : ["เวลา", "การกระทำ", "โครงการ", "IP", "ผลลัพธ์"];
+  const lines = items.map((it) => {
+    const result = isFail(it.action) ? "ล้มเหลว" : "สำเร็จ";
+    const action = ACTION_LABEL[it.action] || it.action;
+    const cols =
+      variant === "all"
+        ? [
+            fmtTime(it.createdAt),
+            it.username || "--",
+            action,
+            it.activeProjectId || "--",
+            it.ip || "--",
+            result,
+          ]
+        : [
+            fmtTime(it.createdAt),
+            action,
+            it.activeProjectId || "--",
+            it.ip || "--",
+            result,
+          ];
+    return cols.map(csvCell).join(",");
+  });
+  const csv = "﻿" + [header.map(csvCell).join(","), ...lines].join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `access-logs-${variant}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function AccessLogModal({
   variant,
   onClose,
@@ -117,7 +160,7 @@ export function AccessLogModal({
           </button>
         </div>
 
-        {/* Range filter */}
+        {/* Range filter + export */}
         <div className="flex items-center gap-1.5 px-5 py-2.5 border-b border-bdr dark:border-dk-bdr flex-shrink-0">
           {RANGES.map((r) => (
             <button
@@ -132,6 +175,18 @@ export function AccessLogModal({
               {r.label}
             </button>
           ))}
+          <div className="flex-1" />
+          <button
+            onClick={() => exportCsv(variant, items)}
+            disabled={loading || items.length === 0}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition border bg-grn-lt dark:bg-grn/15 text-grn border-grn/20 hover:border-grn/50 disabled:opacity-40 disabled:cursor-not-allowed"
+            title="ดาวน์โหลด CSV"
+          >
+            <span className="ms" style={{ fontSize: 15 }}>
+              download
+            </span>
+            <span>Export CSV</span>
+          </button>
         </div>
 
         {/* Table (scroll ภายใน) */}
