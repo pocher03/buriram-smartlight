@@ -1,9 +1,8 @@
 "use client";
 
-import type { Device, Kpi, MaintenanceStatus } from "@/lib/types";
+import type { Device, MaintenanceStatus } from "@/lib/types";
 
 interface KpiColumnProps {
-  kpi: Kpi;
   maintenance: MaintenanceStatus;
   devices: Device[];
 }
@@ -11,32 +10,34 @@ interface KpiColumnProps {
 function StatBlock({
   title,
   pct,
+  pctColorClass,
+  cols,
   rows,
 }: {
   title: string;
   pct: number | null;
+  pctColorClass: string;
+  cols: 2 | 3;
   rows: { label: string; value: number; color: string }[];
 }) {
   return (
     <div className="bg-sf-2 dark:bg-dk-sf2 rounded-xl p-3 border border-bdr/60 dark:border-dk-bdr mb-2.5">
       <div className="text-center mb-2">
-        <div className="text-3xl font-extrabold leading-none text-grn">
+        <div className={`text-3xl font-extrabold leading-none ${pctColorClass}`}>
           {pct == null ? "--" : `${pct.toFixed(2)}%`}
         </div>
         <div className="text-[10px] text-t3 mt-1 font-medium">{title}</div>
       </div>
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className={`grid gap-1.5 ${cols === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {rows.map((r) => (
           <div
             key={r.label}
-            className="flex items-center gap-1.5 py-2 px-2 rounded-lg bg-sf dark:bg-dk-sf border border-bdr/50 dark:border-dk-bdr"
+            className="flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-lg bg-sf dark:bg-dk-sf border border-bdr/50 dark:border-dk-bdr"
           >
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${r.color}`} />
-            <div className="min-w-0">
-              <div className="text-[8px] text-t3 leading-none">{r.label}</div>
-              <div className="text-sm font-bold tabular-nums leading-tight text-t1 dark:text-dk-t1">
-                {r.value}
-              </div>
+            <div className="text-[8px] text-t3 leading-none mt-0.5 truncate">{r.label}</div>
+            <div className="text-sm font-bold tabular-nums leading-tight text-t1 dark:text-dk-t1">
+              {r.value}
             </div>
           </div>
         ))}
@@ -53,6 +54,7 @@ export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
   const lightingPct = total > 0 ? (onLights / total) * 100 : null;
 
   const online = devices.filter((d) => d.telemetry.onlineStatus === 1).length;
+  const offline = total - online;
   const onlinePct = total > 0 ? (online / total) * 100 : null;
 
   return (
@@ -65,6 +67,8 @@ export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
         <StatBlock
           title="สถานะไฟ (Lighting %)"
           pct={lightingPct}
+          pctColorClass="text-yel"
+          cols={2}
           rows={[
             { label: "ไฟเปิด", value: onLights, color: "bg-grn" },
             { label: "ไฟปิด", value: offLights, color: "bg-t3" },
@@ -74,8 +78,11 @@ export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
         <StatBlock
           title="สถานะออนไลน์ (Online %)"
           pct={onlinePct}
+          pctColorClass="text-grn"
+          cols={3}
           rows={[
             { label: "ออนไลน์", value: online, color: "bg-grn" },
+            { label: "ออฟไลน์", value: offline, color: "bg-red" },
             { label: "ทั้งหมด", value: total, color: "bg-blu" },
           ]}
         />
