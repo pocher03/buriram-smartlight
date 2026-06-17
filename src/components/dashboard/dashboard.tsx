@@ -86,18 +86,26 @@ return (
 
       {/* Footer */}
       <div className="flex-shrink-0 h-6 bg-sf-3 dark:bg-dk-sf border-t border-bdr dark:border-dk-bdr flex items-center px-4 gap-3 text-[10px] text-t3">
-        <span>โหมดข้อมูล:</span>
-        <strong className={source === "mock" ? "text-yel" : "text-grn"}>
-          {source === "mock" ? "สาธิต (Mock)" : "ใช้งานจริง (Live)"}
-        </strong>
+        
+        {/* กลุ่มข้อมูลด้านซ้าย (โหมด + Sync + Uptime) */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span>โหมดข้อมูล:</span>
+            <strong className={source === "mock" ? "text-yel" : "text-grn"}>
+              {source === "mock" ? "สาธิต (Mock)" : "ใช้งานจริง (Live)"}
+            </strong>
+          </div>
 
-        {/* ส่วนที่เพิ่มใหม่: ดันเนื้อหาไปขวาและแสดง Last Sync / Uptime */}
-        <div className="flex-1 flex justify-end items-center gap-3 pr-2">
+          <div className="w-px h-3 bg-bdr dark:bg-dk-bdr" />
+
           <div className="flex items-center gap-1" title="เวลาที่ดึงข้อมูลล่าสุดจากระบบต้นทาง">
             <span className="ms text-blu" style={{ fontSize: 12 }}>sync</span>
             <span>Last Sync: <strong className="text-t2 dark:text-dk-t2 tracking-wider">{data.lastSync || "--:--:--"}</strong></span>
           </div>
-          <div className="flex items-center gap-1 border-l border-bdr dark:border-dk-bdr pl-3" title="ระยะเวลาที่ระบบทำงานต่อเนื่อง">
+
+          <div className="w-px h-3 bg-bdr dark:bg-dk-bdr" />
+
+          <div className="flex items-center gap-1" title="ระยะเวลาที่ระบบทำงานต่อเนื่อง">
             <span className="ms text-grn" style={{ fontSize: 12 }}>memory</span>
             <span>UPTIME: <strong className="text-t2 dark:text-dk-t2 tracking-wider">{data.uptime || "--"}</strong></span>
           </div>
