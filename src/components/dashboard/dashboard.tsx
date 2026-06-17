@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Zone } from "@/lib/mock-data";
 import type { DashboardData } from "@/lib/adapters/types";
-import type { EnergyPeriod, EnergySeries, Kpi } from "@/lib/types";
+import type { EnergyPeriod, EnergySeries } from "@/lib/types";
 import { DemoBanner } from "@/components/shared/demo-banner";
 import { Header } from "./header";
 import { KpiColumn } from "./kpi-column";
@@ -26,20 +26,6 @@ interface DashboardProps {
   energy: Record<EnergyPeriod, EnergySeries>;
 }
 
-/** สร้าง KPI จากชุดอุปกรณ์ (ใช้ตอนกรองตามโซน) */
-function kpiFromDevices(devices: DashboardData["devices"], base: Kpi): Kpi {
-  const total = devices.length;
-  const online = devices.filter((d) => d.telemetry.onlineStatus === 1).length;
-  return {
-    lightTotal: total,
-    lightOnlineNum: online,
-    lightOfflineNum: total - online,
-    alarmNum: total - online,
-    openTime: base.openTime,
-    closeTime: base.closeTime,
-  };
-}
-
 export function Dashboard({ source, user, zones, data, energy }: DashboardProps) {
   const [selectedZone, setSelectedZone] = useState("all");
   const [period, setPeriod] = useState<EnergyPeriod>("month");
@@ -58,11 +44,6 @@ export function Dashboard({ source, user, zones, data, energy }: DashboardProps)
         ? data.alarms
         : data.alarms.filter((a) => a.zoneName === selectedZone),
     [data.alarms, selectedZone]
-  );
-
-  const kpi = useMemo(
-    () => (selectedZone === "all" ? data.kpi : kpiFromDevices(devices, data.kpi)),
-    [selectedZone, data.kpi, devices]
   );
 
   const faultAreas = useMemo(
