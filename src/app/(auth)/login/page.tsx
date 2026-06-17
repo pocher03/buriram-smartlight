@@ -106,10 +106,15 @@ export default function LoginPage() {
                 style={{
                   position: "absolute",
                   right: 12,
-                  top: 38,
+                  top: "50%",
+                  transform: "translateY(-50%)",
                   border: "none",
                   background: "none",
                   cursor: "pointer",
+                  padding: 0,
+                  lineHeight: 0,
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
                 <span className="ms" style={{ fontSize: 17, color: "#9aa0a6" }}>
