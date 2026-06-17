@@ -34,6 +34,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const [mounted, setMounted] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [logModal, setLogModal] = useState<"me" | "all" | null>(null);
+  const [placeholder, setPlaceholder] = useState<string | null>(null);
   useEffect(() => setMounted(true), []);
 
   const roleLabel =
@@ -223,6 +224,36 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
                   บันทึกการเข้าใช้งานระบบ
                 </span>
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setPlaceholder("เมนูการสั่งการ");
+                }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left border-b border-bdr dark:border-dk-bdr"
+              >
+                <span className="ms ms-f text-t3" style={{ fontSize: 18 }}>
+                  tune
+                </span>
+                <span className="text-[12px] font-semibold text-t1 dark:text-dk-t1">
+                  เมนูการสั่งการ
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setPlaceholder("เมนูตั้งค่าระบบ");
+                }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left border-b border-bdr dark:border-dk-bdr"
+              >
+                <span className="ms ms-f text-t3" style={{ fontSize: 18 }}>
+                  settings
+                </span>
+                <span className="text-[12px] font-semibold text-t1 dark:text-dk-t1">
+                  เมนูตั้งค่าระบบ
+                </span>
+              </button>
               <form action={logoutAction}>
                 <button
                   type="submit"
@@ -241,6 +272,41 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
 
       {logModal && (
         <AccessLogModal variant={logModal} onClose={() => setLogModal(null)} />
+      )}
+
+      {placeholder && (
+        <div
+          className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setPlaceholder(null)}
+        >
+          <div
+            className="dropdown-in w-full max-w-sm bg-sf dark:bg-dk-sf border border-bdr dark:border-dk-bdr rounded-2xl shadow-g3 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-bdr dark:border-dk-bdr">
+              <span className="text-sm font-bold text-t1 dark:text-dk-t1">
+                {placeholder}
+              </span>
+              <button
+                onClick={() => setPlaceholder(null)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-t3 hover:bg-sf-3 dark:hover:bg-dk-sf2 transition"
+                title="ปิด"
+              >
+                <span className="ms" style={{ fontSize: 20 }}>
+                  close
+                </span>
+              </button>
+            </div>
+            <div className="px-5 py-8 flex flex-col items-center gap-3 text-center">
+              <span className="ms text-t3" style={{ fontSize: 40 }}>
+                hourglass_empty
+              </span>
+              <span className="text-[13px] text-t2 dark:text-dk-t2">
+                ฟีเจอร์นี้ยังไม่พร้อมใช้งาน — รอเชื่อมต่อข้อมูลจากระบบต้นทาง
+              </span>
+            </div>
+          </div>
+        </div>
       )}
     </header>
   );
