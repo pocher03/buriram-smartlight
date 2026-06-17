@@ -285,10 +285,6 @@ export function AccessLogModal({
 
         {/* Footer note */}
         <div className="px-5 py-2 border-t border-bdr dark:border-dk-bdr flex-shrink-0">
-          <span className="text-[9px] text-t3">
-            บันทึกการเข้าใช้งานเป็นแบบเพิ่มอย่างเดียว (APPEND-ONLY) ตาม TOR
-            ๔.๗.๒–๔.๗.๓ · แสดงสูงสุด 100 รายการล่าสุด
-          </span>
         </div>
       </div>
     </div>
