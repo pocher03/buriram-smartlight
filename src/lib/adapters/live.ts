@@ -85,7 +85,11 @@ const liveAdapter: DataAdapter = {
 
   async getProjects(): Promise<Project[]> {
     const rows = await prisma.project.findMany({ orderBy: { name: "asc" } });
+<<<<<<< HEAD
     return rows.map((p: any) => ({ id: p.id, name: p.name, divisionId: p.divisionId }));
+=======
+    return rows.map((p: { id: string; name: string; divisionId: string }) => ({ id: p.id, name: p.name, divisionId: p.divisionId }));
+>>>>>>> c69cb5cbe8e1e27f343c503dd5c3ce9664a1716f
   },
 
   async getZones(projectId: string): Promise<Zone[]> {
@@ -165,7 +169,11 @@ const liveAdapter: DataAdapter = {
       : { temp: null, desc: null, humidity: null, pm25: null, co2: null };
 
     const faultAreas: FaultArea[] = faultGroups
+<<<<<<< HEAD
       .map((g) => ({ name: g.divisionName ?? "ไม่ระบุ", count: g._count._all }))
+=======
+      .map((g: any) => ({ name: g.divisionName ?? "ไม่ระบุ", count: g._count._all }))
+>>>>>>> c69cb5cbe8e1e27f343c503dd5c3ce9664a1716f
       .sort((a: any, b: any) => b.count - a.count)
       .slice(0, 5);
 
