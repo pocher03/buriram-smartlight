@@ -22,6 +22,8 @@ export interface DashboardData {
   maintenance: MaintenanceStatus;
   weather: WeatherInfo;
   faultAreas: FaultArea[];
+  lastSync?: string; // เพิ่มบรรทัดนี้ (เช่น "11:00:00")
+  uptime?: string;   // เพิ่มบรรทัดนี้ (เช่น "12h 30m")
 }
 
 export interface DataAdapter {

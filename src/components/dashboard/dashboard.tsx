@@ -54,7 +54,7 @@ export function Dashboard({ source, user, zones, data, energy }: DashboardProps)
     [data.faultAreas, selectedZone]
   );
 
-  return (
+return (
     <div className="flex flex-col h-screen overflow-hidden">
       {source === "mock" && <DemoBanner />}
 
@@ -90,7 +90,19 @@ export function Dashboard({ source, user, zones, data, energy }: DashboardProps)
         <strong className={source === "mock" ? "text-yel" : "text-grn"}>
           {source === "mock" ? "สาธิต (Mock)" : "ใช้งานจริง (Live)"}
         </strong>
-        <div className="flex-1" />
+
+        {/* ส่วนที่เพิ่มใหม่: ดันเนื้อหาไปขวาและแสดง Last Sync / Uptime */}
+        <div className="flex-1 flex justify-end items-center gap-3 pr-2">
+          <div className="flex items-center gap-1" title="เวลาที่ดึงข้อมูลล่าสุดจากระบบต้นทาง">
+            <span className="ms text-blu" style={{ fontSize: 12 }}>sync</span>
+            <span>Last Sync: <strong className="text-t2 dark:text-dk-t2 tracking-wider">{data.lastSync || "--:--:--"}</strong></span>
+          </div>
+          <div className="flex items-center gap-1 border-l border-bdr dark:border-dk-bdr pl-3" title="ระยะเวลาที่ระบบทำงานต่อเนื่อง">
+            <span className="ms text-grn" style={{ fontSize: 12 }}>memory</span>
+            <span>UPTIME: <strong className="text-t2 dark:text-dk-t2 tracking-wider">{data.uptime || "--"}</strong></span>
+          </div>
+        </div>
+
         พัฒนาโดย
         <strong className="text-t2 dark:text-dk-t2">บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด</strong>
         <span className="mx-1">|</span>v1.0.0
