@@ -119,7 +119,7 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
             </div>
           )
         ) : (
-          <EmptyFeed text="พร้อมใช้งานใน Phase 2 (ยังไม่ทดสอบ endpoint ต้นทาง)" />
+          <EmptyFeed text="ยังไม่มีข้อมูล)" />
         )}
       </div>
     </div>
