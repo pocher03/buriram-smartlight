@@ -224,36 +224,6 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
                   บันทึกการเข้าใช้งานระบบ
                 </span>
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setProfileOpen(false);
-                  setPlaceholder("เมนูการสั่งการ");
-                }}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left border-b border-bdr dark:border-dk-bdr"
-              >
-                <span className="ms ms-f text-t3" style={{ fontSize: 18 }}>
-                  tune
-                </span>
-                <span className="text-[12px] font-semibold text-t1 dark:text-dk-t1">
-                  เมนูการสั่งการ
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setProfileOpen(false);
-                  setPlaceholder("เมนูตั้งค่าระบบ");
-                }}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left border-b border-bdr dark:border-dk-bdr"
-              >
-                <span className="ms ms-f text-t3" style={{ fontSize: 18 }}>
-                  settings
-                </span>
-                <span className="text-[12px] font-semibold text-t1 dark:text-dk-t1">
-                  เมนูตั้งค่าระบบ
-                </span>
-              </button>
               <form action={logoutAction}>
                 <button
                   type="submit"
@@ -269,7 +239,6 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
           )}
         </div>
       </div>
-
       {logModal && (
         <AccessLogModal variant={logModal} onClose={() => setLogModal(null)} />
       )}
