@@ -1,21 +1,59 @@
 "use client";
 
-import type { Kpi, MaintenanceStatus } from "@/lib/types";
-import { display } from "@/lib/null-safe";
-import { AvailabilityGauge } from "./availability-gauge";
+import type { Device, Kpi, MaintenanceStatus } from "@/lib/types";
 
 interface KpiColumnProps {
   kpi: Kpi;
   maintenance: MaintenanceStatus;
+  devices: Device[];
 }
 
-const pctOf = (n: number | null, total: number | null) =>
-  n != null && total && total > 0 ? `${((n / total) * 100).toFixed(2)}%` : "--";
+function StatBlock({
+  title,
+  pct,
+  rows,
+}: {
+  title: string;
+  pct: number | null;
+  rows: { label: string; value: number; color: string }[];
+}) {
+  return (
+    <div className="bg-sf-2 dark:bg-dk-sf2 rounded-xl p-3 border border-bdr/60 dark:border-dk-bdr mb-2.5">
+      <div className="text-center mb-2">
+        <div className="text-3xl font-extrabold leading-none text-grn">
+          {pct == null ? "--" : `${pct.toFixed(2)}%`}
+        </div>
+        <div className="text-[10px] text-t3 mt-1 font-medium">{title}</div>
+      </div>
+      <div className="grid grid-cols-2 gap-1.5">
+        {rows.map((r) => (
+          <div
+            key={r.label}
+            className="flex items-center gap-1.5 py-2 px-2 rounded-lg bg-sf dark:bg-dk-sf border border-bdr/50 dark:border-dk-bdr"
+          >
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${r.color}`} />
+            <div className="min-w-0">
+              <div className="text-[8px] text-t3 leading-none">{r.label}</div>
+              <div className="text-sm font-bold tabular-nums leading-tight text-t1 dark:text-dk-t1">
+                {r.value}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-export function KpiColumn({ kpi, maintenance }: KpiColumnProps) {
-  const total = kpi.lightTotal ?? 0;
-  const online = kpi.lightOnlineNum ?? 0;
-  const offline = kpi.lightOfflineNum ?? 0;
+export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
+  const total = devices.length;
+
+  const onLights = devices.filter((d) => d.telemetry.switchStatus === 1).length;
+  const offLights = devices.filter((d) => d.telemetry.switchStatus === 0).length;
+  const lightingPct = total > 0 ? (onLights / total) * 100 : null;
+
+  const online = devices.filter((d) => d.telemetry.onlineStatus === 1).length;
+  const onlinePct = total > 0 ? (online / total) * 100 : null;
 
   return (
     <div className="flex flex-col overflow-hidden bg-sf dark:bg-dk-sf border-r border-bdr dark:border-dk-bdr">
@@ -24,59 +62,24 @@ export function KpiColumn({ kpi, maintenance }: KpiColumnProps) {
           ภาพรวมอุปกรณ์
         </div>
 
-        <AvailabilityGauge online={online} offline={offline} total={total} />
+        <StatBlock
+          title="สถานะไฟ (Lighting %)"
+          pct={lightingPct}
+          rows={[
+            { label: "ไฟเปิด", value: onLights, color: "bg-grn" },
+            { label: "ไฟปิด", value: offLights, color: "bg-t3" },
+          ]}
+        />
 
-        <div className="stagger space-y-1.5 mb-4">
-          {/* ทั้งหมด */}
-          <div className="kpi-card flex items-center gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/60 dark:border-dk-bdr">
-            <div className="w-7 h-7 rounded-lg bg-blu-lt dark:bg-blu/15 flex items-center justify-center flex-shrink-0">
-              <span className="ms ms-f text-blu" style={{ fontSize: 16 }}>
-                streetview
-              </span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] text-t2 dark:text-dk-t2">โคมไฟทั้งหมด</div>
-              <div className="text-lg font-bold text-t1 dark:text-dk-t1 leading-tight">
-                {display(kpi.lightTotal)}
-              </div>
-            </div>
-            <div className="text-[9px] text-t3 font-medium">ต้น</div>
-          </div>
+        <StatBlock
+          title="สถานะออนไลน์ (Online %)"
+          pct={onlinePct}
+          rows={[
+            { label: "ออนไลน์", value: online, color: "bg-grn" },
+            { label: "ทั้งหมด", value: total, color: "bg-blu" },
+          ]}
+        />
 
-          {/* ออนไลน์ */}
-          <div className="kpi-card flex items-center gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/60 dark:border-dk-bdr">
-            <div className="w-7 h-7 rounded-lg bg-grn-lt dark:bg-grn/15 flex items-center justify-center flex-shrink-0">
-              <span className="ms ms-f text-grn" style={{ fontSize: 16 }}>
-                check_circle
-              </span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] text-t2 dark:text-dk-t2">ออนไลน์</div>
-              <div className="text-lg font-bold text-grn leading-tight">
-                {display(kpi.lightOnlineNum)}
-              </div>
-            </div>
-            <div className="text-[9px] text-t3 font-medium">{pctOf(kpi.lightOnlineNum, total)}</div>
-          </div>
-
-          {/* ออฟไลน์ */}
-          <div className="kpi-card flex items-center gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/60 dark:border-dk-bdr">
-            <div className="w-7 h-7 rounded-lg bg-red-lt dark:bg-red/15 flex items-center justify-center flex-shrink-0">
-              <span className="ms ms-f text-red" style={{ fontSize: 16 }}>
-                cancel
-              </span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] text-t2 dark:text-dk-t2">ออฟไลน์</div>
-              <div className="text-lg font-bold text-red leading-tight">
-                {display(kpi.lightOfflineNum)}
-              </div>
-            </div>
-            <div className="text-[9px] text-t3 font-medium">{pctOf(kpi.lightOfflineNum, total)}</div>
-          </div>
-        </div>
-
-        {/* งานซ่อมบำรุง */}
         <div className="text-[9px] font-bold text-t3 uppercase tracking-widest mb-2 px-1">
           สถานะงานซ่อมบำรุง
         </div>
