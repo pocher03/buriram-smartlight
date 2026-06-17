@@ -166,7 +166,41 @@ const liveAdapter: DataAdapter = {
       .sort((a: any, b: any) => b.count - a.count)
       .slice(0, 5);
 
-    return { kpi, devices, alarms, maintenance, weather, faultAreas };
+    // 1. หาเวลา Last Sync จาก Telemetry ที่ใหม่ที่สุด
+    let lastSync: string | undefined = undefined;
+    const timestamps = devices
+      .map((d) => d.telemetry.updatedAt)
+      .filter((t) => t !== null) // กรองเอาเฉพาะโคมที่มีข้อมูล
+      .map((t) => new Date(t as string).getTime());
+
+    if (timestamps.length > 0) {
+      const maxDate = new Date(Math.max(...timestamps));
+      lastSync = maxDate.toLocaleTimeString("th-TH", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZone: "Asia/Bangkok",
+      });
+    }
+
+    // 2. คำนวณ System Uptime จาก Server Process
+    const uptimeSec = process.uptime();
+    const d = Math.floor(uptimeSec / (3600 * 24));
+    const h = Math.floor((uptimeSec % (3600 * 24)) / 3600);
+    const m = Math.floor((uptimeSec % 3600) / 60);
+    const uptime = `${d > 0 ? `${d}d ` : ""}${h}h ${m}m`;
+
+    // คืนค่าทั้งหมดกลับไปให้หน้า UI
+    return { 
+      kpi, 
+      devices, 
+      alarms, 
+      maintenance, 
+      weather, 
+      faultAreas, 
+      lastSync, // ส่งตัวแปรใหม่ไปที่ UI
+      uptime    // ส่งตัวแปรใหม่ไปที่ UI
+    };
   },
 
   async getEnergy(projectId: string, period: EnergyPeriod): Promise<EnergySeries> {
