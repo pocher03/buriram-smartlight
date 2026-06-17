@@ -27,7 +27,6 @@ const THAI_MONTHS = [
 
 const num = (v: number | null | undefined): number | null => (v == null ? null : v);
 
-/** อุปกรณ์ + telemetry ล่าสุด (take 1) → Device ของ UI */
 type DeviceRow = {
   id: string;
   name: string;
@@ -85,11 +84,7 @@ const liveAdapter: DataAdapter = {
 
   async getProjects(): Promise<Project[]> {
     const rows = await prisma.project.findMany({ orderBy: { name: "asc" } });
-<<<<<<< HEAD
     return rows.map((p: any) => ({ id: p.id, name: p.name, divisionId: p.divisionId }));
-=======
-    return rows.map((p: { id: string; name: string; divisionId: string }) => ({ id: p.id, name: p.name, divisionId: p.divisionId }));
->>>>>>> c69cb5cbe8e1e27f343c503dd5c3ce9664a1716f
   },
 
   async getZones(projectId: string): Promise<Zone[]> {
@@ -124,7 +119,6 @@ const liveAdapter: DataAdapter = {
 
     const devices = (deviceRows as DeviceRow[]).map(toDevice);
 
-    // KPI — derive online/offline จาก telemetry (DB truth); แผนเปิด/ปิดไฟจาก snapshot
     const total = devices.length || null;
     const online = devices.filter((d) => d.telemetry.onlineStatus === 1).length;
     const offline = devices.length - online;
@@ -137,7 +131,6 @@ const liveAdapter: DataAdapter = {
       closeTime: snap?.closeTime ?? null,
     };
 
-    // งานซ่อมบำรุง — นับจาก handleStatus ของ alarm_logs
     const countOf = (s: string) =>
       handleGroups.find((g: any) => g.handleStatus === s)?._count._all ?? 0;
     const maintenance: MaintenanceStatus = {
@@ -169,11 +162,7 @@ const liveAdapter: DataAdapter = {
       : { temp: null, desc: null, humidity: null, pm25: null, co2: null };
 
     const faultAreas: FaultArea[] = faultGroups
-<<<<<<< HEAD
-      .map((g) => ({ name: g.divisionName ?? "ไม่ระบุ", count: g._count._all }))
-=======
       .map((g: any) => ({ name: g.divisionName ?? "ไม่ระบุ", count: g._count._all }))
->>>>>>> c69cb5cbe8e1e27f343c503dd5c3ce9664a1716f
       .sort((a: any, b: any) => b.count - a.count)
       .slice(0, 5);
 
@@ -181,7 +170,6 @@ const liveAdapter: DataAdapter = {
   },
 
   async getEnergy(projectId: string, period: EnergyPeriod): Promise<EnergySeries> {
-    // month → energy_stats รายเดือน; week/day → รายวัน (7 / 12 รายการล่าสุด)
     const isMonth = period === "month";
     const take = period === "month" ? 12 : period === "week" ? 7 : 12;
 
@@ -190,14 +178,14 @@ const liveAdapter: DataAdapter = {
       orderBy: { period: "desc" },
       take,
     });
-    rows.reverse(); // เรียงเก่า → ใหม่ สำหรับกราฟ
+    rows.reverse();
 
     const label = (p: string): string => {
       if (isMonth) {
-        const m = Number(p.split("-")[1]); // "YYYY-MM"
+        const m = Number(p.split("-")[1]);
         return Number.isFinite(m) && m >= 1 && m <= 12 ? THAI_MONTHS[m - 1] : p;
       }
-      return p.slice(5); // "MM-DD"
+      return p.slice(5);
     };
 
     const points: EnergyPoint[] = rows.map((r: any) => ({
