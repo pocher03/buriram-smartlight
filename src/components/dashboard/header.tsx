@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react"; // เพิ่ม useRef
 import { useTheme } from "next-themes";
 import type { Zone } from "@/lib/mock-data";
 import type { WeatherInfo } from "@/lib/types";
@@ -35,7 +35,28 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const [profileOpen, setProfileOpen] = useState(false);
   const [logModal, setLogModal] = useState<"me" | "all" | null>(null);
   const [placeholder, setPlaceholder] = useState<string | null>(null);
+  
+  // 1. สร้าง Ref สำหรับอ้างอิงพื้นที่ของโปรไฟล์
+  const profileRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => setMounted(true), []);
+
+  // 2. ดักจับการคลิกนอกพื้นที่ (Click Outside)
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+
+    // เพิ่ม Event Listener เฉพาะตอนที่เมนูเปิดอยู่เท่านั้น (ลดภาระระบบ)
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileOpen]);
 
   const roleLabel =
     user.role === "super_admin"
@@ -177,7 +198,8 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
         </button>
 
         {/* Profile */}
-        <div className="relative">
+        {/* 3. ผูก Ref เข้ากับ Container หลักของ Profile */}
+        <div className="relative" ref={profileRef}>
           <div
             className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-blu to-blu-dk flex items-center justify-center text-white text-[13px] font-bold cursor-pointer flex-shrink-0 shadow-g2"
             onClick={() => setProfileOpen((v) => !v)}

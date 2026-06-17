@@ -74,9 +74,6 @@ export default function LoginPage() {
               <h1 style={{ fontSize: 18, fontWeight: 700, color: "#202124", lineHeight: 1.3 }}>
                 ศูนย์บริหารจัดการโคมไฟถนนอัจฉริยะ
               </h1>
-              <p style={{ fontSize: 12, color: "#5f6368", marginTop: 5 }}>
-                เทศบาลเมืองบุรีรัมย์
-              </p>
             </div>
 
             <Field label="ชื่อผู้ใช้งาน" icon="person">
