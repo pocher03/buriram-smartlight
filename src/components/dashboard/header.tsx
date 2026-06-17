@@ -7,6 +7,7 @@ import type { WeatherInfo } from "@/lib/types";
 import type { DashboardUser } from "./dashboard";
 import { display } from "@/lib/null-safe";
 import { logoutAction } from "@/app/(dashboard)/actions";
+import { AccessLogModal } from "./access-log-modal";
 
 interface HeaderProps {
   zones: Zone[];
@@ -32,6 +33,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [logModal, setLogModal] = useState<"me" | "all" | null>(null);
   useEffect(() => setMounted(true), []);
 
   const roleLabel =
@@ -191,6 +193,36 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
                 <div className="text-[10px] text-t3 mt-0.5">{roleLabel}</div>
                 <div className="text-[11px] text-t3 truncate">{user.email}</div>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setLogModal("me");
+                }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left border-b border-bdr dark:border-dk-bdr"
+              >
+                <span className="ms ms-f text-blu" style={{ fontSize: 18 }}>
+                  history
+                </span>
+                <span className="text-[12px] font-semibold text-t1 dark:text-dk-t1">
+                  ประวัติ Session ของฉัน
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setLogModal("all");
+                }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left border-b border-bdr dark:border-dk-bdr"
+              >
+                <span className="ms ms-f text-blu" style={{ fontSize: 18 }}>
+                  shield_person
+                </span>
+                <span className="text-[12px] font-semibold text-t1 dark:text-dk-t1">
+                  บันทึกการเข้าใช้งานระบบ
+                </span>
+              </button>
               <form action={logoutAction}>
                 <button
                   type="submit"
@@ -206,6 +238,10 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
           )}
         </div>
       </div>
+
+      {logModal && (
+        <AccessLogModal variant={logModal} onClose={() => setLogModal(null)} />
+      )}
     </header>
   );
 }
