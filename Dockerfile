@@ -4,11 +4,13 @@
 # Multi-stage: deps → builder → runner (image เล็ก, ไม่มี source/devDeps)
 # ============================================================
 
-# ---- deps: ติดตั้ง dependencies ----
+# ---- deps: ติดตั้ง dependencies --
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY prisma ./prisma
 RUN npm ci
+RUN npx prisma generate
 
 # ---- builder: build Next.js แบบ standalone ----
 FROM node:20-alpine AS builder
