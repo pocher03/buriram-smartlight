@@ -85,12 +85,12 @@ const liveAdapter: DataAdapter = {
 
   async getProjects(): Promise<Project[]> {
     const rows = await prisma.project.findMany({ orderBy: { name: "asc" } });
-    return rows.map((p) => ({ id: p.id, name: p.name, divisionId: p.divisionId }));
+    return rows.map((p: { id: string; name: string; divisionId: string }) => ({ id: p.id, name: p.name, divisionId: p.divisionId }));
   },
 
   async getZones(projectId: string): Promise<Zone[]> {
     const rows = await prisma.zone.findMany({ where: { projectId }, orderBy: { name: "asc" } });
-    return rows.map((z) => ({ id: z.id, projectId: z.projectId, name: z.name }));
+    return rows.map((z: any) => ({ id: z.id, projectId: z.projectId, name: z.name }));
   },
 
   async getDashboard(projectId: string): Promise<DashboardData> {
@@ -135,14 +135,14 @@ const liveAdapter: DataAdapter = {
 
     // งานซ่อมบำรุง — นับจาก handleStatus ของ alarm_logs
     const countOf = (s: string) =>
-      handleGroups.find((g) => g.handleStatus === s)?._count._all ?? 0;
+      handleGroups.find((g: any) => g.handleStatus === s)?._count._all ?? 0;
     const maintenance: MaintenanceStatus = {
       pending: countOf("pending"),
       processing: countOf("processing"),
       done: countOf("done"),
     };
 
-    const alarms: AlarmLog[] = alarmRows.map((a) => ({
+    const alarms: AlarmLog[] = alarmRows.map((a: any) => ({
       id: a.id.toString(),
       deviceName: a.deviceName,
       name: a.name,
@@ -165,8 +165,8 @@ const liveAdapter: DataAdapter = {
       : { temp: null, desc: null, humidity: null, pm25: null, co2: null };
 
     const faultAreas: FaultArea[] = faultGroups
-      .map((g) => ({ name: g.divisionName ?? "ไม่ระบุ", count: g._count._all }))
-      .sort((a, b) => b.count - a.count)
+      .map((g: any) => ({ name: g.divisionName ?? "ไม่ระบุ", count: g._count._all }))
+      .sort((a: any, b: any) => b.count - a.count)
       .slice(0, 5);
 
     return { kpi, devices, alarms, maintenance, weather, faultAreas };
@@ -192,7 +192,7 @@ const liveAdapter: DataAdapter = {
       return p.slice(5); // "MM-DD"
     };
 
-    const points: EnergyPoint[] = rows.map((r) => ({
+    const points: EnergyPoint[] = rows.map((r: any) => ({
       label: label(r.period),
       current: num(r.energyNow),
       previous: num(r.energyPrev),
