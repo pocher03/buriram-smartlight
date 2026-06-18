@@ -7,7 +7,7 @@
 //   - ห้าม unmount/remount → กัน Leaflet re-init ทุกครั้งที่สลับแท็บ
 //   - แผนที่รับ active={activeTab==='map'} → เรียก invalidateSize() เมื่อแท็บแสดงผล
 //     (กัน Leaflet คำนวณขนาด container เป็น 0x0 ตอนถูกซ่อนด้วย display:none)
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   Device,
   AlarmLog,
@@ -16,6 +16,7 @@ import type {
   EnergySeries,
   FaultArea,
 } from "@/lib/types";
+import type { Zone } from "@/lib/mock-data";
 import type { DashboardUser } from "./dashboard";
 import { KpiColumn } from "./kpi-column";
 import { MapPanel } from "./map-panel";
@@ -29,10 +30,13 @@ interface MobileLayoutProps {
   alarms: AlarmLog[];
   maintenance: MaintenanceStatus;
   user: DashboardUser;
+  zones: Zone[];
   energy: EnergySeries;
   period: EnergyPeriod;
   onPeriodChange: (p: EnergyPeriod) => void;
   faultAreas: FaultArea[];
+  lastSync?: string;
+  uptime?: string;
 }
 
 /** ห่อแต่ละแท็บ: เต็มจอเสมอ ซ่อนด้วย CSS เมื่อไม่ active (ไม่ unmount) */
@@ -57,12 +61,25 @@ export function MobileLayout({
   alarms,
   maintenance,
   user,
+  zones,
   energy,
   period,
   onPeriodChange,
   faultAreas,
+  lastSync,
+  uptime,
 }: MobileLayoutProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("overview");
+
+  // โซนที่เลือกบนแผนที่ (scope เฉพาะแผนที่ — ไม่กรอง KPI/Log)
+  const [mapZone, setMapZone] = useState("all");
+  const mapDevices = useMemo(
+    () =>
+      mapZone === "all"
+        ? devices
+        : devices.filter((d) => d.zoneName === mapZone),
+    [devices, mapZone]
+  );
 
   return (
     <div className="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -79,11 +96,34 @@ export function MobileLayout({
               onPeriodChange={onPeriodChange}
               faultAreas={faultAreas}
             />
+            {/* ข้อมูล footer (ย้ายจากแถบ footer desktop) — null-safe */}
+            <div className="px-4 py-3 flex items-center justify-center gap-2 flex-wrap text-[10px] text-t3 border-t border-bdr/50 dark:border-dk-bdr">
+              <span>
+                อัปเดตล่าสุด:{" "}
+                <strong className="text-t2 dark:text-dk-t2 tabular-nums">
+                  {lastSync || "--:--:--"}
+                </strong>
+              </span>
+              <span className="text-bdr dark:text-dk-bdr">|</span>
+              <span>
+                ระยะเวลาทำงาน:{" "}
+                <strong className="text-t2 dark:text-dk-t2 tabular-nums">
+                  {uptime || "--"}
+                </strong>
+              </span>
+            </div>
           </div>
         </TabPanel>
 
         <TabPanel active={activeTab === "map"}>
-          <MapPanel devices={devices} active={activeTab === "map"} />
+          <MapPanel
+            devices={mapDevices}
+            active={activeTab === "map"}
+            focusZone={mapZone}
+            zones={zones}
+            mapZone={mapZone}
+            onMapZoneChange={setMapZone}
+          />
         </TabPanel>
 
         <TabPanel active={activeTab === "history"}>
