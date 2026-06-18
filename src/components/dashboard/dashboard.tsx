@@ -65,7 +65,12 @@ export function Dashboard({ source, user, zones, data, energy }: DashboardProps)
   );
 
 return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    // h-dvh (ไม่ใช่ h-screen): บนมือถือ 100vh นับรวมพื้นที่ที่ Chrome/Safari UI bar
+    // ลอยบังไว้ ทำให้ root สูงเกินจอที่เห็นจริง ดัน BottomTabBar ใน MobileLayout
+    // (flex item ตัวสุดท้าย) หลุดออกนอกขอบจอที่มองเห็น — h-dvh คำนวณตามพื้นที่
+    // มองเห็นจริง ณ ขณะนั้น แก้ปัญหานี้ตรงจุด ไม่กระทบ Desktop (vh = dvh บนจอที่ไม่มี
+    // UI bar ลอยแบบมือถือ)
+    <div className="flex flex-col h-dvh overflow-hidden">
       {source === "mock" && <DemoBanner />}
 
       <Header
