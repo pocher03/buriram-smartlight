@@ -35,21 +35,17 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const [profileOpen, setProfileOpen] = useState(false);
   const [logModal, setLogModal] = useState<"me" | "all" | null>(null);
   const [placeholder, setPlaceholder] = useState<string | null>(null);
-  
-  // 1. สร้าง Ref สำหรับอ้างอิงพื้นที่ของโปรไฟล์
+
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
 
-  // 2. ดักจับการคลิกนอกพื้นที่ (Click Outside)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
       }
     }
-
-    // เพิ่ม Event Listener เฉพาะตอนที่เมนูเปิดอยู่เท่านั้น (ลดภาระระบบ)
     if (profileOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -87,7 +83,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
 
   return (
     <header className="flex-shrink-0 h-14 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-3 md:px-4 gap-2 md:gap-3 shadow-g1 z-50">
-      <div className="flex items-center gap-2.5 min-w-0 mr-2">
+      <div className="flex items-center gap-2 md:gap-2.5 min-w-0 mr-1 md:mr-2">
         <div className="w-8 h-8 rounded-xl bg-blu flex items-center justify-center flex-shrink-0 shadow-g2">
           <span className="ms ms-f text-white" style={{ fontSize: 18 }}>
             location_city
@@ -97,7 +93,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
           <div className="font-bold text-t1 dark:text-dk-t1 text-xs leading-tight truncate">
             ศูนย์บริหารจัดการโคมไฟถนนอัจฉริยะ
           </div>
-          <div className="text-t3 text-[9px] tracking-wide">เทศบาลเมืองบุรีรัมย์</div>
+          <div className="text-t3 text-[9px] tracking-wide truncate">เทศบาลเมืองบุรีรัมย์</div>
         </div>
       </div>
       <div className="hidden md:block w-px h-7 bg-bdr dark:bg-dk-bdr mx-1 flex-shrink-0" />
@@ -121,8 +117,8 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
         </select>
       </div>
 
-      {/* Center: date / time (desktop only) + system status (ทุก breakpoint) */}
-      <div className="flex-1 flex items-center justify-center gap-2.5 min-w-0">
+      {/* Center: date / time (desktop only) + system status (ทุก breakpoint แต่ย่อบน mobile) */}
+      <div className="flex-1 flex items-center justify-center gap-1.5 md:gap-2.5 min-w-0">
         <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
           <span className="ms text-t3" style={{ fontSize: 14 }}>
             calendar_today
@@ -135,9 +131,18 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
           </span>
           <span className="text-sm font-bold text-blu tabular-nums">{timeStr}</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-grn-lt dark:bg-grn/15 rounded-xl border border-grn/20 flex-shrink-0">
+        {/* สถานะระบบ: ทุก breakpoint — บน mobile ย่อเหลือคำว่า "ปกติ" สั้นๆ กันทับชื่อโครงการ/weather */}
+        <div
+          className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-grn-lt dark:bg-grn/15 rounded-xl border border-grn/20 flex-shrink-0"
+          title="ระบบทำงานปกติ"
+        >
           <div className="w-2 h-2 rounded-full bg-grn animate-pulse-dot flex-shrink-0" />
-          <span className="text-[11px] font-semibold text-grn">ระบบทำงานปกติ</span>
+          <span className="hidden md:inline text-[11px] font-semibold text-grn whitespace-nowrap">
+            ระบบทำงานปกติ
+          </span>
+          <span className="md:hidden text-[10px] font-semibold text-grn whitespace-nowrap">
+            ปกติ
+          </span>
         </div>
       </div>
 
@@ -150,7 +155,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
               <div className="text-sm font-bold text-blu leading-none">
                 {display(weather.temp, "°C")}
               </div>
-              <div className="text-[8px] text-t3 leading-none mt-0.5">
+              <div className="hidden md:block text-[8px] text-t3 leading-none mt-0.5">
                 {display(weather.desc)}
               </div>
             </div>
@@ -198,7 +203,6 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
         </button>
 
         {/* Profile (desktop only — mobile ใช้แท็บโปรไฟล์แทน dropdown) */}
-        {/* 3. ผูก Ref เข้ากับ Container หลักของ Profile */}
         <div className="relative hidden md:block" ref={profileRef}>
           <div
             className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-blu to-blu-dk flex items-center justify-center text-white text-[13px] font-bold cursor-pointer flex-shrink-0 shadow-g2"
