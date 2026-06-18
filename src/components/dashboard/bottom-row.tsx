@@ -28,12 +28,9 @@ export function BottomRow({ energy, period, onPeriodChange, faultAreas }: Bottom
   const co2Fmt = savings.co2 === "--" ? "--" : Number(savings.co2).toLocaleString("th-TH");
 
   return (
-    <div
-      className="flex-shrink-0 bg-sf dark:bg-dk-sf border-t border-bdr dark:border-dk-bdr flex overflow-hidden"
-      style={{ height: 210 }}
-    >
+    <div className="flex-shrink-0 bg-sf dark:bg-dk-sf border-t border-bdr dark:border-dk-bdr flex flex-col md:flex-row overflow-hidden md:h-[210px]">
       {/* Energy chart */}
-      <div className="btm-sec flex flex-col p-3" style={{ flex: 1.8, minWidth: 0 }}>
+      <div className="btm-sec flex flex-col p-3 h-[240px] md:h-auto md:min-w-0 md:[flex:1.8]">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="ms ms-f text-yel" style={{ fontSize: 15 }}>
@@ -59,7 +56,7 @@ export function BottomRow({ energy, period, onPeriodChange, faultAreas }: Bottom
       </div>
 
       {/* Savings */}
-      <div className="btm-sec flex flex-col justify-center gap-2 p-3" style={{ flex: 0.82, minWidth: 0 }}>
+      <div className="btm-sec flex flex-col justify-center gap-2 p-3 border-t border-bdr/50 dark:border-dk-bdr md:border-t-0 md:min-w-0 md:[flex:0.82]">
         <div className="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider flex items-center gap-1.5 mb-1">
           <span className="ms ms-f" style={{ fontSize: 14, color: "#34a853" }}>
             savings
@@ -83,7 +80,7 @@ export function BottomRow({ energy, period, onPeriodChange, faultAreas }: Bottom
       </div>
 
       {/* Top fault */}
-      <div className="btm-sec flex flex-col p-3" style={{ flex: 0.78, minWidth: 0 }}>
+      <div className="btm-sec flex flex-col p-3 border-t border-bdr/50 dark:border-dk-bdr md:border-t-0 md:min-w-0 md:[flex:0.78]">
         <div className="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider flex items-center gap-1.5 mb-2">
           <span className="ms ms-f text-red" style={{ fontSize: 14 }}>
             report_problem
@@ -123,7 +120,7 @@ export function BottomRow({ energy, period, onPeriodChange, faultAreas }: Bottom
       </div>
 
       {/* AI Insight */}
-      <div className="flex flex-col p-3" style={{ flex: 0.95, minWidth: 0 }}>
+      <div className="flex flex-col p-3 border-t border-bdr/50 dark:border-dk-bdr md:border-t-0 md:min-w-0 md:[flex:0.95]">
         <div className="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider flex items-center gap-1.5 mb-2">
           <span className="ms ms-f text-blu" style={{ fontSize: 14 }}>
             psychology

@@ -10,12 +10,14 @@ import { KpiColumn } from "./kpi-column";
 import { MapPanel } from "./map-panel";
 import { LogsPanel } from "./logs-panel";
 import { BottomRow } from "./bottom-row";
+import { MobileLayout } from "./mobile-layout";
 
 export interface DashboardUser {
   name: string;
   email: string;
   role: "admin" | "super_admin";
   isCrossProject: boolean;
+  activeProjectId: string;
 }
 
 interface DashboardProps {
@@ -66,7 +68,8 @@ return (
         user={user}
       />
 
-      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      {/* ───── Desktop layout (≥768px) — 3-column grid + bottom row (ไม่เปลี่ยนของเดิม) ───── */}
+      <div className="hidden md:flex flex-1 min-h-0 flex-col overflow-hidden">
         <div
           className="flex-1 min-h-0 grid overflow-hidden"
           style={{ gridTemplateColumns: "1fr 55% 1fr" }}
@@ -84,8 +87,20 @@ return (
         />
       </div>
 
-      {/* Footer */}
-      <div className="flex-shrink-0 h-6 bg-sf-3 dark:bg-dk-sf border-t border-bdr dark:border-dk-bdr flex items-center px-4 gap-3 text-[10px] text-t3">
+      {/* ───── Mobile layout (<768px) — Bottom Tab Bar 4 แท็บ เต็มจอทีละแท็บ ───── */}
+      <MobileLayout
+        devices={devices}
+        alarms={alarms}
+        maintenance={data.maintenance}
+        user={user}
+        energy={energy[period]}
+        period={period}
+        onPeriodChange={setPeriod}
+        faultAreas={faultAreas}
+      />
+
+      {/* Footer (desktop only — แถบข้อมูลแนวนอนล้นจอบน mobile) */}
+      <div className="hidden md:flex flex-shrink-0 h-6 bg-sf-3 dark:bg-dk-sf border-t border-bdr dark:border-dk-bdr items-center px-4 gap-3 text-[10px] text-t3">
         
         {/* กลุ่มข้อมูลด้านซ้าย (โหมด + Sync + Uptime) */}
         <div className="flex items-center gap-3">

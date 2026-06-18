@@ -1,7 +1,8 @@
 "use client";
 
 // Leaflet map (โหลดแบบ client-only ผ่าน dynamic import ใน map-panel)
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import type { Device } from "@/lib/types";
 import { DEVICE_PROFILES } from "@/lib/device-profiles";
 import { deviceStatus, STATUS_COLOR, STATUS_LABEL } from "@/lib/device-status";
@@ -9,7 +10,30 @@ import { display } from "@/lib/null-safe";
 
 const CENTER: [number, number] = [14.992892, 103.113694];
 
-export default function MapInner({ devices }: { devices: Device[] }) {
+/**
+ * บน mobile แผนที่ถูกซ่อนด้วย display:none ตอนยังไม่ได้กดแท็บ "แผนที่"
+ * Leaflet จึงคำนวณขนาด container เป็น 0x0 ตอน init → ต้องสั่ง invalidateSize()
+ * ใหม่ทุกครั้งที่ container กลับมาแสดงผล (active = true) เพื่อให้คำนวณขนาดถูก
+ * Desktop ส่ง active = true เสมอ → เรียกครั้งเดียวตอน mount (ไม่กระทบของเดิม)
+ */
+function InvalidateOnActive({ active }: { active: boolean }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!active) return;
+    // หน่วงหนึ่ง frame ให้ browser paint container จริงก่อนค่อยวัดขนาด
+    const t = setTimeout(() => map.invalidateSize(), 0);
+    return () => clearTimeout(t);
+  }, [active, map]);
+  return null;
+}
+
+export default function MapInner({
+  devices,
+  active = true,
+}: {
+  devices: Device[];
+  active?: boolean;
+}) {
   // กฎเหล็ก #3: ปักหมุดเฉพาะต้นที่มีพิกัด (null = ไม่ปักหมุด)
   const located = devices.filter((d) => d.lat != null && d.lng != null);
 
@@ -23,6 +47,7 @@ export default function MapInner({ devices }: { devices: Device[] }) {
       style={{ height: "100%", width: "100%" }}
       attributionControl={false}
     >
+      <InvalidateOnActive active={active} />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {located.map((d) => {
         const status = deviceStatus(d);

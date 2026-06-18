@@ -31,6 +31,7 @@ export default async function DashboardPage() {
         email: session.user.email,
         role: session.user.role,
         isCrossProject: session.user.isCrossProject,
+        activeProjectId,
       }}
       zones={zones}
       data={data}

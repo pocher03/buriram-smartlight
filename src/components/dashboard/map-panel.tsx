@@ -13,9 +13,15 @@ const MapInner = dynamic(() => import("./map-inner"), {
   ),
 });
 
-export function MapPanel({ devices }: { devices: Device[] }) {
+export function MapPanel({
+  devices,
+  active = true,
+}: {
+  devices: Device[];
+  active?: boolean;
+}) {
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden h-full">
       <div className="absolute top-0 left-0 right-0 h-10 bg-sf/95 dark:bg-dk-sf/95 backdrop-blur-sm border-b border-bdr dark:border-dk-bdr flex items-center px-3 gap-3 z-20">
         <span className="ms ms-f text-blu" style={{ fontSize: 17 }}>
           map
@@ -38,7 +44,7 @@ export function MapPanel({ devices }: { devices: Device[] }) {
         </div>
       </div>
       <div className="absolute inset-0 top-10 z-[1]">
-        <MapInner devices={devices} />
+        <MapInner devices={devices} active={active} />
       </div>
     </div>
   );

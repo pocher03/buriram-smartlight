@@ -4,6 +4,7 @@
 // variant "me"  → ประวัติ session ของตัวเอง (/api/access-logs/me)
 // variant "all" → บันทึกการเข้าใช้งานระบบ ภาพรวม (/api/access-logs)
 import { useEffect, useState } from "react";
+import { BottomSheet } from "./bottom-sheet";
 
 type Variant = "me" | "all";
 type Range = "today" | "7d" | "30d" | "all";
@@ -131,42 +132,18 @@ export function AccessLogModal({
   }, [variant, range]);
 
   return (
-    <div
-      className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
+    <BottomSheet
+      title={title}
+      icon={variant === "me" ? "history" : "shield_person"}
+      onClose={onClose}
     >
-      <div
-        className="dropdown-in w-full max-w-3xl max-h-[80vh] flex flex-col bg-sf dark:bg-dk-sf border border-bdr dark:border-dk-bdr rounded-2xl shadow-g3 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-bdr dark:border-dk-bdr flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <span className="ms ms-f text-blu" style={{ fontSize: 20 }}>
-              {variant === "me" ? "history" : "shield_person"}
-            </span>
-            <span className="text-sm font-bold text-t1 dark:text-dk-t1">
-              {title}
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-t3 hover:bg-sf-3 dark:hover:bg-dk-sf2 transition"
-            title="ปิด"
-          >
-            <span className="ms" style={{ fontSize: 20 }}>
-              close
-            </span>
-          </button>
-        </div>
-
-        {/* Range filter + export */}
-        <div className="flex items-center gap-1.5 px-5 py-2.5 border-b border-bdr dark:border-dk-bdr flex-shrink-0">
+      {/* Range filter + export — mobile: เลื่อนแนวนอนได้ (กันล้นจอ), desktop: เหมือนเดิม */}
+        <div className="flex items-center gap-1.5 px-5 py-2.5 border-b border-bdr dark:border-dk-bdr flex-shrink-0 overflow-x-auto">
           {RANGES.map((r) => (
             <button
               key={r.key}
               onClick={() => setRange(r.key)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition border ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition border ${
                 range === r.key
                   ? "bg-blu text-white border-blu"
                   : "bg-sf-3 dark:bg-dk-sf2 text-t2 dark:text-dk-t2 border-bdr dark:border-dk-bdr hover:border-blu/40"
@@ -175,11 +152,11 @@ export function AccessLogModal({
               {r.label}
             </button>
           ))}
-          <div className="flex-1" />
+          <div className="md:flex-1" />
           <button
             onClick={() => exportCsv(variant, items)}
             disabled={loading || items.length === 0}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition border bg-grn-lt dark:bg-grn/15 text-grn border-grn/20 hover:border-grn/50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition border bg-grn-lt dark:bg-grn/15 text-grn border-grn/20 hover:border-grn/50 disabled:opacity-40 disabled:cursor-not-allowed"
             title="ดาวน์โหลด CSV"
           >
             <span className="ms" style={{ fontSize: 15 }}>
@@ -190,7 +167,7 @@ export function AccessLogModal({
         </div>
 
         {/* Table (scroll ภายใน) */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto overflow-x-auto min-h-0">
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 bg-sf-3 dark:bg-dk-sf2 z-10">
               <tr className="text-[10px] uppercase tracking-wide text-t3">
@@ -283,10 +260,8 @@ export function AccessLogModal({
           </table>
         </div>
 
-        {/* Footer note */}
-        <div className="px-5 py-2 border-t border-bdr dark:border-dk-bdr flex-shrink-0">
-        </div>
-      </div>
-    </div>
+      {/* Footer note */}
+      <div className="px-5 py-2 border-t border-bdr dark:border-dk-bdr flex-shrink-0"></div>
+    </BottomSheet>
   );
 }
