@@ -99,9 +99,13 @@ export function MapPanel({
         </div>
       </div>
 
-      {/* dropdown เลือกโซน — mobile เท่านั้น, ลอยมุมบนซ้ายของแผนที่ (touch ≥44px) */}
+      {/*
+        dropdown เลือกโซน — mobile เท่านั้น
+        ย้ายไปมุมบนขวาของแผนที่ (เดิมอยู่ซ้าย ชนกับปุ่ม zoom +/- ของ Leaflet ที่ default
+        อยู่มุมบนซ้ายเสมอ) ไม่แก้ตำแหน่งปุ่ม zoom ของ Leaflet เอง — ย้ายแค่ dropdown นี้หนีไปแทน
+      */}
       {zones && onMapZoneChange && (
-        <div className="md:hidden absolute top-12 left-2 z-20">
+        <div className="md:hidden absolute top-12 right-2 z-20">
           <select
             value={mapZone}
             onChange={(e) => onMapZoneChange(e.target.value)}
