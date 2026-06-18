@@ -7,10 +7,17 @@ import type { EnergyPeriod, EnergySeries } from "@/lib/types";
 import { DemoBanner } from "@/components/shared/demo-banner";
 import { Header } from "./header";
 import { KpiColumn } from "./kpi-column";
-import { MapPanel } from "./map-panel";
+import { MapPanel, type MapSize } from "./map-panel";
 import { LogsPanel } from "./logs-panel";
 import { BottomRow } from "./bottom-row";
 import { MobileLayout } from "./mobile-layout";
+
+// ระดับขนาดคอลัมน์แผนที่ (desktop) — ปรับสัดส่วน 3 คอลัมน์หลัก
+const GRID_COLS: Record<MapSize, string> = {
+  auto: "1fr 55% 1fr",
+  sm: "1fr 42% 1fr",
+  lg: "1fr 72% 1fr",
+};
 
 export interface DashboardUser {
   name: string;
@@ -31,6 +38,7 @@ interface DashboardProps {
 export function Dashboard({ source, user, zones, data, energy }: DashboardProps) {
   const [selectedZone, setSelectedZone] = useState("all");
   const [period, setPeriod] = useState<EnergyPeriod>("month");
+  const [mapSize, setMapSize] = useState<MapSize>("auto");
 
   const devices = useMemo(
     () =>
@@ -72,10 +80,15 @@ return (
       <div className="hidden md:flex flex-1 min-h-0 flex-col overflow-hidden">
         <div
           className="flex-1 min-h-0 grid overflow-hidden"
-          style={{ gridTemplateColumns: "1fr 55% 1fr" }}
+          style={{ gridTemplateColumns: GRID_COLS[mapSize] }}
         >
           <KpiColumn maintenance={data.maintenance} devices={devices} />
-          <MapPanel devices={devices} />
+          <MapPanel
+            devices={devices}
+            sizeKey={mapSize}
+            mapSize={mapSize}
+            onMapSizeChange={setMapSize}
+          />
           <LogsPanel alarms={alarms} />
         </div>
 
@@ -93,10 +106,13 @@ return (
         alarms={alarms}
         maintenance={data.maintenance}
         user={user}
+        zones={zones}
         energy={energy[period]}
         period={period}
         onPeriodChange={setPeriod}
         faultAreas={faultAreas}
+        lastSync={data.lastSync}
+        uptime={data.uptime}
       />
 
       {/* Footer (desktop only — แถบข้อมูลแนวนอนล้นจอบน mobile) */}

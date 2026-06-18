@@ -86,7 +86,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const isDark = mounted ? resolvedTheme === "dark" : true;
 
   return (
-    <header className="flex-shrink-0 h-14 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr hidden md:flex items-center px-4 gap-3 shadow-g1 z-50">
+    <header className="flex-shrink-0 h-14 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-3 md:px-4 gap-2 md:gap-3 shadow-g1 z-50">
       <div className="flex items-center gap-2.5 min-w-0 mr-2">
         <div className="w-8 h-8 rounded-xl bg-blu flex items-center justify-center flex-shrink-0 shadow-g2">
           <span className="ms ms-f text-white" style={{ fontSize: 18 }}>
@@ -100,10 +100,10 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
           <div className="text-t3 text-[9px] tracking-wide">เทศบาลเมืองบุรีรัมย์</div>
         </div>
       </div>
-      <div className="w-px h-7 bg-bdr dark:bg-dk-bdr mx-1 flex-shrink-0" />
+      <div className="hidden md:block w-px h-7 bg-bdr dark:bg-dk-bdr mx-1 flex-shrink-0" />
 
-      {/* Zone selector */}
-      <div className="flex items-center gap-1.5 flex-shrink-0">
+      {/* Zone selector (desktop only — mobile เลือกโซนในแท็บแผนที่แทน) */}
+      <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
         <span className="ms text-t3" style={{ fontSize: 15 }}>
           pin_drop
         </span>
@@ -121,30 +121,30 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
         </select>
       </div>
 
-      {/* Center: date / time / status */}
-      <div className="flex-1 flex items-center justify-center gap-2.5">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
+      {/* Center: date / time (desktop only) + system status (ทุก breakpoint) */}
+      <div className="flex-1 flex items-center justify-center gap-2.5 min-w-0">
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
           <span className="ms text-t3" style={{ fontSize: 14 }}>
             calendar_today
           </span>
           <span className="text-xs font-medium text-t1 dark:text-dk-t1">{dateStr}</span>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
           <span className="ms text-t3" style={{ fontSize: 14 }}>
             schedule
           </span>
           <span className="text-sm font-bold text-blu tabular-nums">{timeStr}</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-grn-lt dark:bg-grn/15 rounded-xl border border-grn/20">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-grn-lt dark:bg-grn/15 rounded-xl border border-grn/20 flex-shrink-0">
           <div className="w-2 h-2 rounded-full bg-grn animate-pulse-dot flex-shrink-0" />
           <span className="text-[11px] font-semibold text-grn">ระบบทำงานปกติ</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
-        {/* Weather (null-safe) */}
-        <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gradient-to-r from-blu-lt to-sf-3 dark:from-blu/10 dark:to-dk-sf2 rounded-xl border border-blu/15">
-          <div className="flex items-center gap-1.5 pr-2.5 border-r border-bdr dark:border-dk-bdr">
+      <div className="flex items-center gap-2 md:gap-2.5 flex-shrink-0">
+        {/* Weather (null-safe) — mobile: ย่อเหลือไอคอน+อุณหภูมิ */}
+        <div className="flex items-center gap-2.5 px-2.5 md:px-3 py-1.5 bg-gradient-to-r from-blu-lt to-sf-3 dark:from-blu/10 dark:to-dk-sf2 rounded-xl border border-blu/15">
+          <div className="flex items-center gap-1.5 md:pr-2.5 md:border-r border-bdr dark:border-dk-bdr">
             <span style={{ fontSize: 22 }}>⛅</span>
             <div>
               <div className="text-sm font-bold text-blu leading-none">
@@ -155,7 +155,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-2.5">
             <div className="text-center" title="ความชื้นสัมพัทธ์">
               <div className="ms text-blu mx-auto" style={{ fontSize: 14 }}>
                 water_drop
@@ -186,10 +186,10 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
           </div>
         </div>
 
-        {/* Theme toggle */}
+        {/* Theme toggle (desktop only — mobile มีในแท็บโปรไฟล์) */}
         <button
           onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr text-t2 dark:text-dk-t2 hover:border-blu/40 transition text-xs font-medium"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr text-t2 dark:text-dk-t2 hover:border-blu/40 transition text-xs font-medium"
         >
           <span className="ms" style={{ fontSize: 15 }}>
             {isDark ? "light_mode" : "dark_mode"}
@@ -197,9 +197,9 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
           <span>{isDark ? "สว่าง" : "มืด"}</span>
         </button>
 
-        {/* Profile */}
+        {/* Profile (desktop only — mobile ใช้แท็บโปรไฟล์แทน dropdown) */}
         {/* 3. ผูก Ref เข้ากับ Container หลักของ Profile */}
-        <div className="relative" ref={profileRef}>
+        <div className="relative hidden md:block" ref={profileRef}>
           <div
             className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-blu to-blu-dk flex items-center justify-center text-white text-[13px] font-bold cursor-pointer flex-shrink-0 shadow-g2"
             onClick={() => setProfileOpen((v) => !v)}
