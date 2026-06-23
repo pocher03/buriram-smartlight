@@ -36,13 +36,13 @@ function createPulseIcon(color: string) {
           opacity: 0.15;
         "></div>
         <!-- วงกลาง -->
-          <div style="
-            position: absolute;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: white;
-            opacity: 1;
-          "></div>
+        <div style="
+          position: absolute;
+          width: 14px; height: 14px;
+          border-radius: 50%;
+          background: ${color};
+          opacity: 0.3;
+        "></div>
         <!-- จุดใน -->
         <div style="
           position: absolute;
