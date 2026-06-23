@@ -2,13 +2,60 @@
 
 // Leaflet map (โหลดแบบ client-only ผ่าน dynamic import ใน map-panel)
 import { useEffect } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
 import type { Device } from "@/lib/types";
 import { DEVICE_PROFILES } from "@/lib/device-profiles";
 import { deviceStatus, STATUS_COLOR, STATUS_LABEL } from "@/lib/device-status";
 import { display } from "@/lib/null-safe";
 
+
 const CENTER: [number, number] = [14.992892, 103.113694];
+
+function createPulseIcon(color: string) {
+  return L.divIcon({
+    className: "",
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+    html: `
+      <div style="
+        position: relative;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        <!-- วงนอก aura -->
+        <div style="
+          position: absolute;
+          width: 24px; height: 24px;
+          border-radius: 50%;
+          background: ${color};
+          opacity: 0.15;
+        "></div>
+        <!-- วงกลาง -->
+        <div style="
+          position: absolute;
+          width: 14px; height: 14px;
+          border-radius: 50%;
+          background: ${color};
+          opacity: 0.3;
+        "></div>
+        <!-- จุดใน -->
+        <div style="
+          position: absolute;
+          width: 7px; height: 7px;
+          border-radius: 50%;
+          background: ${color};
+          opacity: 1;
+          box-shadow: 0 0 6px ${color};
+        "></div>
+      </div>
+    `,
+  });
+}
 
 /**
  * เรียก map.invalidateSize() ใหม่ทุกครั้งที่ container เปลี่ยนขนาด/กลับมาแสดงผล:
@@ -90,16 +137,10 @@ export default function MapInner({
         const color = STATUS_COLOR[status];
         const showSOC = DEVICE_PROFILES[d.deviceType].showSOC;
         return (
-          <CircleMarker
-            key={d.deviceId}
-            center={[d.lat as number, d.lng as number]}
-            radius={8}
-            pathOptions={{
-            color: color,
-            weight: 2,
-            fillColor: color,
-            fillOpacity: 0.50,
-          }}
+            <Marker
+              key={d.deviceId}
+              position={[d.lat as number, d.lng as number]}
+              icon={createPulseIcon(color)}
           >
             <Popup>
               <div style={{ fontSize: 12 }}>
@@ -137,7 +178,7 @@ export default function MapInner({
                 </div>
               </div>
             </Popup>
-          </CircleMarker>
+          </Marker>
         );
       })}
     </MapContainer>
