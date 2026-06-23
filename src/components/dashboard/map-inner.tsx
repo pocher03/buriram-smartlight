@@ -41,7 +41,7 @@ function createPulseIcon(color: string) {
             width: 14px; height: 14px;
             border-radius: 50%;
             background: white;
-            opacity: 0.3;
+            opacity: 1;
           "></div>
         <!-- จุดใน -->
         <div style="
