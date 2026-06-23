@@ -95,10 +95,10 @@ export default function MapInner({
             center={[d.lat as number, d.lng as number]}
             radius={8}
             pathOptions={{
-            color: color,        // stroke = สีนีออน
+            color: color,
             weight: 2.5,
             fillColor: color,
-            fillOpacity: 0.15,   // fill โปร่งใสดูล้ำ
+            fillOpacity: 0.50,
           }}
           >
             <Popup>

@@ -119,18 +119,18 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
 
       {/* Center: date / time (desktop only) + system status (ทุก breakpoint แต่ย่อบน mobile) */}
       <div className="flex-1 flex items-center justify-center gap-1.5 md:gap-2.5 min-w-0">
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
-          <span className="ms text-t3" style={{ fontSize: 14 }}>
-            calendar_today
-          </span>
-          <span className="text-xs font-medium text-t1 dark:text-dk-t1">{dateStr}</span>
-        </div>
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
-          <span className="ms text-t3" style={{ fontSize: 14 }}>
-            schedule
-          </span>
-          <span className="text-sm font-bold text-blu tabular-nums">{timeStr}</span>
-        </div>
+          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
+            <span className="ms text-t3" style={{ fontSize: 16 }}>
+              calendar_today
+            </span>
+            <span className="text-sm font-bold text-t1 dark:text-dk-t1">{dateStr}</span>
+          </div>
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-sf-3 dark:bg-dk-sf2 rounded-xl border border-bdr dark:border-dk-bdr">
+              <span className="ms text-t3" style={{ fontSize: 16 }}>
+                schedule
+              </span>
+              <span className="text-2xl font-black text-blu tabular-nums tracking-tight">{timeStr}</span>
+            </div>
         {/* สถานะระบบ: ทุก breakpoint — บน mobile ย่อเหลือคำว่า "ปกติ" สั้นๆ กันทับชื่อโครงการ/weather */}
         <div
           className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-grn-lt dark:bg-grn/15 rounded-xl border border-grn/20 flex-shrink-0"

@@ -7,7 +7,6 @@
 @tailwind utilities;
 
 @layer base {
-  /* Light theme (corporate Google) */
   :root {
     --background: 0 0% 100%;
     --foreground: 225 6% 13%;
