@@ -93,13 +93,13 @@ export default function MapInner({
           <CircleMarker
             key={d.deviceId}
             center={[d.lat as number, d.lng as number]}
-            radius={7}
+            radius={8}
             pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: color,
-              fillOpacity: 0.95,
-            }}
+            color: color,        // stroke = สีนีออน
+            weight: 2.5,
+            fillColor: color,
+            fillOpacity: 0.15,   // fill โปร่งใสดูล้ำ
+          }}
           >
             <Popup>
               <div style={{ fontSize: 12 }}>

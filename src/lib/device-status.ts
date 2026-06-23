@@ -10,11 +10,10 @@ import type { Device, DeviceStatus } from "./types";
 export const deviceStatus = (d: Device): DeviceStatus =>
   d.telemetry.onlineStatus === 1 ? "online" : "offline";
 
-/** สีตามสถานะ (ใช้ชื่อ token brand: grn/red) */
 export const STATUS_COLOR: Record<DeviceStatus, string> = {
-  online: "#1e8e3e",
-  offline: "#d93025",
-  alarm: "#f29900",
+  online: "#00e676",   // เขียวนีออน
+  offline: "#ff1744",  // แดงนีออน
+  alarm: "#ffea00",    // เหลืองนีออน
 };
 
 export const STATUS_LABEL: Record<DeviceStatus, string> = {

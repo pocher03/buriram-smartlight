@@ -125,15 +125,15 @@ export function BottomRow({ energy, period, onPeriodChange, faultAreas }: Bottom
           <span className="ms ms-f text-blu" style={{ fontSize: 14 }}>
             psychology
           </span>
-          AI Insight
+          Intelligent
         </div>
         <div className="flex-1 bg-blu-lt dark:bg-blu/10 rounded-xl p-3 border border-blu/20 flex flex-col justify-between">
           <div className="flex gap-2">
             <span className="ms ms-f text-blu flex-shrink-0 mt-0.5" style={{ fontSize: 22 }}>
-              smart_toy
+              auto_awesome
             </span>
             <p className="text-[11px] text-t2 dark:text-dk-t2 leading-relaxed">
-              <strong className="text-t1 dark:text-dk-t1">AI วิเคราะห์:</strong> ประหยัดพลังงานได้{" "}
+              <strong className="text-t1 dark:text-dk-t1">วิเคราะห์:</strong> ประหยัดพลังงานได้{" "}
               <span className="text-grn font-semibold">{display(energy.totalSave, " kWh")}</span>{" "}
               เมื่อเทียบกับปีก่อน ระบบทำงานเสถียร
             </p>
@@ -196,6 +196,16 @@ function EnergyChart({ energy }: { energy: EnergySeries }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart data={energy.points} margin={{ top: 6, right: 4, left: -18, bottom: 0 }}>
+        <defs>
+          <linearGradient id="gradCurr" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#4fc3f7" stopOpacity={1} />
+            <stop offset="100%" stopColor="#1a73e8" stopOpacity={0.8} />
+          </linearGradient>
+          <linearGradient id="gradPrev" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#69f0ae" stopOpacity={1} />
+            <stop offset="100%" stopColor="#1e8e3e" stopOpacity={0.7} />
+          </linearGradient>
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
         <XAxis dataKey="label" tick={{ fontSize: 9, fill: axis }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 9, fill: axis }} axisLine={false} tickLine={false} width={40} />
@@ -208,8 +218,8 @@ function EnergyChart({ energy }: { energy: EnergySeries }) {
           }}
           labelStyle={{ color: axis }}
         />
-        <Bar dataKey="previous" name="ปีก่อน" fill="rgba(30,142,62,.7)" radius={[3, 3, 0, 0]} maxBarSize={14} />
-        <Bar dataKey="current" name="ปีนี้" fill="#1a73e8" radius={[3, 3, 0, 0]} maxBarSize={14} />
+        <Bar dataKey="previous" name="ปีก่อน" fill="url(#gradPrev)" radius={[3, 3, 0, 0]} maxBarSize={14} />
+        <Bar dataKey="current" name="ปีนี้" fill="url(#gradCurr)" radius={[3, 3, 0, 0]} maxBarSize={14} />
         <Line dataKey="carbon" name="คาร์บอนเครดิต" type="monotone" stroke="#34a853" strokeWidth={2} dot={false} />
       </ComposedChart>
     </ResponsiveContainer>
