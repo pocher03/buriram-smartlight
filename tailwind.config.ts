@@ -53,22 +53,27 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         // --- Brand palette (Google Material style — จาก buriram_v8_4.html) ---
-        blu: { DEFAULT: "#1a73e8", lt: "#e8f0fe", dk: "#1557b0" },
-        grn: { DEFAULT: "#1e8e3e", lt: "#e6f4ea" },
-        red: { DEFAULT: "#d93025", lt: "#fce8e6" },
-        yel: { DEFAULT: "#f9ab00", lt: "#fef9e7" },
-        prp: { DEFAULT: "#7c3aed", lt: "#ede9fe" },
+        // --- Brand palette — Futuristic Dark (ระดับ 1) ---
+        blu: { DEFAULT: "#00b4d8", lt: "#0a1628", dk: "#0077b6" },  // cyan แทน blue
+        grn: { DEFAULT: "#00e676", lt: "#001a0d" },                  // เขียวนีออน
+        red: { DEFAULT: "#ff1744", lt: "#1a0005" },                  // แดงนีออน
+        yel: { DEFAULT: "#ffea00", lt: "#1a1500" },                  // เหลืองนีออน
+        prp: { DEFAULT: "#d500f9", lt: "#1a0020" },                  // ม่วงนีออน
         sf: { DEFAULT: "#ffffff", 2: "#f8f9fa", 3: "#f1f3f4" },
         bdr: "#e0e0e0",
         t1: "#202124",
         t2: "#5f6368",
         t3: "#9aa0a6",
-        "dk-bg": "#0f1117",
-        "dk-sf": "#1e2128",
-        "dk-sf2": "#262b35",
-        "dk-bdr": "#2e3340",
-        "dk-t1": "#e8eaed",
-        "dk-t2": "#9aa0a6",
+        "dk-bg": "#020810",      // เข้มขึ้นมาก (เกือบดำ)
+        "dk-sf": "#0a1628",      // navy dark
+        "dk-sf2": "#0d1f3c",     // navy dark 2
+        "dk-bdr": "#1a3a5c",     // border สี cyan อ่อน
+        "dk-t1": "#e0f7fa",      // ข้อความหลัก cyan ซีด
+        "dk-t2": "#80cbc4",      // ข้อความรอง teal
+        // เพิ่มใน boxShadow
+        "neon-cyan": "0 0 12px rgba(0,180,216,.4), 0 0 4px rgba(0,180,216,.2)",
+        "neon-grn":  "0 0 12px rgba(0,230,118,.4), 0 0 4px rgba(0,230,118,.2)",
+        "neon-red":  "0 0 12px rgba(255,23,68,.4),  0 0 4px rgba(255,23,68,.2)",
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -32,26 +32,55 @@
 
   /* Dark theme (ค่าเริ่มต้นของระบบ — ผูกกับ brand dark surfaces) */
   .dark {
-    --background: 225 21% 7%;
-    --foreground: 216 12% 92%;
-    --card: 222 14% 14%;
-    --card-foreground: 216 12% 92%;
-    --popover: 222 14% 14%;
-    --popover-foreground: 216 12% 92%;
-    --primary: 214 82% 56%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 16% 18%;
-    --secondary-foreground: 216 12% 92%;
-    --muted: 220 16% 18%;
-    --muted-foreground: 215 7% 63%;
-    --accent: 220 16% 18%;
-    --accent-foreground: 216 12% 92%;
-    --destructive: 4 71% 55%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 223 16% 22%;
-    --input: 223 16% 22%;
-    --ring: 214 82% 56%;
+    .dark {
+        --background: 222 47% 4%;       /* #020810 เกือบดำ */
+        --foreground: 187 100% 96%;     /* cyan ซีด */
+        --card: 213 64% 11%;            /* #0a1628 navy */
+        --card-foreground: 187 100% 96%;
+        --popover: 213 64% 11%;
+        --popover-foreground: 187 100% 96%;
+        --primary: 194 100% 43%;        /* cyan #00b4d8 */
+        --primary-foreground: 222 47% 4%;
+        --secondary: 213 57% 15%;
+        --secondary-foreground: 187 100% 96%;
+        --muted: 213 57% 15%;
+        --muted-foreground: 174 24% 51%;
+        --accent: 213 57% 15%;
+        --accent-foreground: 187 100% 96%;
+        --destructive: 351 100% 55%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 210 54% 23%;          /* border สี navy-cyan */
+        --input: 210 54% 23%;
+        --ring: 194 100% 43%;
+      }
   }
+}
+/* ── Futuristic Dark — panel border glow (dark mode only) ── */
+.dark .border-bdr,
+.dark [class*="border-dk-bdr"] {
+  border-color: rgba(0, 180, 216, 0.15);
+}
+
+/* card glow subtle */
+.dark .rounded-xl,
+.dark .rounded-2xl {
+  box-shadow: 0 0 0 1px rgba(0, 180, 216, 0.08),
+              0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Leaflet dark tile — เข้มขึ้นให้ดู sci-fi */
+.dark .leaflet-tile {
+  filter: invert(1) hue-rotate(200deg) brightness(0.75) contrast(1.1) saturate(0.6);
+}
+
+/* Marker glow subtle (ไม่เกินไป) */
+.leaflet-interactive {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+/* Scrollbar สี cyan */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(0, 180, 216, 0.3);
 }
 
 @layer base {
@@ -264,8 +293,4 @@
 .login-btn-grn:hover {
   background: #176c30 !important;
   box-shadow: 0 4px 16px rgba(30, 142, 62, 0.35) !important;
-}
-/* Neon glow — Leaflet CircleMarker */
-.leaflet-interactive {
-  filter: drop-shadow(0 0 6px currentColor);
 }

@@ -98,7 +98,7 @@ export default function MapInner({
             color: color,
             weight: 2.5,
             fillColor: color,
-            fillOpacity: 0.50,
+            fillOpacity: 0.70,
           }}
           >
             <Popup>
