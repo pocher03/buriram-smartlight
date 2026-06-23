@@ -96,9 +96,9 @@ export default function MapInner({
             radius={8}
             pathOptions={{
             color: color,
-            weight: 2.5,
+            weight: 2,
             fillColor: color,
-            fillOpacity: 0.70,
+            fillOpacity: 0.50,
           }}
           >
             <Popup>
