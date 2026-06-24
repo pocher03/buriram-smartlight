@@ -15,41 +15,41 @@ const CENTER: [number, number] = [14.992892, 103.113694];
 function createPulseIcon(color: string) {
   return L.divIcon({
     className: "",
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
     html: `
       <div style="
         position: relative;
-        width: 32px;
-        height: 32px;
+        width: 24px;
+        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
       ">
-        <!-- วงนอก: สีเขียวโปร่งใส 0.2 -->
+        <!-- วงนอก aura โปร่งใส -->
         <div style="
           position: absolute;
-          width: 32px; height: 32px;
+          width: 24px; height: 24px;
           border-radius: 50%;
           background: ${color};
           opacity: 0.2;
         "></div>
-        <!-- วงกลาง: ขอบขาวบางๆ พื้นโปร่งใส -->
+        <!-- วงกลาง ขอบขาวชิดจุดกลาง -->
         <div style="
           position: absolute;
-          width: 20px; height: 20px;
+          width: 13px; height: 13px;
           border-radius: 50%;
-          border: 2px solid rgba(255,255,255,0.85);
+          border: 1.5px solid rgba(255,255,255,0.85);
           background: transparent;
         "></div>
-        <!-- จุดใน: สีเขียวสว่างทึบ + glow -->
+        <!-- จุดใน -->
         <div style="
           position: absolute;
-          width: 10px; height: 10px;
+          width: 7px; height: 7px;
           border-radius: 50%;
           background: ${color};
-          box-shadow: 0 0 8px ${color}, 0 0 16px ${color}40;
+          box-shadow: 0 0 6px ${color};
         "></div>
       </div>
     `,
