@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { AlarmLog } from "@/lib/types";
 import { parseUTC } from "@/lib/null-safe";
 
-type Tab = "hw" | "cmd" | "cfg";
+type Tab = "hw" | "cmd";
 
 const SEV_STYLE: Record<AlarmLog["alarmLevel"], { badge: string; icon: string }> = {
   crit: { badge: "bg-red-lt text-red dark:bg-red/15", icon: "error" },
@@ -69,9 +69,6 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
           <button className={tabClass("cmd")} onClick={() => setTab("cmd")}>
             คำสั่งการ
           </button>
-          <button className={tabClass("cfg")} onClick={() => setTab("cfg")}>
-            ตั้งค่าระบบ
-          </button>
         </div>
       </div>
 
@@ -118,9 +115,9 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
               })}
             </div>
           )
-        ) : (
-          <EmptyFeed text="ยังไม่มีข้อมูล)" />
-        )}
+        ) : tab === "cmd" ? (
+  <EmptyFeed text="ยังไม่มีบันทึกคำสั่งการ — ระบบพร้อมแสดงข้อมูลเมื่อมีการสั่งการ" />
+        ) : null}
       </div>
     </div>
   );
