@@ -28,15 +28,11 @@ const HANDLE_LABEL: Record<AlarmLog["handleStatus"], string> = {
 
 const fmtTime = (iso: string) => {
   if (!iso) return "--";
-  const d = new Date(iso); // ใช้ new Date() ตรงๆ ไม่ต้องผ่าน parseUTC
+  const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "--" : d.toLocaleString("th-TH", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Bangkok",
+    day: "2-digit", month: "2-digit", year: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+    hour12: false, timeZone: "Asia/Bangkok",
   });
 };
 
@@ -49,6 +45,25 @@ interface ControlLog {
   error_details: string | null;
   occurred_at: string | null;
 }
+
+const OPERATE_TH: Record<string, string> = {
+  "Query status": "ตรวจสอบสถานะ",
+  "Turn on the light": "เปิดไฟ",
+  "Turn off the lights": "ปิดไฟ",
+  "Dimming": "ปรับความสว่าง",
+  "Query firmware version service": "ตรวจสอบเวอร์ชัน firmware",
+  "Query power and running time": "ตรวจสอบพลังงานและเวลาทำงาน",
+  "Query timing strategy": "ตรวจสอบตารางเวลา",
+  "Query latitude and longitude (strategy)": "ตรวจสอบพิกัด GPS",
+  "Read local time": "อ่านเวลาท้องถิ่น",
+  "Clear electric energy statistics": "รีเซ็ตสถิติพลังงาน",
+  "Set the timing strategy master switch": "ตั้งค่าสวิตช์หลักตารางเวลา",
+  "Read light sensor switch status": "อ่านสถานะเซนเซอร์แสง",
+};
+const toThai = (desc: string | null): string => {
+  if (!desc) return "--";
+  return OPERATE_TH[desc] ?? desc;
+};
 
 function useControlLogs(days: number) {
   const [logs, setLogs] = useState<ControlLog[]>([]);
@@ -66,6 +81,7 @@ function useControlLogs(days: number) {
 export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
   const [tab, setTab] = useState<Tab>("hw");
   const [days, setDays] = useState(7);
+  const [selected, setSelected] = useState<AlarmLog | null>(null);
 
   const tabClass = (t: Tab) =>
     `tab-btn flex-1 text-[9px] font-medium py-1.5 px-1 rounded-lg text-center ${
@@ -75,124 +91,204 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
     }`;
 
   return (
-    <div className="flex flex-col overflow-hidden bg-sf dark:bg-dk-sf border-l border-bdr dark:border-dk-bdr">
-      <div className="flex-shrink-0 px-3 pt-3 pb-2 border-b border-bdr dark:border-dk-bdr">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="ms ms-f text-blu" style={{ fontSize: 16 }}>
-            history
-          </span>
-          <span className="font-semibold text-t1 dark:text-dk-t1 text-xs">
-            ประวัติระบบและการแจ้งเตือน
-          </span>
+    <>
+      <div className="flex flex-col overflow-hidden bg-sf dark:bg-dk-sf border-l border-bdr dark:border-dk-bdr">
+        <div className="flex-shrink-0 px-3 pt-3 pb-2 border-b border-bdr dark:border-dk-bdr">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="ms ms-f text-blu" style={{ fontSize: 16 }}>history</span>
+            <span className="font-semibold text-t1 dark:text-dk-t1 text-xs">
+              ประวัติระบบและการแจ้งเตือน
+            </span>
+          </div>
+          <select
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value))}
+            className="w-full text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition mb-2"
+          >
+            {DAY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <div className="flex gap-0.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl p-1">
+            <button className={tabClass("hw")} onClick={() => setTab("hw")}>ฮาร์ดแวร์</button>
+            <button className={tabClass("cmd")} onClick={() => setTab("cmd")}>คำสั่งการ</button>
+          </div>
         </div>
-        <select
-          value={days}
-          onChange={(e) => setDays(Number(e.target.value))}
-          className="w-full text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition mb-2"
-        >
-          {DAY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <div className="flex gap-0.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl p-1">
-          <button className={tabClass("hw")} onClick={() => setTab("hw")}>
-            ฮาร์ดแวร์
-          </button>
-          <button className={tabClass("cmd")} onClick={() => setTab("cmd")}>
-            คำสั่งการ
-          </button>
+
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2">
+          {tab === "hw" ? (
+            (() => {
+              const cutoff = new Date();
+              cutoff.setDate(cutoff.getDate() - days);
+              const inRange = alarms.filter((a) => {
+                const d = new Date(a.createdAt);
+                return !Number.isNaN(d.getTime()) && d >= cutoff;
+              });
+              const seen = new Map<string, typeof alarms[0]>();
+              for (const a of inRange) {
+                const key = `${a.deviceName}__${a.name}`;
+                const existing = seen.get(key);
+                if (!existing || new Date(a.createdAt) > new Date(existing.createdAt)) {
+                  seen.set(key, a);
+                }
+              }
+              const deduped = Array.from(seen.values()).sort(
+                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              );
+              return deduped.length === 0 ? (
+                <EmptyFeed text="ไม่พบรายการแจ้งเตือน" />
+              ) : (
+                <div className="space-y-1.5">
+                  {deduped.map((a) => {
+                    const sev = SEV_STYLE[a.alarmLevel];
+                    // นับจำนวนครั้งของ device นี้ใน DB (ทั้งหมดไม่ filter days)
+                    const histCount = alarms.filter(
+                      (x) => x.deviceName === a.deviceName && x.name === a.name
+                    ).length;
+                    return (
+                      <div
+                        key={a.id}
+                        className="flex items-start gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr cursor-pointer hover:border-blu/30 transition"
+                        onClick={() => setSelected(a)}
+                        title="กดเพื่อดูประวัติทั้งหมด"
+                      >
+                        <span
+                          className={`ms ms-f flex-shrink-0 mt-0.5 ${sev.badge} rounded-md p-1`}
+                          style={{ fontSize: 14 }}
+                        >
+                          {sev.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 truncate">
+                              {a.name}
+                            </span>
+                            {histCount > 1 && (
+                              <span className="text-[9px] bg-sf-3 dark:bg-dk-sf2 text-t3 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                                {histCount} ครั้ง
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-t2 dark:text-dk-t2 truncate">
+                            {a.deviceName} · {a.zoneName}
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[9px] text-t3 tabular-nums">
+                              {fmtTime(a.createdAt)}
+                            </span>
+                            <span className="text-[9px] text-t3">·</span>
+                            <span className="text-[9px] text-t3">
+                              {HANDLE_LABEL[a.handleStatus]}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="ms text-t3 flex-shrink-0 self-center" style={{ fontSize: 14 }}>
+                          chevron_right
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()
+          ) : tab === "cmd" ? (
+            <CmdTab days={days} />
+          ) : null}
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2">
-        {tab === "hw" ? (
-          (() => {
-            // Step 1: filter ตาม days
-            const cutoff = new Date();
-            cutoff.setDate(cutoff.getDate() - days);
-            const inRange = alarms.filter((a) => {
-              const d = new Date(a.createdAt);
-              return !Number.isNaN(d.getTime()) && d >= cutoff;
-            });
+      {/* Bottom Sheet — ประวัติทั้งหมดของ device (ตอบ TOR ข้อ ๔.๗.๒) */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-[2000] flex items-end md:items-center justify-center bg-black/50"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="sheet-in w-full md:max-w-lg bg-sf dark:bg-dk-sf rounded-t-2xl md:rounded-2xl shadow-g3 overflow-hidden max-h-[85vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-bdr dark:border-dk-bdr flex-shrink-0">
+              <div className="min-w-0">
+                <div className="text-sm font-bold text-t1 dark:text-dk-t1 truncate">
+                  {selected.deviceName}
+                </div>
+                <div className="text-[10px] text-t3">
+                  ประวัติการแจ้งเตือน "{selected.name}" ทั้งหมด
+                </div>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-t3 hover:bg-sf-3 dark:hover:bg-dk-sf2 transition flex-shrink-0 ml-2"
+              >
+                <span className="ms" style={{ fontSize: 20 }}>close</span>
+              </button>
+            </div>
 
-            // Step 2: dedup — เก็บแค่รายการล่าสุดของแต่ละ device+name
-            // (เหมือน LINE/Gmail grouping) ข้อมูลยังครบใน DB
-            const seen = new Map<string, typeof alarms[0]>();
-            for (const a of inRange) {
-              const key = `${a.deviceName}__${a.name}`;
-              const existing = seen.get(key);
-              if (!existing || new Date(a.createdAt) > new Date(existing.createdAt)) {
-                seen.set(key, a);
-              }
-            }
-            const deduped = Array.from(seen.values()).sort(
-              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-
-            return deduped.length === 0 ? (
-              <EmptyFeed text="ไม่พบรายการแจ้งเตือน" />
-            ) : (
-              <div className="space-y-1.5">
-                {deduped.map((a) => {
+            {/* รายการประวัติทั้งหมด — ดึงจาก alarms prop ที่มีอยู่แล้ว */}
+            <div className="overflow-y-auto flex-1 p-3 space-y-1.5">
+              {alarms
+                .filter((a) => a.deviceName === selected.deviceName && a.name === selected.name)
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .map((a, i) => {
                   const sev = SEV_STYLE[a.alarmLevel];
                   return (
                     <div
                       key={a.id}
-                      className="flex items-start gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr"
+                      className="flex items-center gap-2.5 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr"
                     >
                       <span
-                        className={`ms ms-f flex-shrink-0 mt-0.5 ${sev.badge} rounded-md p-1`}
-                        style={{ fontSize: 14 }}
+                        className={`ms ms-f flex-shrink-0 ${sev.badge} rounded-md p-1`}
+                        style={{ fontSize: 13 }}
                       >
                         {sev.icon}
                       </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 truncate">
-                            {a.name}
-                          </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] font-semibold text-t1 dark:text-dk-t1">
+                          {fmtTime(a.createdAt)}
                         </div>
-                        <div className="text-[10px] text-t2 dark:text-dk-t2 truncate">
-                          {a.deviceName} · {a.zoneName}
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[9px] text-t3 tabular-nums">
-                            {fmtTime(a.createdAt)}
-                          </span>
-                          <span className="text-[9px] text-t3">·</span>
-                          <span className="text-[9px] text-t3">
-                            {HANDLE_LABEL[a.handleStatus]}
-                          </span>
+                        <div className="text-[9px] text-t3">
+                          {HANDLE_LABEL[a.handleStatus]} · {a.zoneName}
                         </div>
                       </div>
+                      {i === 0 && (
+                        <span className="text-[9px] bg-blu text-white px-1.5 py-0.5 rounded-full flex-shrink-0">
+                          ล่าสุด
+                        </span>
+                      )}
                     </div>
                   );
                 })}
-              </div>
-            );
-          })()
-        ) : tab === "cmd" ? (
-          <CmdTab days={days} />
-        ) : null}
-      </div>
-    </div>
+            </div>
+
+            {/* Footer สรุป */}
+            <div className="flex-shrink-0 px-4 py-2.5 border-t border-bdr dark:border-dk-bdr bg-sf-3 dark:bg-dk-sf2">
+              <span className="text-[10px] text-t3">
+                พบทั้งหมด{" "}
+                <strong className="text-t1 dark:text-dk-t1">
+                  {alarms.filter((a) => a.deviceName === selected.deviceName && a.name === selected.name).length}
+                </strong>{" "}
+                รายการในระบบ (ข้อมูลครบถ้วนตาม TOR ๔.๗.๒)
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
-
 
 function CmdTab({ days }: { days: number }) {
   const { logs, loading } = useControlLogs(days);
   if (loading) return <EmptyFeed text="กำลังโหลด..." />;
-  if (logs.length === 0) return (
-    <EmptyFeed text="ยังไม่มีบันทึกคำสั่งการ" />
-  );
+  if (logs.length === 0) return <EmptyFeed text="ยังไม่มีบันทึกคำสั่งการ" />;
   return (
     <div className="space-y-1.5">
       {logs.map((l, i) => (
         <div key={i} className="p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr">
           <div className="flex items-center justify-between mb-0.5">
             <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 truncate">
-              {l.operate_describe ?? "--"}
+              {toThai(l.operate_describe)}
             </span>
             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
               l.error_code === 0
@@ -221,9 +317,7 @@ function CmdTab({ days }: { days: number }) {
 function EmptyFeed({ text }: { text: string }) {
   return (
     <div className="h-full flex flex-col items-center justify-center text-t3 gap-2 py-10">
-      <span className="ms" style={{ fontSize: 28 }}>
-        inbox
-      </span>
+      <span className="ms" style={{ fontSize: 28 }}>inbox</span>
       <span className="text-[11px]">{text}</span>
     </div>
   );
