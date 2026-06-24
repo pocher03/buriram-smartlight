@@ -16,10 +16,6 @@ import { SYNC_CRON, TOKEN_CRON } from "./lib/config";
 import { prisma } from "../lib/prisma";
 import { syncServiceControlLog } from "./jobs/sync-service-control-log";
 
-// เพิ่มใน cron schedule เดิม เช่น
-cron.schedule("*/30 * * * *", async () => {
-  await syncServiceControlLog();
-});
 
 const TZ = "Asia/Bangkok";
 
@@ -52,6 +48,7 @@ async function runSync(reason: string) {
     await step("alarms", () => syncAlarms()); // รวม backfill พิกัด → devices
     await step("energy", () => syncEnergy());
     await step("weather", () => syncWeather());
+    await step("control-log", () => syncServiceControlLog()); // เพิ่มบรรทัดนี้
   } finally {
     syncing = false;
     console.log(`[worker] จบรอบ sync (${reason}) ใช้เวลา ${Date.now() - t0}ms`);
