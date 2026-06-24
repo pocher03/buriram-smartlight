@@ -33,6 +33,7 @@ const fmtTime = (iso: string) => {
     ? d.toLocaleString("th-TH", {
         day: "2-digit",
         month: "2-digit",
+        year: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
@@ -107,47 +108,56 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
 
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2">
         {tab === "hw" ? (
-          alarms.length === 0 ? (
-            <EmptyFeed text="ไม่พบรายการแจ้งเตือน" />
-          ) : (
-            <div className="space-y-1.5">
-              {alarms.map((a) => {
-                const sev = SEV_STYLE[a.alarmLevel];
-                return (
-                  <div
-                    key={a.id}
-                    className="flex items-start gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr"
-                  >
-                    <span
-                      className={`ms ms-f flex-shrink-0 mt-0.5 ${sev.badge} rounded-md p-1`}
-                      style={{ fontSize: 14 }}
+          (() => {
+            const filtered = alarms.filter((a) => {
+              const d = parseUTC(a.createdAt);
+              if (!d) return true;
+              const cutoff = new Date();
+              cutoff.setDate(cutoff.getDate() - days);
+              return d >= cutoff;
+            });
+            return filtered.length === 0 ? (
+              <EmptyFeed text="ไม่พบรายการแจ้งเตือน" />
+            ) : (
+              <div className="space-y-1.5">
+                {filtered.map((a) => {
+                  const sev = SEV_STYLE[a.alarmLevel];
+                  return (
+                    <div
+                      key={a.id}
+                      className="flex items-start gap-2 p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr"
                     >
-                      {sev.icon}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 truncate">
-                          {a.name}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-t2 dark:text-dk-t2 truncate">
-                        {a.deviceName} · {a.zoneName}
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[9px] text-t3 tabular-nums">
-                          {fmtTime(a.createdAt)}
-                        </span>
-                        <span className="text-[9px] text-t3">·</span>
-                        <span className="text-[9px] text-t3">
-                          {HANDLE_LABEL[a.handleStatus]}
-                        </span>
+                      <span
+                        className={`ms ms-f flex-shrink-0 mt-0.5 ${sev.badge} rounded-md p-1`}
+                        style={{ fontSize: 14 }}
+                      >
+                        {sev.icon}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 truncate">
+                            {a.name}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-t2 dark:text-dk-t2 truncate">
+                          {a.deviceName} · {a.zoneName}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[9px] text-t3 tabular-nums">
+                            {fmtTime(a.createdAt)}
+                          </span>
+                          <span className="text-[9px] text-t3">·</span>
+                          <span className="text-[9px] text-t3">
+                            {HANDLE_LABEL[a.handleStatus]}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )
+                  );
+                })}
+              </div>
+            );
+          })()
         ) : tab === "cmd" ? (
           <CmdTab days={days} />
         ) : null}
