@@ -28,19 +28,17 @@ const HANDLE_LABEL: Record<AlarmLog["handleStatus"], string> = {
 };
 
 const fmtTime = (iso: string) => {
-  console.log("fmtTime input:", iso); // เพิ่มบรรทัดนี้
-  const d = parseUTC(iso);
-  return d
-    ? d.toLocaleString("th-TH", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "Asia/Bangkok",
-      })
-    : "--";
+  if (!iso) return "--";
+  const d = new Date(iso); // ใช้ new Date() ตรงๆ ไม่ต้องผ่าน parseUTC
+  return Number.isNaN(d.getTime()) ? "--" : d.toLocaleString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Bangkok",
+  });
 };
 
 interface ControlLog {
