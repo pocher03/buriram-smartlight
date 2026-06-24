@@ -156,25 +156,6 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
   );
 }
 
-const OPERATE_TH: Record<string, string> = {
-  "Query status": "ตรวจสอบสถานะ",
-  "Turn on the light": "เปิดไฟ",
-  "Turn off the lights": "ปิดไฟ",
-  "Dimming": "ปรับความสว่าง",
-  "Query firmware version service": "ตรวจสอบเวอร์ชัน firmware",
-  "Query power and running time": "ตรวจสอบพลังงานและเวลาทำงาน",
-  "Query timing strategy": "ตรวจสอบตารางเวลา",
-  "Query latitude and longitude (strategy)": "ตรวจสอบพิกัด GPS",
-  "Read local time": "อ่านเวลาท้องถิ่น",
-  "Clear electric energy statistics": "รีเซ็ตสถิติพลังงาน",
-  "Set the timing strategy master switch": "ตั้งค่าสวิตช์หลักตารางเวลา",
-  "Read light sensor switch status": "อ่านสถานะเซนเซอร์แสง",
-};
-
-const toThai = (desc: string | null): string => {
-  if (!desc) return "--";
-  return OPERATE_TH[desc] ?? desc; // ถ้าไม่มีใน mapping แสดงภาษาอังกฤษเดิม
-};
 
 function CmdTab({ days }: { days: number }) {
   const { logs, loading } = useControlLogs(days);
@@ -188,7 +169,7 @@ function CmdTab({ days }: { days: number }) {
         <div key={i} className="p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr">
           <div className="flex items-center justify-between mb-0.5">
             <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 truncate">
-              {toThai(l.operate_describe)}
+              {l.operate_describe ?? "--"}
             </span>
             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
               l.error_code === 0
