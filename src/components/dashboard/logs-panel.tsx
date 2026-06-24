@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import type { AlarmLog } from "@/lib/types";
 import { parseUTC } from "@/lib/null-safe";
+import { useEffect, useState } from "react";
 
 type Tab = "hw" | "cmd";
 
@@ -32,6 +32,28 @@ const fmtTime = (iso: string) => {
       })
     : "--";
 };
+
+interface ControlLog {
+  username: string | null;
+  object_name: string | null;
+  operate_describe: string | null;
+  act_type: number | null;
+  error_code: number | null;
+  error_details: string | null;
+  occurred_at: string | null;
+}
+
+function useControlLogs() {
+  const [logs, setLogs] = useState<ControlLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch("/api/logs/service-control?page=0&size=50")
+      .then((r) => r.json())
+      .then((d) => setLogs(d.data ?? []))
+      .finally(() => setLoading(false));
+  }, []);
+  return { logs, loading };
+}
 
 export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
   const [tab, setTab] = useState<Tab>("hw");
@@ -116,9 +138,47 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
             </div>
           )
         ) : tab === "cmd" ? (
-  <EmptyFeed text="ยังไม่มีบันทึกคำสั่งการ — ระบบพร้อมแสดงข้อมูลเมื่อมีการสั่งการ" />
+          <CmdTab />
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function CmdTab() {
+  const { logs, loading } = useControlLogs();
+  if (loading) return <EmptyFeed text="กำลังโหลด..." />;
+  if (logs.length === 0) return (
+    <EmptyFeed text="ยังไม่มีบันทึกคำสั่งการ" />
+  );
+  return (
+    <div className="space-y-1.5">
+      {logs.map((l, i) => (
+        <div key={i} className="p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr">
+          <div className="flex items-center justify-between mb-0.5">
+            <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 truncate">
+              {l.operate_describe ?? "--"}
+            </span>
+            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+              l.error_code === 0
+                ? "bg-grn-lt text-grn dark:bg-grn/15"
+                : "bg-red-lt text-red dark:bg-red/15"
+            }`}>
+              {l.error_code === 0 ? "สำเร็จ" : "ผิดพลาด"}
+            </span>
+          </div>
+          <div className="text-[10px] text-t2 dark:text-dk-t2 truncate">
+            {l.object_name ?? "--"} · {l.username ?? "--"}
+          </div>
+          <div className="text-[9px] text-t3 tabular-nums mt-0.5">
+            {l.occurred_at ? new Date(l.occurred_at).toLocaleString("th-TH", {
+              timeZone: "Asia/Bangkok",
+              day: "2-digit", month: "2-digit",
+              hour: "2-digit", minute: "2-digit",
+            }) : "--"}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
