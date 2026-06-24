@@ -12,13 +12,14 @@ import {
 } from "recharts";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import type { EnergySeries, FaultArea } from "@/lib/types";
+import type { EnergyPeriod, EnergySeries, FaultArea } from "@/lib/types";
 import { calcSavings, display } from "@/lib/null-safe";
+
 
 interface BottomRowProps {
   energy: EnergySeries;
   period: string;
-  onPeriodChange: (p: string) => void;
+  onPeriodChange: (p: EnergyPeriod) => void;
   faultAreas: FaultArea[];
 }
 
