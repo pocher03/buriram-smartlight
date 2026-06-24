@@ -259,3 +259,24 @@ model PasswordResetToken {
 
   @@map("password_reset_tokens")
 }
+
+// APPEND-ONLY — log การสั่งการอุปกรณ์จาก RULR
+// endpoint: POST /mm/api/sys/operate/log/rulr
+model ServiceControlLog {
+  id              BigInt    @id @default(autoincrement())
+  domain          String?
+  username        String?                        // ผู้สั่งการ
+  objectId        BigInt?   @map("object_id")    // ID อุปกรณ์
+  objectName      String?   @map("object_name")  // ชื่ออุปกรณ์
+  operateDescribe String?   @map("operate_describe") // คำอธิบายคำสั่ง
+  actType         Int?      @map("act_type")     // 1=manual, 2=auto
+  ipAddr          String?   @map("ip_addr")
+  errorCode       Int?      @map("error_code")   // 0=สำเร็จ
+  errorDetails    String?   @map("error_details") // ผลลัพธ์
+  occurredAt      DateTime  @map("occurred_at")  // createdAt จาก RULR
+  syncedAt        DateTime  @default(now()) @map("synced_at")
+
+  @@index([occurredAt])
+  @@index([objectId])
+  @@map("service_control_logs")
+}
