@@ -1,7 +1,6 @@
 "use client";
 
 import type { AlarmLog } from "@/lib/types";
-import { parseUTC } from "@/lib/null-safe";
 import { useEffect, useState } from "react";
 
 type Tab = "hw" | "cmd";
