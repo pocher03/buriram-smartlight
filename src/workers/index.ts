@@ -14,6 +14,12 @@ import { syncEnergy } from "./jobs/sync-energy";
 import { syncWeather } from "./jobs/sync-weather";
 import { SYNC_CRON, TOKEN_CRON } from "./lib/config";
 import { prisma } from "../lib/prisma";
+import { syncServiceControlLog } from "./jobs/sync-service-control-log";
+
+// เพิ่มใน cron schedule เดิม เช่น
+cron.schedule("*/30 * * * *", async () => {
+  await syncServiceControlLog();
+});
 
 const TZ = "Asia/Bangkok";
 
