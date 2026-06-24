@@ -108,18 +108,33 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2">
         {tab === "hw" ? (
           (() => {
-            const filtered = alarms.filter((a) => {
-              const d = parseUTC(a.createdAt);
-              if (!d) return true;
-              const cutoff = new Date();
-              cutoff.setDate(cutoff.getDate() - days);
-              return d >= cutoff;
+            // Step 1: filter ตาม days
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - days);
+            const inRange = alarms.filter((a) => {
+              const d = new Date(a.createdAt);
+              return !Number.isNaN(d.getTime()) && d >= cutoff;
             });
-            return filtered.length === 0 ? (
+
+            // Step 2: dedup — เก็บแค่รายการล่าสุดของแต่ละ device+name
+            // (เหมือน LINE/Gmail grouping) ข้อมูลยังครบใน DB
+            const seen = new Map<string, typeof alarms[0]>();
+            for (const a of inRange) {
+              const key = `${a.deviceName}__${a.name}`;
+              const existing = seen.get(key);
+              if (!existing || new Date(a.createdAt) > new Date(existing.createdAt)) {
+                seen.set(key, a);
+              }
+            }
+            const deduped = Array.from(seen.values()).sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+
+            return deduped.length === 0 ? (
               <EmptyFeed text="ไม่พบรายการแจ้งเตือน" />
             ) : (
               <div className="space-y-1.5">
-                {filtered.map((a) => {
+                {deduped.map((a) => {
                   const sev = SEV_STYLE[a.alarmLevel];
                   return (
                     <div
