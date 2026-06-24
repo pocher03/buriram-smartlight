@@ -179,15 +179,6 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
               </div>
               <div className="text-[7px] text-t3 leading-none mt-0.5">PM2.5</div>
             </div>
-            <div className="text-center" title="คาร์บอนไดออกไซด์">
-              <div className="ms text-grn mx-auto" style={{ fontSize: 14 }}>
-                co2
-              </div>
-              <div className="text-[10px] font-bold text-t1 dark:text-dk-t1 leading-none">
-                {display(weather.co2)}
-              </div>
-              <div className="text-[7px] text-t3 leading-none mt-0.5">CO₂ ppm</div>
-            </div>
           </div>
         </div>
 
