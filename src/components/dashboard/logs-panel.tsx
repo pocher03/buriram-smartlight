@@ -28,6 +28,7 @@ const HANDLE_LABEL: Record<AlarmLog["handleStatus"], string> = {
 };
 
 const fmtTime = (iso: string) => {
+  console.log("fmtTime input:", iso); // เพิ่มบรรทัดนี้
   const d = parseUTC(iso);
   return d
     ? d.toLocaleString("th-TH", {
