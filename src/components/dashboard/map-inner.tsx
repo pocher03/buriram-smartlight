@@ -38,7 +38,7 @@ function createPulseIcon(color: string) {
         <!-- วงกลาง ขอบขาวชิดจุดกลาง -->
         <div style="
           position: absolute;
-          width: 13px; height: 13px;
+          width: 10px; height: 10px;
           border-radius: 50%;
           border: 1.5px solid rgba(255,255,255,0.85);
           background: transparent;
