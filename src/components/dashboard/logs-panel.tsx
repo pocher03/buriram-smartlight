@@ -214,7 +214,7 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
                   {selected.deviceName}
                 </div>
                 <div className="text-[10px] text-t3">
-                  ประวัติการแจ้งเตือน "{selected.name}" ทั้งหมด
+                  ประวัติการแจ้งเตือน ({selected.name}) ทั้งหมด
                 </div>
               </div>
               <button
