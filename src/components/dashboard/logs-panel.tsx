@@ -268,7 +268,7 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
                 <strong className="text-t1 dark:text-dk-t1">
                   {alarms.filter((a) => a.deviceName === selected.deviceName && a.name === selected.name).length}
                 </strong>{" "}
-                รายการในระบบ (ข้อมูลครบถ้วนตาม TOR ๔.๗.๒)
+                รายการในระบบ
               </span>
             </div>
           </div>
