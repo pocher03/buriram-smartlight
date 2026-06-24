@@ -6,6 +6,14 @@ import { useEffect, useState } from "react";
 
 type Tab = "hw" | "cmd";
 
+const DAY_OPTIONS = [
+  { label: "วันนี้", value: 1 },
+  { label: "3 วัน", value: 3 },
+  { label: "7 วัน", value: 7 },
+  { label: "30 วัน", value: 30 },
+  { label: "90 วัน", value: 90 },
+];
+
 const SEV_STYLE: Record<AlarmLog["alarmLevel"], { badge: string; icon: string }> = {
   crit: { badge: "bg-red-lt text-red dark:bg-red/15", icon: "error" },
   warn: { badge: "bg-yel-lt text-yel dark:bg-yel/15", icon: "warning" },
@@ -43,20 +51,22 @@ interface ControlLog {
   occurred_at: string | null;
 }
 
-function useControlLogs() {
+function useControlLogs(days: number) {
   const [logs, setLogs] = useState<ControlLog[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    fetch("/api/logs/service-control?page=0&size=50")
+    setLoading(true);
+    fetch(`/api/logs/service-control?page=0&size=50&days=${days}`)
       .then((r) => r.json())
       .then((d) => setLogs(d.data ?? []))
       .finally(() => setLoading(false));
-  }, []);
+  }, [days]);
   return { logs, loading };
 }
 
 export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
   const [tab, setTab] = useState<Tab>("hw");
+  const [days, setDays] = useState(7);
 
   const tabClass = (t: Tab) =>
     `tab-btn flex-1 text-[9px] font-medium py-1.5 px-1 rounded-lg text-center ${
@@ -76,13 +86,14 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
             ประวัติระบบและการแจ้งเตือน
           </span>
         </div>
-        <select className="w-full text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition mb-2">
-          <option>วันนี้</option>
-          <option>3 วัน</option>
-          <option>7 วัน</option>
-          <option>30 วัน</option>
-          <option>90 วัน</option>
-          <option>กำหนดเอง</option>
+        <select
+          value={days}
+          onChange={(e) => setDays(Number(e.target.value))}
+          className="w-full text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition mb-2"
+        >
+          {DAY_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
         </select>
         <div className="flex gap-0.5 bg-sf-3 dark:bg-dk-sf2 rounded-xl p-1">
           <button className={tabClass("hw")} onClick={() => setTab("hw")}>
@@ -138,15 +149,15 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
             </div>
           )
         ) : tab === "cmd" ? (
-          <CmdTab />
+          <CmdTab days={days} />
         ) : null}
       </div>
     </div>
   );
 }
 
-function CmdTab() {
-  const { logs, loading } = useControlLogs();
+function CmdTab({ days }: { days: number }) {
+  const { logs, loading } = useControlLogs(days);
   if (loading) return <EmptyFeed text="กำลังโหลด..." />;
   if (logs.length === 0) return (
     <EmptyFeed text="ยังไม่มีบันทึกคำสั่งการ" />
