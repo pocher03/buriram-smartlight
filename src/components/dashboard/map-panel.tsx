@@ -58,7 +58,7 @@ export function MapPanel({
           map
         </span>
         <span className="font-semibold text-t1 dark:text-dk-t1 text-xs truncate min-w-0">
-          แผนที่โคมไฟอัจฉริยะ (Smart Map)
+          แผนที่โคมไฟอัจฉริยะ
         </span>
 
         <div className="ml-auto flex items-center gap-2.5">
