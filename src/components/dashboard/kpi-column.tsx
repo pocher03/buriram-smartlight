@@ -65,7 +65,7 @@ export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
         </div>
 
         <StatBlock
-          title="สถานะไฟ (Lighting %)"
+          title="สถานะไฟ"
           pct={lightingPct}
           pctColorClass="text-yel"
           cols={2}
@@ -76,7 +76,7 @@ export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
         />
 
         <StatBlock
-          title="สถานะออนไลน์ (Online %)"
+          title="สถานะออนไลน์"
           pct={onlinePct}
           pctColorClass="text-grn"
           cols={3}
