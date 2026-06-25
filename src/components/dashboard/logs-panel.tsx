@@ -35,6 +35,7 @@ const LEVEL_LABEL: Record<AlarmLog["alarmLevel"], string> = {
 
 const fmtTime = (iso: string) => {
   if (!iso) return "--";
+    console.log("raw iso:", iso); // เพิ่มบรรทัดนี้
     const d = new Date(iso.endsWith("Z") ? iso : iso + "Z");
   return Number.isNaN(d.getTime()) ? "--" : d.toLocaleString("th-TH", {
     day: "2-digit", month: "2-digit", year: "2-digit",
