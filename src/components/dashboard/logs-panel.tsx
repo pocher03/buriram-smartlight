@@ -35,12 +35,12 @@ const LEVEL_LABEL: Record<AlarmLog["alarmLevel"], string> = {
 
 const fmtTime = (iso: string) => {
   if (!iso) return "--";
-    console.log("raw iso:", iso); // เพิ่มบรรทัดนี้
-    const d = new Date(iso.endsWith("Z") ? iso : iso + "Z");
+  const clean = iso.endsWith("Z") ? iso.slice(0, -1) : iso;
+  const d = new Date(clean);
   return Number.isNaN(d.getTime()) ? "--" : d.toLocaleString("th-TH", {
     day: "2-digit", month: "2-digit", year: "2-digit",
     hour: "2-digit", minute: "2-digit",
-    hour12: false, timeZone: "Asia/Bangkok",
+    hour12: false,
   });
 };
 
