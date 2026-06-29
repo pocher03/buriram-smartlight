@@ -11,10 +11,19 @@ export async function GET(req: NextRequest) {
   const since = new Date();
   since.setDate(since.getDate() - days);
 
+  const search = searchParams.get("search") ?? "";
+
   // กรอง: ในช่วงเวลา + ไม่เอา account admin จีน (Impact202309)
   const where: Prisma.ServiceControlLogWhereInput = {
     occurredAt: { gte: since },
     NOT: { username: "Impact202309" },
+    ...(search ? {
+      OR: [
+        { objectName: { contains: search, mode: "insensitive" } },
+        { username: { contains: search, mode: "insensitive" } },
+        { operateDescribe: { contains: search, mode: "insensitive" } },
+      ],
+    } : {}),
   };
 
   const [total, rows] = await Promise.all([

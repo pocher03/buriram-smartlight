@@ -304,16 +304,23 @@ const OPERATE_TH: Record<string, string> = {
 };
 const toThai = (desc: string | null) => !desc ? "--" : (OPERATE_TH[desc] ?? desc);
 
-function useControlLogs(days: number) {
+function useControlLogs(days: number, search: string) {
   const [logs, setLogs] = useState<ControlLog[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/logs/service-control?page=0&size=50&days=${days}`)
+    const params = new URLSearchParams({
+      page: "0",
+      size: "100",
+      days: String(days),
+      ...(search ? { search } : {}),
+    });
+    fetch(`/api/logs/service-control?${params}`)
       .then((r) => r.json())
       .then((d) => setLogs(d.data ?? []))
+      .catch(() => setLogs([]))
       .finally(() => setLoading(false));
-  }, [days]);
+  }, [days, search]);
   return { logs, loading };
 }
 
@@ -492,11 +499,39 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
 }
 
 function CmdTab({ days }: { days: number }) {
-  const { logs, loading } = useControlLogs(days);
-  if (loading) return <EmptyFeed text="กำลังโหลด..." />;
-  if (logs.length === 0) return <EmptyFeed text="ยังไม่มีบันทึกคำสั่งการ" />;
+  const [search, setSearch] = useState("");
+  const { logs, loading } = useControlLogs(days, search);
+
   return (
-    <div className="space-y-1.5">
+    <div className="flex flex-col h-full">
+      {/* ช่องค้นหา */}
+      <div className="flex-shrink-0 mb-2">
+        <div className="flex items-center gap-2 bg-sf-3 dark:bg-dk-sf2 rounded-lg px-2.5 py-1.5 border border-bdr dark:border-dk-bdr">
+          <span className="ms text-t3" style={{ fontSize: 14 }}>search</span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ค้นหาอุปกรณ์ / ผู้สั่ง / คำสั่ง..."
+            className="flex-1 bg-transparent text-[10px] text-t1 dark:text-dk-t1 outline-none placeholder:text-t3"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="text-t3 hover:text-t1 transition">
+              <span className="ms" style={{ fontSize: 14 }}>close</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* รายการ */}
+      <div className="flex-1 min-h-0">
+        {loading ? (
+          <EmptyFeed text="กำลังโหลด..." />
+        ) : logs.length === 0 ? (
+          <EmptyFeed text={search ? "ไม่พบผลการค้นหา" : "ยังไม่มีบันทึกคำสั่งการ"} />
+        ) : (
+          <div className="space-y-1.5">
+
       {logs.map((l, i) => (
         <div key={i} className="p-2 rounded-lg bg-sf-2 dark:bg-dk-sf2 border border-bdr/50 dark:border-dk-bdr">
           <div className="flex items-center justify-between mb-0.5">
@@ -510,7 +545,10 @@ function CmdTab({ days }: { days: number }) {
             {l.occurred_at ? new Date(l.occurred_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "--"}
           </div>
         </div>
-      ))}
+))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
