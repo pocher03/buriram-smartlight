@@ -82,12 +82,12 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const isDark = mounted ? resolvedTheme === "dark" : true;
 
   return (
-    <header className="flex-shrink-0 h-14 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-3 md:px-4 gap-2 md:gap-3 shadow-g1 z-50">
+    <header className="flex-shrink-0 h-20 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-3 md:px-4 gap-2 md:gap-3 shadow-g1 z-50">
       <div className="flex items-center gap-2 md:gap-2.5 min-w-0 mr-1 md:mr-2">
         <img
           src="/logo.png"
           alt="ตราเทศบาลเมืองบุรีรัมย์"
-          className="w-11 h-11 object-contain flex-shrink-0 drop-shadow-sm"
+          className="w-14 h-14 object-contain flex-shrink-0 drop-shadow-sm"
         />
         <div className="min-w-0">
           <div className="font-bold text-t1 dark:text-dk-t1 text-[13px] md:text-sm leading-tight truncate">
