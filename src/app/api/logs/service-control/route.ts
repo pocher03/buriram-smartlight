@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -10,29 +11,43 @@ export async function GET(req: NextRequest) {
   const since = new Date();
   since.setDate(since.getDate() - days);
 
+  // กรอง: ในช่วงเวลา + ไม่เอา account admin จีน (Impact202309)
+  const where: Prisma.ServiceControlLogWhereInput = {
+    occurredAt: { gte: since },
+    NOT: { username: "Impact202309" },
+  };
+
   const [total, rows] = await Promise.all([
-    prisma.$queryRaw<{ count: bigint }[]>`
-      SELECT COUNT(*) as count
-      FROM service_control_logs
-      WHERE occurred_at >= ${since}
-        AND (username IS NULL OR username != 'Impact202309')
-    `,
-    prisma.$queryRaw<Record<string, unknown>[]>`
-      SELECT username, object_name, operate_describe,
-             act_type, ip_addr, error_code, error_details, occurred_at
-      FROM service_control_logs
-      WHERE occurred_at >= ${since}
-        AND (username IS NULL OR username != 'Impact202309')
-      ORDER BY occurred_at DESC
-      LIMIT ${size} OFFSET ${page * size}
-    `,
+    prisma.serviceControlLog.count({ where }),
+    prisma.serviceControlLog.findMany({
+      where,
+      orderBy: { occurredAt: "desc" },
+      skip: page * size,
+      take: size,
+      select: {
+        username: true,
+        objectName: true,
+        operateDescribe: true,
+        actType: true,
+        ipAddr: true,
+        errorCode: true,
+        errorDetails: true,
+        occurredAt: true,
+      },
+    }),
   ]);
 
-  return NextResponse.json({
-    total: Number(total[0].count),
-    page,
-    size,
-    days,
-    data: rows,
-  });
+  // map camelCase → snake_case ให้ตรงกับที่ frontend ใช้อยู่
+  const data = rows.map((r) => ({
+    username: r.username,
+    object_name: r.objectName,
+    operate_describe: r.operateDescribe,
+    act_type: r.actType,
+    ip_addr: r.ipAddr,
+    error_code: r.errorCode,
+    error_details: r.errorDetails,
+    occurred_at: r.occurredAt,
+  }));
+
+  return NextResponse.json({ total, page, size, days, data });
 }
