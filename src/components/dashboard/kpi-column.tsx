@@ -11,13 +11,11 @@ function StatBlock({
   title,
   pct,
   pctColorClass,
-  cols,
   rows,
 }: {
   title: string;
   pct: number | null;
-  pctColorClass: string;
-  cols: 2 | 3;
+    pctColorClass: string;
   rows: { label: string; value: number; color: string }[];
 }) {
   return (
@@ -71,7 +69,6 @@ export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
           title="สถานะไฟ"
           pct={lightingPct}
           pctColorClass="text-yel"
-          cols={2}
           rows={[
             { label: "ไฟเปิด", value: onLights, color: "bg-grn" },
             { label: "ไฟปิด", value: offLights, color: "bg-t3" },
@@ -82,7 +79,6 @@ export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
           title="สถานะออนไลน์"
           pct={onlinePct}
           pctColorClass="text-grn"
-          cols={3}
           rows={[
             { label: "ออนไลน์", value: online, color: "bg-grn" },
             { label: "ออฟไลน์", value: offline, color: "bg-red" },
