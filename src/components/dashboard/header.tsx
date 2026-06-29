@@ -84,16 +84,18 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   return (
     <header className="flex-shrink-0 h-14 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-3 md:px-4 gap-2 md:gap-3 shadow-g1 z-50">
       <div className="flex items-center gap-2 md:gap-2.5 min-w-0 mr-1 md:mr-2">
-        <div className="w-8 h-8 rounded-xl bg-blu flex items-center justify-center flex-shrink-0 shadow-g2">
-          <span className="ms ms-f text-white" style={{ fontSize: 18 }}>
-            location_city
-          </span>
-        </div>
+        <img
+          src="/logo.png"
+          alt="ตราเทศบาลเมืองบุรีรัมย์"
+          className="w-11 h-11 object-contain flex-shrink-0 drop-shadow-sm"
+        />
         <div className="min-w-0">
-          <div className="font-bold text-t1 dark:text-dk-t1 text-xs leading-tight truncate">
+          <div className="font-bold text-t1 dark:text-dk-t1 text-[13px] md:text-sm leading-tight truncate">
             ศูนย์บริหารจัดการโคมไฟถนนอัจฉริยะ
           </div>
-          <div className="text-t3 text-[9px] tracking-wide truncate">เทศบาลเมืองบุรีรัมย์</div>
+          <div className="text-t2 dark:text-dk-t2 text-[10px] md:text-[11px] font-medium tracking-wide truncate">
+            เทศบาลเมืองบุรีรัมย์
+          </div>
         </div>
       </div>
       <div className="hidden md:block w-px h-7 bg-bdr dark:bg-dk-bdr mx-1 flex-shrink-0" />
