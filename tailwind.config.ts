@@ -52,24 +52,24 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // --- Brand palette (Google Material style — จาก buriram_v8_4.html) ---
-        // --- Brand palette — Futuristic Dark (ระดับ 1) ---
-        blu: { DEFAULT: "#00b4d8", lt: "#0a1628", dk: "#0077b6" },  // cyan แทน blue
-        grn: { DEFAULT: "#00e676", lt: "#001a0d" },                  // เขียวนีออน
-        red: { DEFAULT: "#ff1744", lt: "#1a0005" },                  // แดงนีออน
-        yel: { DEFAULT: "#ffea00", lt: "#1a1500" },                  // เหลืองนีออน
-        prp: { DEFAULT: "#d500f9", lt: "#1a0020" },                  // ม่วงนีออน
+// --- Brand palette — Neon accent + soft light tints ---
+        // DEFAULT = สีนีออน (โดดเด่นทั้ง 2 โหมด) | lt = สีอ่อนสำหรับพื้น light mode
+        blu: { DEFAULT: "#00b4d8", lt: "#e0f7fb", dk: "#0077b6" },
+        grn: { DEFAULT: "#00c853", lt: "#e3fcef" },
+        red: { DEFAULT: "#ff1744", lt: "#ffe5ea" },
+        yel: { DEFAULT: "#f9a825", lt: "#fff8e1" },
+        prp: { DEFAULT: "#d500f9", lt: "#f9e5ff" },
         sf: { DEFAULT: "#ffffff", 2: "#f8f9fa", 3: "#f1f3f4" },
         bdr: "#e0e0e0",
         t1: "#202124",
         t2: "#5f6368",
         t3: "#9aa0a6",
-        "dk-bg": "#020810",      // เข้มขึ้นมาก (เกือบดำ)
-        "dk-sf": "#0a1628",      // navy dark
-        "dk-sf2": "#0d1f3c",     // navy dark 2
-        "dk-bdr": "#1a3a5c",     // border สี cyan อ่อน
-        "dk-t1": "#e0f7fa",      // ข้อความหลัก cyan ซีด
-        "dk-t2": "#80cbc4",      // ข้อความรอง teal
+        "dk-bg": "#020810",
+        "dk-sf": "#0a1628",
+        "dk-sf2": "#0d1f3c",
+        "dk-bdr": "#1a3a5c",
+        "dk-t1": "#e0f7fa",
+        "dk-t2": "#80cbc4",
         // เพิ่มใน boxShadow
         "neon-cyan": "0 0 12px rgba(0,180,216,.4), 0 0 4px rgba(0,180,216,.2)",
         "neon-grn":  "0 0 12px rgba(0,230,118,.4), 0 0 4px rgba(0,230,118,.2)",

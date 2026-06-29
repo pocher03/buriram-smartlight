@@ -82,7 +82,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const isDark = mounted ? resolvedTheme === "dark" : true;
 
   return (
-    <header className="flex-shrink-0 h-18 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-3 md:px-4 gap-2 md:gap-3 shadow-g1 z-50">
+    <header className="flex-shrink-0 h-19 bg-sf dark:bg-dk-sf border-b border-bdr dark:border-dk-bdr flex items-center px-3 md:px-4 gap-2 md:gap-3 shadow-g1 z-50">
       <div className="flex items-center gap-2 md:gap-2.5 min-w-0 mr-1 md:mr-2">
         <img
           src="/logo.png"

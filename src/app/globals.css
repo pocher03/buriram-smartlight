@@ -31,28 +31,28 @@
   }
 
   /* Dark theme (ค่าเริ่มต้นของระบบ — ผูกกับ brand dark surfaces) */
+/* Dark theme — Futuristic navy/cyan */
+/* Dark theme — Futuristic navy/cyan */
   .dark {
-    .dark {
-        --background: 222 47% 4%;       /* #020810 เกือบดำ */
-        --foreground: 187 100% 96%;     /* cyan ซีด */
-        --card: 213 64% 11%;            /* #0a1628 navy */
-        --card-foreground: 187 100% 96%;
-        --popover: 213 64% 11%;
-        --popover-foreground: 187 100% 96%;
-        --primary: 194 100% 43%;        /* cyan #00b4d8 */
-        --primary-foreground: 222 47% 4%;
-        --secondary: 213 57% 15%;
-        --secondary-foreground: 187 100% 96%;
-        --muted: 213 57% 15%;
-        --muted-foreground: 174 24% 51%;
-        --accent: 213 57% 15%;
-        --accent-foreground: 187 100% 96%;
-        --destructive: 351 100% 55%;
-        --destructive-foreground: 0 0% 100%;
-        --border: 210 54% 23%;          /* border สี navy-cyan */
-        --input: 210 54% 23%;
-        --ring: 194 100% 43%;
-      }
+    --background: 222 47% 4%;
+    --foreground: 187 100% 96%;
+    --card: 213 64% 11%;
+    --card-foreground: 187 100% 96%;
+    --popover: 213 64% 11%;
+    --popover-foreground: 187 100% 96%;
+    --primary: 194 100% 43%;
+    --primary-foreground: 222 47% 4%;
+    --secondary: 213 57% 15%;
+    --secondary-foreground: 187 100% 96%;
+    --muted: 213 57% 15%;
+    --muted-foreground: 174 24% 51%;
+    --accent: 213 57% 15%;
+    --accent-foreground: 187 100% 96%;
+    --destructive: 351 100% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 54% 23%;
+    --input: 210 54% 23%;
+    --ring: 194 100% 43%;
   }
 }
 /* ── Futuristic Dark — panel border glow (dark mode only) ── */
