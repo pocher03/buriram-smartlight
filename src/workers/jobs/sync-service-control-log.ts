@@ -41,14 +41,14 @@ export async function syncServiceControlLog(): Promise<{ inserted: number }> {
   const cfg = getRulrConfig();
 
   // Delta sync: ดึงตั้งแต่ log ล่าสุดที่มีใน DB ถึงวันนี้
-  const latest = await prisma.$queryRaw<{ occurred_at: Date }[]>`
-    SELECT occurred_at FROM service_control_logs
-    ORDER BY occurred_at DESC LIMIT 1
-  `;
+  const latest = await prisma.serviceControlLog.findFirst({
+    orderBy: { occurredAt: "desc" },
+    select: { occurredAt: true },
+  });
 
   const now = new Date();
-  const startDate = latest.length > 0
-    ? new Date(latest[0].occurred_at)
+  const startDate = latest
+    ? latest.occurredAt
     : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // ย้อนหลัง 30 วัน ถ้าไม่มีข้อมูลเลย
 
   const start = dateStr(startDate);
@@ -76,25 +76,30 @@ export async function syncServiceControlLog(): Promise<{ inserted: number }> {
       if (!occurredAt) continue;
 
       // กัน insert ซ้ำด้วย occurred_at + objectId + username
-      const exists = await prisma.$queryRaw<{ id: bigint }[]>`
-        SELECT id FROM service_control_logs
-        WHERE occurred_at = ${occurredAt}
-          AND object_id = ${r.objectId ?? null}
-          AND username = ${r.username ?? null}
-        LIMIT 1
-      `;
-      if (exists.length > 0) continue;
+      const exists = await prisma.serviceControlLog.findFirst({
+        where: {
+          occurredAt,
+          objectId: r.objectId ?? null,
+          username: r.username ?? null,
+        },
+        select: { id: true },
+      });
+      if (exists) continue;
 
-      await prisma.$executeRaw`
-        INSERT INTO service_control_logs
-          (domain, username, object_id, object_name, operate_describe,
-           act_type, ip_addr, error_code, error_details, occurred_at)
-        VALUES
-          (${r.domain ?? null}, ${r.username ?? null}, ${r.objectId ?? null},
-           ${r.objectName ?? null}, ${r.operateDescribe ?? null},
-           ${r.actType ?? null}, ${r.ipAddr ?? null}, ${r.errorCode ?? null},
-           ${r.errorDetails ?? null}, ${occurredAt})
-      `;
+      await prisma.serviceControlLog.create({
+        data: {
+          domain: r.domain ?? null,
+          username: r.username ?? null,
+          objectId: r.objectId ?? null,
+          objectName: r.objectName ?? null,
+          operateDescribe: r.operateDescribe ?? null,
+          actType: r.actType ?? null,
+          ipAddr: r.ipAddr ?? null,
+          errorCode: r.errorCode ?? null,
+          errorDetails: r.errorDetails ?? null,
+          occurredAt,
+        },
+      });
       inserted++;
     }
 
