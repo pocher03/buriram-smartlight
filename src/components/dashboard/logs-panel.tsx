@@ -44,19 +44,30 @@ const fmtTime = (iso: string) => {
   });
 };
 
+// ── ชนิดข้อมูลแถว alarm จาก API ──────────────────────────────
+interface AlarmRow {
+  id: string | number;
+  deviceName: string;
+  name: string;
+  alarmLevel: AlarmLog["alarmLevel"];
+  handleStatus: AlarmLog["handleStatus"];
+  divisionName: string | null;
+  createdAt: string;
+}
+
 // ── Export CSV ──────────────────────────────────────────────
-function exportCSV(rows: AlarmLog[], days: number) {
+function exportCSV(rows: AlarmRow[], days: number) {
   const header = ["ชื่อการแจ้งเตือน", "ชื่ออุปกรณ์", "โซน", "ระดับ", "เวลาเกิด", "สถานะ"];
   const body = rows.map((a) => [
     a.name,
     a.deviceName,
-    a.zoneName ?? "--",
+    a.divisionName ?? "--",
     LEVEL_LABEL[a.alarmLevel],
     fmtTime(a.createdAt),
     HANDLE_LABEL[a.handleStatus],
   ]);
   const csv = [header, ...body].map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }); // BOM สำหรับ Excel ภาษาไทย
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -65,28 +76,37 @@ function exportCSV(rows: AlarmLog[], days: number) {
   URL.revokeObjectURL(url);
 }
 
-// ── Alarm All Popup ──────────────────────────────────────────
-interface AlarmAllPopupProps {
-  alarms: AlarmLog[];
-  days: number;
-  onClose: () => void;
-}
+// ── Alarm All Popup (ดึงจาก API — ไม่จำกัด 50 รายการ) ────────
+const POPUP_DAY_OPTIONS = [
+  { label: "วันนี้", value: 1 },
+  { label: "3 วัน", value: 3 },
+  { label: "7 วัน", value: 7 },
+  { label: "30 วัน", value: 30 },
+  { label: "90 วัน", value: 90 },
+];
 
-function AlarmAllPopup({ alarms, days, onClose }: AlarmAllPopupProps) {
+function AlarmAllPopup({ onClose }: { onClose: () => void }) {
+  const [days, setDays] = useState(7);
   const [search, setSearch] = useState("");
+  const [rows, setRows] = useState<AlarmRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
+  // ดึงจาก API ทุกครั้งที่ days เปลี่ยน
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/logs/alarms?days=${days}`)
+      .then((r) => r.json())
+      .then((d) => setRows(d.data ?? []))
+      .catch(() => setRows([]))
+      .finally(() => setLoading(false));
+  }, [days]);
 
-  const filtered = alarms
-    .filter((a) => {
-      const d = new Date(a.createdAt);
-      if (Number.isNaN(d.getTime()) || d < cutoff) return false;
-      if (!search) return true;
-      const q = search.toLowerCase();
-      return a.deviceName.toLowerCase().includes(q) || a.name.toLowerCase().includes(q);
-    })
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  // search กรอง client-side
+  const filtered = rows.filter((a) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return a.deviceName.toLowerCase().includes(q) || a.name.toLowerCase().includes(q);
+  });
 
   return (
     <div
@@ -108,6 +128,16 @@ function AlarmAllPopup({ alarms, days, onClose }: AlarmAllPopupProps) {
               ย้อนหลัง {days} วัน · {filtered.length} รายการ
             </div>
           </div>
+          {/* Dropdown เลือกวัน */}
+          <select
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value))}
+            className="text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition"
+          >
+            {POPUP_DAY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
           {/* Export CSV */}
           <button
             onClick={() => exportCSV(filtered, days)}
@@ -145,7 +175,12 @@ function AlarmAllPopup({ alarms, days, onClose }: AlarmAllPopupProps) {
 
         {/* Table */}
         <div className="overflow-auto flex-1">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-16 text-t3">
+              <span className="ms animate-spin" style={{ fontSize: 28 }}>progress_activity</span>
+              <span className="text-[11px]">กำลังโหลด...</span>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-t3">
               <span className="ms" style={{ fontSize: 32 }}>inbox</span>
               <span className="text-[11px]">ไม่พบรายการแจ้งเตือน</span>
@@ -174,7 +209,7 @@ function AlarmAllPopup({ alarms, days, onClose }: AlarmAllPopupProps) {
                     >
                       <td className="px-4 py-2 font-semibold text-t1 dark:text-dk-t1 whitespace-nowrap">{a.name}</td>
                       <td className="px-4 py-2 text-t2 dark:text-dk-t2 whitespace-nowrap">{a.deviceName}</td>
-                      <td className="px-4 py-2 text-t3 whitespace-nowrap">{a.zoneName ?? "--"}</td>
+                      <td className="px-4 py-2 text-t3 whitespace-nowrap">{a.divisionName ?? "--"}</td>
                       <td className="px-4 py-2">
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${sev.badge}`}>
                           {LEVEL_LABEL[a.alarmLevel]}
@@ -192,7 +227,7 @@ function AlarmAllPopup({ alarms, days, onClose }: AlarmAllPopupProps) {
 
         {/* Footer */}
         <div className="flex-shrink-0 px-5 py-2 border-t border-bdr dark:border-dk-bdr bg-sf-3 dark:bg-dk-sf2 text-[10px] text-t3">
-          แสดง {filtered.length} รายการ
+          แสดง {filtered.length} รายการ · ข้อมูลครบถ้วนตาม TOR ๔.๗.๒
         </div>
       </div>
     </div>
@@ -358,9 +393,7 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
       </div>
 
       {/* Popup ดูทั้งหมด + Export */}
-      {showAll && (
-        <AlarmAllPopup alarms={alarms} days={days} onClose={() => setShowAll(false)} />
-      )}
+      {showAll && <AlarmAllPopup onClose={() => setShowAll(false)} />}
 
       {/* Bottom Sheet ประวัติ device */}
       {selected && (

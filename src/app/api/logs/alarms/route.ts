@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       name: true,
       alarmLevel: true,
       handleStatus: true,
+      divisionName: true,
       createdAt: true,
     },
   });
