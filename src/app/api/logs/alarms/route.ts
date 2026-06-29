@@ -32,5 +32,8 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ data: rows, days, total: rows.length });
+  // แปลง BigInt id → string (JSON serialize ไม่ได้)
+  const data = rows.map((r) => ({ ...r, id: r.id.toString() }));
+
+  return NextResponse.json({ data, days, total: data.length });
 }

@@ -227,7 +227,7 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
 
         {/* Footer */}
         <div className="flex-shrink-0 px-5 py-2 border-t border-bdr dark:border-dk-bdr bg-sf-3 dark:bg-dk-sf2 text-[10px] text-t3">
-          แสดง {filtered.length} รายการ · ข้อมูลครบถ้วนตาม TOR ๔.๗.๒
+          แสดง {filtered.length} รายการ
         </div>
       </div>
     </div>
