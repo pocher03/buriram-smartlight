@@ -76,7 +76,7 @@ function exportCSV(rows: AlarmRow[], days: number) {
   URL.revokeObjectURL(url);
 }
 
-// ── Alarm All Popup (ดึงจาก API — ไม่จำกัด 50 รายการ) ────────
+// ── Alarm All Popup (ดึงจาก API + pagination) ────────────────
 const POPUP_DAY_OPTIONS = [
   { label: "วันนี้", value: 1 },
   { label: "3 วัน", value: 3 },
@@ -88,25 +88,44 @@ const POPUP_DAY_OPTIONS = [
 function AlarmAllPopup({ onClose }: { onClose: () => void }) {
   const [days, setDays] = useState(7);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const [rows, setRows] = useState<AlarmRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
   const [loading, setLoading] = useState(true);
 
-  // ดึงจาก API ทุกครั้งที่ days เปลี่ยน
+  // ดึงจาก API เมื่อ days / page / search เปลี่ยน
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/logs/alarms?days=${days}`)
+    const params = new URLSearchParams({
+      days: String(days),
+      page: String(page),
+      ...(search ? { search } : {}),
+    });
+    fetch(`/api/logs/alarms?${params}`)
       .then((r) => r.json())
-      .then((d) => setRows(d.data ?? []))
-      .catch(() => setRows([]))
+      .then((d) => {
+        setRows(d.data ?? []);
+        setTotal(d.total ?? 0);
+        setTotalPages(d.totalPages ?? 0);
+        setPageSize(d.pageSize ?? 50);
+      })
+      .catch(() => {
+        setRows([]);
+        setTotal(0);
+        setTotalPages(0);
+      })
       .finally(() => setLoading(false));
-  }, [days]);
+  }, [days, page, search]);
 
-  // search กรอง client-side
-  const filtered = rows.filter((a) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return a.deviceName.toLowerCase().includes(q) || a.name.toLowerCase().includes(q);
-  });
+  // เปลี่ยน days หรือ search → กลับหน้า 1
+  useEffect(() => {
+    setPage(0);
+  }, [days, search]);
+
+  const startNo = total === 0 ? 0 : page * pageSize + 1;
+  const endNo = Math.min((page + 1) * pageSize, total);
 
   return (
     <div
@@ -125,7 +144,7 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
               บันทึกการแจ้งเตือนทั้งหมด
             </div>
             <div className="text-[10px] text-t3">
-              ย้อนหลัง {days} วัน · {filtered.length} รายการ
+              ย้อนหลัง {days} วัน · ทั้งหมด {total} รายการ
             </div>
           </div>
           {/* Dropdown เลือกวัน */}
@@ -138,10 +157,11 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
-          {/* Export CSV */}
+          {/* Export CSV — เฉพาะหน้าปัจจุบัน */}
           <button
-            onClick={() => exportCSV(filtered, days)}
+            onClick={() => exportCSV(rows, days)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-grn-lt dark:bg-grn/15 text-grn border border-grn/20 text-[11px] font-semibold hover:bg-grn/20 transition"
+            title="ส่งออกเฉพาะรายการในหน้านี้"
           >
             <span className="ms ms-f" style={{ fontSize: 15 }}>download</span>
             Export CSV
@@ -180,7 +200,7 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
               <span className="ms animate-spin" style={{ fontSize: 28 }}>progress_activity</span>
               <span className="text-[11px]">กำลังโหลด...</span>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : rows.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-t3">
               <span className="ms" style={{ fontSize: 32 }}>inbox</span>
               <span className="text-[11px]">ไม่พบรายการแจ้งเตือน</span>
@@ -198,7 +218,7 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((a, i) => {
+                {rows.map((a, i) => {
                   const sev = SEV_STYLE[a.alarmLevel];
                   return (
                     <tr
@@ -225,9 +245,32 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex-shrink-0 px-5 py-2 border-t border-bdr dark:border-dk-bdr bg-sf-3 dark:bg-dk-sf2 text-[10px] text-t3">
-          แสดง {filtered.length} รายการ
+        {/* Footer + Pagination */}
+        <div className="flex-shrink-0 px-5 py-2.5 border-t border-bdr dark:border-dk-bdr bg-sf-3 dark:bg-dk-sf2 flex items-center justify-between gap-3">
+          <span className="text-[10px] text-t3">
+            แสดง {startNo}-{endNo} จาก {total} รายการ
+          </span>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage((p) => Math.max(p - 1, 0))}
+                disabled={page === 0}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-t2 dark:text-dk-t2 border border-bdr dark:border-dk-bdr hover:text-blu hover:border-blu/40 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span className="ms" style={{ fontSize: 16 }}>chevron_left</span>
+              </button>
+              <span className="text-[11px] font-semibold text-t1 dark:text-dk-t1 px-2 tabular-nums">
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
+                disabled={page >= totalPages - 1}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-t2 dark:text-dk-t2 border border-bdr dark:border-dk-bdr hover:text-blu hover:border-blu/40 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span className="ms" style={{ fontSize: 16 }}>chevron_right</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
