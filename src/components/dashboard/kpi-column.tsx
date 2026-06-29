@@ -21,26 +21,29 @@ function StatBlock({
   rows: { label: string; value: number; color: string }[];
 }) {
   return (
-    <div className="bg-sf-2 dark:bg-dk-sf2 rounded-xl p-3 border border-bdr/60 dark:border-dk-bdr mb-2.5">
-      <div className="text-center mb-2">
-        <div className={`text-3xl font-extrabold leading-none ${pctColorClass}`}>
-          {pct == null ? "--" : `${pct.toFixed(2)}%`}
-        </div>
-        <div className="text-[10px] text-t3 mt-1 font-medium">{title}</div>
-      </div>
-      <div className={`grid gap-1.5 ${cols === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
-        {rows.map((r) => (
-          <div
-            key={r.label}
-            className="flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-lg bg-sf dark:bg-dk-sf border border-bdr/50 dark:border-dk-bdr"
-          >
-            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${r.color}`} />
-            <div className="text-[8px] text-t3 leading-none mt-0.5 truncate">{r.label}</div>
-            <div className="text-sm font-bold tabular-nums leading-tight text-t1 dark:text-dk-t1">
-              {r.value}
-            </div>
+    <div className="bg-sf-2 dark:bg-dk-sf2 rounded-xl p-2.5 border border-bdr/60 dark:border-dk-bdr mb-2.5">
+      <div className="flex items-center gap-3">
+        {/* ซ้าย: % ใหญ่ */}
+        <div className="flex flex-col items-center justify-center flex-shrink-0 pr-3 border-r border-bdr/60 dark:border-dk-bdr min-w-[72px]">
+          <div className={`text-2xl font-extrabold leading-none ${pctColorClass}`}>
+            {pct == null ? "--" : `${pct.toFixed(0)}%`}
           </div>
-        ))}
+          <div className="text-[9px] text-t3 mt-1 font-medium text-center">{title}</div>
+        </div>
+        {/* ขวา: ตัวเลขย่อยแถวเดียว */}
+        <div className="flex-1 flex items-center justify-around gap-1">
+          {rows.map((r) => (
+            <div key={r.label} className="flex flex-col items-center gap-1">
+              <div className="flex items-center gap-1">
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${r.color}`} />
+                <span className="text-[9px] text-t3 leading-none">{r.label}</span>
+              </div>
+              <div className="text-base font-bold tabular-nums leading-none text-t1 dark:text-dk-t1">
+                {r.value}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
