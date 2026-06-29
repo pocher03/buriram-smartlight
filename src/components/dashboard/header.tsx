@@ -87,7 +87,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
         <img
           src="/logo.png"
           alt="ตราเทศบาลเมืองบุรีรัมย์"
-          className="w-14 h-14 object-contain flex-shrink-0 drop-shadow-sm"
+          className="w-18 h-18 object-contain flex-shrink-0 drop-shadow-sm"
         />
         <div className="min-w-0">
           <div className="font-bold text-t1 dark:text-dk-t1 text-[13px] md:text-sm leading-tight truncate">
