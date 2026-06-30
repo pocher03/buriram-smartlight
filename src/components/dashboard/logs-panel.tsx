@@ -290,8 +290,11 @@ interface ControlLog {
 
 const OPERATE_TH: Record<string, string> = {
   "Query status": "ตรวจสอบสถานะ",
+  "Read Status": "อ่านสถานะ",
   "Turn on the light": "เปิดไฟ",
   "Turn off the lights": "ปิดไฟ",
+  "open light(or close circuit)": "เปิดไฟ (ต่อวงจร)",
+  "close light(or break circuit)": "ปิดไฟ (ตัดวงจร)",
   "Dimming": "ปรับความสว่าง",
   "Query firmware version service": "ตรวจสอบเวอร์ชัน firmware",
   "Query power and running time": "ตรวจสอบพลังงานและเวลาทำงาน",
@@ -302,7 +305,24 @@ const OPERATE_TH: Record<string, string> = {
   "Set the timing strategy master switch": "ตั้งค่าสวิตช์หลักตารางเวลา",
   "Read light sensor switch status": "อ่านสถานะเซนเซอร์แสง",
 };
-const toThai = (desc: string | null) => !desc ? "--" : (OPERATE_TH[desc] ?? desc);
+const toThai = (desc: string | null): string => {
+  if (!desc) return "--";
+  // แปลแบบตรงตัวก่อน
+  if (OPERATE_TH[desc]) return OPERATE_TH[desc];
+  // จับ pattern ข้อความ dynamic
+  if (desc.startsWith("name:") && desc.includes("model name:")) {
+    // ดึงชื่ออุปกรณ์จาก "name: BRU-NEMA-017,..."
+    const m = desc.match(/name:\s*([^,]+)/);
+    const dev = m ? m[1].trim() : "";
+    return `ลงทะเบียน/แก้ไขอุปกรณ์${dev ? ` (${dev})` : ""}`;
+  }
+  if (desc.startsWith("brightness:")) {
+    const m = desc.match(/brightness:\s*(\d+)/);
+    return `ปรับความสว่าง${m ? ` ${m[1]}%` : ""}`;
+  }
+  // แปลไม่ได้ → คืนข้อความเดิม
+  return desc;
+};
 
 function useControlLogs(days: number, search: string) {
   const [logs, setLogs] = useState<ControlLog[]>([]);
