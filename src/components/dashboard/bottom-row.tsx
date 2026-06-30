@@ -189,14 +189,14 @@ export function BottomRow({ energy, faultAreas }: BottomRowProps) {
                 <SummaryCard
                   icon="savings" iconColor="text-grn"
                   label="พลังงานประหยัดได้"
-                  value={display(energy.totalSave)}
+                  value={display(energy.totalSave != null ? Math.round(energy.totalSave) : null)}
                   unit="kWh" bg="bg-grn-lt dark:bg-grn/10" border="border-grn/20"
                 />
                 <SummaryCard
                   icon="co2" iconColor="text-blu"
                   label="ลด CO₂"
                   value={energy.totalSave != null
-                    ? (energy.totalSave * 0.5).toLocaleString("th-TH", { maximumFractionDigits: 1 })
+                    ? (energy.totalSave * 0.5).toLocaleString("th-TH", { maximumFractionDigits: 0 })
                     : "--"}
                   unit="kg" bg="bg-blu-lt dark:bg-blu/10" border="border-blu/20"
                 />
