@@ -222,12 +222,26 @@ const liveAdapter: DataAdapter = {
       return p.slice(5);
     };
 
-    const points: EnergyPoint[] = rows.map((r: any) => ({
-      label: label(r.period),
-      current: num(r.energyNow),
-      previous: num(r.energyPrev),
-      carbon: r.reduction != null ? Number((Math.abs(r.reduction) * 0.5).toFixed(2)) : null,
-    }));
+// อัตราส่วนประมาณการพลังงานโคมเดิม (HPS 250W) เทียบโคมใหม่ (LED ~150W วัดจริงจาก actp)
+    // ค่าประมาณการสำหรับเปรียบเทียบ — โคมเดิมไม่มี sensor จึงไม่มีข้อมูลจริง
+    const LEGACY_RATIO = 250 / 150; // ≈ 1.667
+
+    const points: EnergyPoint[] = rows.map((r: any) => {
+      const cur = num(r.energyNow);
+      // ปีก่อน: ถ้า DB มีค่าจริงใช้ค่านั้น, ถ้าไม่มี (0/null) ใช้ค่าประมาณการจากปีนี้
+      const dbPrev = num(r.energyPrev);
+      const prev = dbPrev && dbPrev > 0
+        ? dbPrev
+        : cur != null
+          ? Number((cur * LEGACY_RATIO).toFixed(1))
+          : null;
+      return {
+        label: label(r.period),
+        current: cur,
+        previous: prev,
+        carbon: r.reduction != null ? Number((Math.abs(r.reduction) * 0.5).toFixed(2)) : null,
+      };
+    });
 
     const sum = (key: "current" | "previous") =>
       points.reduce((s, p) => s + (p[key] ?? 0), 0);
