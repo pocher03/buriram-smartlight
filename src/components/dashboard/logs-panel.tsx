@@ -307,7 +307,6 @@ const OPERATE_TH: Record<string, string> = {
 };
 const toThai = (desc: string | null): string => {
   if (!desc) return "--";
-  // แปลแบบตรงตัวก่อน
   if (OPERATE_TH[desc]) return OPERATE_TH[desc];
   // จับ pattern ข้อความ dynamic
   if (desc.startsWith("name:") && desc.includes("model name:")) {
