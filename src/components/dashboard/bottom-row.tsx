@@ -25,8 +25,8 @@ interface BottomRowProps {
 
 export function BottomRow({ energy, faultAreas }: BottomRowProps) {
   const savings = calcSavings(energy.totalSave);
-  const moneyFmt = savings.money === "--" ? "--" : Number(savings.money).toLocaleString("th-TH");
-  const co2Fmt = savings.co2 === "--" ? "--" : Number(savings.co2).toLocaleString("th-TH");
+  const moneyFmt = savings.money === "--" ? "--" : Number(savings.money).toLocaleString("th-TH", { maximumFractionDigits: 0 });
+  const co2Fmt = savings.co2 === "--" ? "--" : Number(savings.co2).toLocaleString("th-TH", { maximumFractionDigits: 0 });
   const [chartOpen, setChartOpen] = useState(false);
 
   return (
