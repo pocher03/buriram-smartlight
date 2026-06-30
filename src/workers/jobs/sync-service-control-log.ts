@@ -75,6 +75,16 @@ export async function syncServiceControlLog(): Promise<{ inserted: number }> {
       const occurredAt = toDate(r.createdAt);
       if (!occurredAt) continue;
 
+      // กรองเฉพาะอุปกรณ์บุรีรัมย์ (BRU-NEMA-) — ตัด solar/test/Broken จาก division อื่นออก
+      const objName = r.objectName ?? "";
+      if (!objName.startsWith("BRU-NEMA-") || objName.startsWith("Broken")) continue;
+
+      // กรองเฉพาะอุปกรณ์บุรีรัมย์ (BRU-NEMA-) ตัด solar/test/Broken จาก division อื่นออก
+      const name = r.objectName ?? "";
+      if (!name.startsWith("BRU-NEMA-") || name.startsWith("Broken")) continue;
+
+      // ... ที่เหลือเหมือนเดิม (เช็คซ้ำ + insert)
+
       // กัน insert ซ้ำด้วย occurred_at + objectId + username
       const exists = await prisma.serviceControlLog.findFirst({
         where: {
