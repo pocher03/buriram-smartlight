@@ -1,11 +1,9 @@
 # ============================================================
 # Caddyfile — Reverse proxy + Auto-HTTPS (Let's Encrypt)
-# ตัวแปร {$APP_DOMAIN}, {$CADDY_ACME_EMAIL} มาจาก env_file (.env.local) ของ service caddy
 # ============================================================
 
 {
 	email {$CADDY_ACME_EMAIL}
-	# เปิดบรรทัดล่างเพื่อทดสอบด้วย staging cert (กัน rate-limit ตอน setup)
 	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 }
 
@@ -13,9 +11,12 @@
 	encode zstd gzip
 
 	# ส่งต่อไปยัง Next.js app ภายใน network (ชื่อ service = app)
-	reverse_proxy app:3000
+	reverse_proxy app:3000 {
+		# ประทับ IP จริงของผู้เชื่อมต่อลง X-Real-IP
+		# Caddy "เขียนทับ" ค่าที่ client ส่งมา → ปลอมไม่ได้ (Caddy เป็น edge ตรง ไม่มี CDN/LB คั่น)
+		header_up X-Real-IP {http.request.remote.host}
+	}
 
-	# Security headers
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 		X-Content-Type-Options "nosniff"

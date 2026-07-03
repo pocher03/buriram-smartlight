@@ -7,6 +7,7 @@ import { prisma } from "./prisma";
 export type AccessAction =
   | "login"
   | "login_failed"
+  | "login_blocked"
   | "logout"
   | "select_project";
 
