@@ -1,10 +1,13 @@
 // src/workers/diagnose-017.ts
-// ⚠️ READ-ONLY — ถาม RULR ว่าส่งอะไรมาสำหรับ BRU-NEMA-017/018 (ไม่เขียน DB)
-// รันครั้งเดียวเพื่อวินิจฉัยเคสเปลี่ยนโหนด แล้วลบทิ้งได้
+// ⚠️ READ-ONLY — เทียบว่าค่าวัด (attribute) อยู่ที่ object ชนิด Lamp หรือ controller
 import { rulrPost } from "./lib/rulr-api";
 import { getRulrConfig } from "./lib/config";
 
-interface AttrItem { thingsObjectId: number | null; }
+interface AttrItem {
+  identify: string;
+  realValue: string | null;
+  thingsObjectId: number | null;
+}
 interface ObjItem {
   id: number;
   name: string;
@@ -27,35 +30,19 @@ async function main() {
     if (rows.length < 100 || all.length >= (data.pageTotal ?? all.length)) break;
   }
 
-  console.log(`\n=== รวม ${all.length} object — จัดกลุ่มตามชื่อ BRU-NEMA ===\n`);
-
-  // จับกลุ่มตามชื่อ ดูว่าแต่ละชื่อมีกี่ object และชนิดอะไรบ้าง
-  const byName = new Map<string, ObjItem[]>();
-  for (const o of all) {
-    if (!o.name?.startsWith("BRU-NEMA-")) continue;
-    const arr = byName.get(o.name) ?? [];
-    arr.push(o);
-    byName.set(o.name, arr);
+  // เทียบ 2 ต้น: 001 (ปกติ) และ 017 (Lamp offline) — ค่าวัดอยู่ object ไหน
+  for (const name of ["BRU-NEMA-001", "BRU-NEMA-017"]) {
+    console.log(`\n═══════ ${name} ═══════`);
+    for (const o of all.filter((x) => x.name === name)) {
+      const attrs = o.thingsAttributeList ?? [];
+      const filled = attrs.filter((a) => a.realValue != null && a.realValue !== "");
+      console.log(`\n[${o.modelName}] id=${o.id} online=${o.onlineStatus} — attribute ที่มีค่า: ${filled.length}/${attrs.length}`);
+      for (const key of ["switchStatus", "voltage", "actp", "onlineStatus"]) {
+        const hit = attrs.find((a) => a.identify === key);
+        console.log(`    ${key.padEnd(14)} = ${hit ? JSON.stringify(hit.realValue) : "(ไม่มี field นี้)"}`);
+      }
+    }
   }
-
-  const sorted = [...byName.keys()].sort();
-  for (const name of sorted) {
-    const items = byName.get(name)!;
-    const parts = items.map(o =>
-      `[${o.modelName} id=${o.id} ${o.onlineStatus === 1 ? "ON" : o.onlineStatus === 0 ? "OFF" : o.onlineStatus === 2 ? "--" : "?"}]`
-    ).join("  ");
-    const flag = items.length > 1 ? " ⚠️ซ้ำ" : "";
-    console.log(`${name} (${items.length})${flag}: ${parts}`);
-  }
-
-  // สรุปชนิดทั้งหมด
-  const modelCount = new Map<string, number>();
-  for (const o of all) {
-    const m = o.modelName ?? "(null)";
-    modelCount.set(m, (modelCount.get(m) ?? 0) + 1);
-  }
-  console.log(`\n=== สรุปชนิด object ทั้งหมด ===`);
-  for (const [m, c] of modelCount) console.log(`  ${m}: ${c}`);
 }
 
 main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });
