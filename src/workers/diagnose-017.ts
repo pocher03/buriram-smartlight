@@ -16,15 +16,10 @@ interface ObjPage { pageTotal: number; pageData: ObjItem[]; }
 
 async function main() {
   const cfg = getRulrConfig();
-  const targets = ["BRU-NEMA-017", "BRU-NEMA-018"];
   const all: ObjItem[] = [];
-
-  // ดึงทุกหน้าเหมือน sync จริง
   for (let page = 0; page < 20; page++) {
     const data = await rulrPost<ObjPage>("/mm/api/things/object/page", {
-      divisionId: cfg.divisionId,
-      page,
-      size: 100,
+      divisionId: cfg.divisionId, page, size: 100,
       filterRequest: { fillThingsLocation: true, fillThingsAttribute: true },
     });
     const rows = data.pageData ?? [];
@@ -32,25 +27,35 @@ async function main() {
     if (rows.length < 100 || all.length >= (data.pageTotal ?? all.length)) break;
   }
 
-  console.log(`\n=== RULR ส่งมาทั้งหมด ${all.length} object ===\n`);
+  console.log(`\n=== รวม ${all.length} object — จัดกลุ่มตามชื่อ BRU-NEMA ===\n`);
 
-  for (const name of targets) {
-    const matches = all.filter((o) => o.name === name);
-    console.log(`── ${name}: พบ ${matches.length} ตัวใน feed ──`);
-    if (matches.length === 0) {
-      console.log(`   ⚠️ ไม่มีชื่อนี้ใน feed เลย (อาจเปลี่ยนชื่อ/ย้าย division)\n`);
-      continue;
-    }
-    for (const o of matches) {
-      const tId = o.thingsAttributeList?.find((a) => a.thingsObjectId != null)?.thingsObjectId ?? null;
-      console.log(
-        `   id=${o.id}  onlineStatus=${o.onlineStatus}  ` +
-        `(${o.onlineStatus === 1 ? "ออนไลน์" : o.onlineStatus === 0 ? "ออฟไลน์" : o.onlineStatus === 2 ? "stateless" : "--"})  ` +
-        `thingsObjectId=${tId}  modelName=${o.modelName}`
-      );
-    }
-    console.log("");
+  // จับกลุ่มตามชื่อ ดูว่าแต่ละชื่อมีกี่ object และชนิดอะไรบ้าง
+  const byName = new Map<string, ObjItem[]>();
+  for (const o of all) {
+    if (!o.name?.startsWith("BRU-NEMA-")) continue;
+    const arr = byName.get(o.name) ?? [];
+    arr.push(o);
+    byName.set(o.name, arr);
   }
+
+  const sorted = [...byName.keys()].sort();
+  for (const name of sorted) {
+    const items = byName.get(name)!;
+    const parts = items.map(o =>
+      `[${o.modelName} id=${o.id} ${o.onlineStatus === 1 ? "ON" : o.onlineStatus === 0 ? "OFF" : o.onlineStatus === 2 ? "--" : "?"}]`
+    ).join("  ");
+    const flag = items.length > 1 ? " ⚠️ซ้ำ" : "";
+    console.log(`${name} (${items.length})${flag}: ${parts}`);
+  }
+
+  // สรุปชนิดทั้งหมด
+  const modelCount = new Map<string, number>();
+  for (const o of all) {
+    const m = o.modelName ?? "(null)";
+    modelCount.set(m, (modelCount.get(m) ?? 0) + 1);
+  }
+  console.log(`\n=== สรุปชนิด object ทั้งหมด ===`);
+  for (const [m, c] of modelCount) console.log(`  ${m}: ${c}`);
 }
 
 main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });
