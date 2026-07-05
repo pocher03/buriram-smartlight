@@ -50,8 +50,9 @@ function StatBlock({
 export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
   const total = devices.length;
 
-  const onLights = devices.filter((d) => d.telemetry.switchStatus === 1).length;
-  const offLights = devices.filter((d) => d.telemetry.switchStatus === 0).length;
+// API: switchStatus 0 = เปิด, 1 = ปิด
+const onLights  = devices.filter((d) => d.telemetry.switchStatus === 0).length;
+const offLights = devices.filter((d) => d.telemetry.switchStatus === 1).length;
   const lightingPct = total > 0 ? (onLights / total) * 100 : null;
 
   const online = devices.filter((d) => d.telemetry.onlineStatus === 1).length;
