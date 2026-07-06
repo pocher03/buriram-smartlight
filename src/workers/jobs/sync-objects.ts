@@ -24,6 +24,7 @@ interface ObjectItem {
   id: number;
   name: string;
   modelName: string | null;
+  categoryId: number | null;   // ← เพิ่ม
   onlineStatus: number | null;
   thingsObjectAddr: string | null;
   thingsAttributeList?: AttrItem[];
@@ -36,8 +37,8 @@ interface ObjectPage {
   pageData: ObjectItem[];
 }
 
-const isValidLamp = (d: ObjectItem) =>
-  d.modelName === "Lamp" && typeof d.name === "string" && d.name.startsWith("BRU-NEMA-");
+const isValidController = (d: ObjectItem) =>
+  d.categoryId === 63 && typeof d.name === "string" && d.name.startsWith("BRU-NEMA-");
 
 const toInt = (v: string | null): number | null => {
   const n = safeNum(v);
@@ -73,11 +74,11 @@ export async function syncObjects(): Promise<{ scanned: number; lamps: number; s
   });
 
   const objects = await fetchAllObjects(cfg.divisionId);
-  const lamps = objects.filter(isValidLamp);
-  console.log(`[sync-objects] ต้นทางคืน ${objects.length} รายการ → โคมจริง ${lamps.length} ต้น`);
+  const controllers = objects.filter(isValidController);
+  console.log(`[sync-objects] ต้นทางคืน ${objects.length} รายการ → controller ${controllers.length} ต้น`);
 
   let snapshots = 0;
-  for (const d of lamps) {
+  for (const d of controllers) {
     const attrs = d.thingsAttributeList ?? [];
     // thingsObjectId: ใช้จาก attribute (ที่ค่าวัดอยู่จริง) ก่อน แล้วค่อย fallback ไป assoc
     const thingsObjectId =
@@ -85,18 +86,20 @@ export async function syncObjects(): Promise<{ scanned: number; lamps: number; s
       d.objectAssociateObjectList?.find((a) => a.objectId != null)?.objectId ??
       null;
 
+    // match ด้วย name (คงที่เมื่อเปลี่ยนโหนด) → อัปเดตแถวเดิม history ต่อเนื่อง
     const device = await prisma.device.upsert({
-      where: { rulrObjectId: BigInt(d.id) },
+      where: { name: d.name },
       create: {
         rulrObjectId: BigInt(d.id),
         thingsObjectId: thingsObjectId != null ? BigInt(thingsObjectId) : null,
         thingsObjectAddr: d.thingsObjectAddr ?? null,
         name: d.name,
         modelName: d.modelName ?? null,
-        deviceType: "controller", // BRU-NEMA = controller (เฟสแรก)
+        deviceType: "controller",
         projectId: PROJECT_ID,
       },
       update: {
+        rulrObjectId: BigInt(d.id), // อัปเดต id เป็น controller (พลิกจาก Lamp เดิม)
         thingsObjectId: thingsObjectId != null ? BigInt(thingsObjectId) : null,
         thingsObjectAddr: d.thingsObjectAddr ?? null,
         modelName: d.modelName ?? null,
@@ -112,7 +115,7 @@ export async function syncObjects(): Promise<{ scanned: number; lamps: number; s
         acte: safeNum(getVal(attrs, "acte")),
         frequency: safeNum(getVal(attrs, "frequency")),
         switchStatus: toInt(getVal(attrs, "switchStatus")),
-        onlineStatus: d.onlineStatus ?? null, // ยึดตรงๆ จาก top-level
+        onlineStatus: d.onlineStatus ?? null, // ยึดตรงๆ จาก top-level ของ controller
         brightness: toInt(getVal(attrs, "brightness")),
         illumination: toInt(getVal(attrs, "illumination")),
         runtime: toInt(getVal(attrs, "runtime")),
@@ -124,5 +127,5 @@ export async function syncObjects(): Promise<{ scanned: number; lamps: number; s
   }
 
   console.log(`[sync-objects] เขียน telemetry ${snapshots} snapshot`);
-  return { scanned: objects.length, lamps: lamps.length, snapshots };
+  return { scanned: objects.length, lamps: controllers.length, snapshots };
 }
