@@ -8,13 +8,9 @@
 //   - แผนที่รับ active={activeTab==='map'} → เรียก invalidateSize() เมื่อแท็บแสดงผล
 //     (กัน Leaflet คำนวณขนาด container เป็น 0x0 ตอนถูกซ่อนด้วย display:none)
 import { useMemo, useState } from "react";
+
 import type {
-  Device,
-  AlarmLog,
-  MaintenanceStatus,
-  EnergyPeriod,
-  EnergySeries,
-  FaultArea,
+  Device, AlarmLog, MaintenanceStatus, EnergyPeriod, EnergySeries, FaultArea, Kpi, // ← เพิ่ม Kpi
 } from "@/lib/types";
 import type { Zone } from "@/lib/mock-data";
 import type { DashboardUser } from "./dashboard";
@@ -29,6 +25,7 @@ interface MobileLayoutProps {
   devices: Device[];
   alarms: AlarmLog[];
   maintenance: MaintenanceStatus;
+  kpi: Kpi;               // ← เพิ่ม
   user: DashboardUser;
   zones: Zone[];
   energy: EnergySeries;
@@ -57,17 +54,7 @@ function TabPanel({
 }
 
 export function MobileLayout({
-  devices,
-  alarms,
-  maintenance,
-  user,
-  zones,
-  energy,
-  period,
-  onPeriodChange,
-  faultAreas,
-  lastSync,
-  uptime,
+  devices, alarms, maintenance, kpi, user, zones, energy, period, onPeriodChange, faultAreas, lastSync, uptime,
 }: MobileLayoutProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>("overview");
 
@@ -89,7 +76,7 @@ export function MobileLayout({
             (ไม่ขัดกฎ single-screen เพราะ scroll อยู่ภายใน panel ไม่ใช่หน้าหลัก) */}
         <TabPanel active={activeTab === "overview"}>
           <div className="h-full overflow-y-auto overflow-x-hidden">
-            <KpiColumn maintenance={maintenance} devices={devices} />
+            <KpiColumn maintenance={maintenance} kpi={kpi} />
             <BottomRow
               energy={energy}
               period={period}

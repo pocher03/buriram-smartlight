@@ -29,6 +29,17 @@ export interface Device {
   telemetry: Telemetry;
 }
 
+/** KPI ภาพรวม (จาก /division/pandect/info) */
+export interface Kpi {
+  lightTotal: number | null;
+  lightOnlineNum: number | null;
+  lightOfflineNum: number | null;
+  lightSwitchNum: number | null; // ← เพิ่ม: จำนวนไฟเปิด (แพลตฟอร์มคำนวณตามตารางเวลาแล้ว)
+  alarmNum: number | null;
+  openTime: string | null;
+  closeTime: string | null;
+}
+
 /** สถานะที่ UI ใช้แสดงสี — คำนวณจาก online + device profile */
 export type DeviceStatus = "online" | "offline" | "alarm";
 

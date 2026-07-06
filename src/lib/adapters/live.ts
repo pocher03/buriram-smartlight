@@ -124,8 +124,14 @@ const liveAdapter: DataAdapter = {
     const offline = devices.length - online;
     const kpi: Kpi = {
       lightTotal: total ?? snap?.lightTotal ?? null,
-      lightOnlineNum: total != null ? online : (snap?.lightOnlineNum ?? null),
-      lightOfflineNum: total != null ? offline : null,
+      // ── ยึดเลขสรุปจากแพลตฟอร์ม (pandect) — คำนวณตามตารางเวลา + debounce มาแล้ว ──
+      lightOnlineNum: snap?.lightOnlineNum ?? null,
+      lightOfflineNum:
+        snap?.lightTotal != null && snap?.lightOnlineNum != null
+          ? snap.lightTotal - snap.lightOnlineNum
+          : null,
+      lightSwitchNum: snap?.lightSwitchNum ?? null,
+      // alarmNum ยังปนกับ offline (per-device) — บันทึกไว้แก้ทีหลัง ไม่แตะรอบนี้
       alarmNum: total != null ? offline : (snap?.alarmNum ?? null),
       openTime: snap?.openTime ?? null,
       closeTime: snap?.closeTime ?? null,

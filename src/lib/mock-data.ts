@@ -164,10 +164,13 @@ export const MOCK_DEVICES: Device[] = buildDevices();
 export const MOCK_KPI: Kpi = (() => {
   const total = MOCK_DEVICES.length;
   const online = MOCK_DEVICES.filter((d) => d.telemetry.onlineStatus === 1).length;
+  // mock: ไฟเปิด = ต้นออนไลน์ที่ switchStatus === 1 (เปิด ตามข้อมูลจำลอง)
+  const switchOn = MOCK_DEVICES.filter((d) => d.telemetry.switchStatus === 1).length;
   return {
     lightTotal: total,
     lightOnlineNum: online,
     lightOfflineNum: total - online,
+    lightSwitchNum: switchOn,   // ← เพิ่มบรรทัดนี้
     alarmNum: MOCK_DEVICES.filter((d) => d.telemetry.onlineStatus !== 1).length,
     openTime: "18:00",
     closeTime: "06:00",

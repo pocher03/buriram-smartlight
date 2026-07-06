@@ -87,7 +87,7 @@ return (
           className="flex-1 min-h-0 grid overflow-hidden"
           style={{ gridTemplateColumns: GRID_COLS[mapSize] }}
         >
-          <KpiColumn maintenance={data.maintenance} devices={devices} />
+          <KpiColumn maintenance={data.maintenance} kpi={data.kpi} />
           <MapPanel
             devices={devices}
             sizeKey={mapSize}
@@ -110,6 +110,7 @@ return (
         devices={devices}
         alarms={alarms}
         maintenance={data.maintenance}
+        kpi={data.kpi}          // ← เพิ่ม
         user={user}
         zones={zones}
         energy={energy[period]}

@@ -1,10 +1,10 @@
 "use client";
 
-import type { Device, MaintenanceStatus } from "@/lib/types";
+import type { Kpi, MaintenanceStatus } from "@/lib/types";
 
 interface KpiColumnProps {
   maintenance: MaintenanceStatus;
-  devices: Device[];
+  kpi: Kpi;
 }
 
 function StatBlock({
@@ -15,8 +15,8 @@ function StatBlock({
 }: {
   title: string;
   pct: number | null;
-    pctColorClass: string;
-  rows: { label: string; value: number; color: string }[];
+  pctColorClass: string;
+  rows: { label: string; value: number | null; color: string }[];
 }) {
   return (
     <div className="bg-sf-2 dark:bg-dk-sf2 rounded-xl p-2.5 border border-bdr/60 dark:border-dk-bdr mb-2.5">
@@ -37,7 +37,7 @@ function StatBlock({
                 <span className="text-[9px] text-t3 leading-none">{r.label}</span>
               </div>
               <div className="text-base font-bold tabular-nums leading-none text-t1 dark:text-dk-t1">
-                {r.value}
+                {r.value == null ? "--" : r.value}
               </div>
             </div>
           ))}
@@ -47,17 +47,20 @@ function StatBlock({
   );
 }
 
-export function KpiColumn({ maintenance, devices }: KpiColumnProps) {
-  const total = devices.length;
+export function KpiColumn({ maintenance, kpi }: KpiColumnProps) {
+  const total = kpi.lightTotal;
 
-// API: switchStatus 0 = เปิด, 1 = ปิด
-const onLights  = devices.filter((d) => d.telemetry.switchStatus === 0).length;
-const offLights = devices.filter((d) => d.telemetry.switchStatus === 1).length;
-  const lightingPct = total > 0 ? (onLights / total) * 100 : null;
+  // สถานะไฟ — ยึด lightSwitchNum จากแพลตฟอร์ม (คำนวณตามตารางเวลา + debounce มาแล้ว)
+  const onLights = kpi.lightSwitchNum;
+  const offLights = onLights != null && total != null ? total - onLights : null;
+  const lightingPct =
+    onLights != null && total != null && total > 0 ? (onLights / total) * 100 : null;
 
-  const online = devices.filter((d) => d.telemetry.onlineStatus === 1).length;
-  const offline = total - online;
-  const onlinePct = total > 0 ? (online / total) * 100 : null;
+  // สถานะออนไลน์ — ยึด lightOnlineNum จากแพลตฟอร์ม
+  const online = kpi.lightOnlineNum;
+  const offline = online != null && total != null ? total - online : null;
+  const onlinePct =
+    online != null && total != null && total > 0 ? (online / total) * 100 : null;
 
   return (
     <div className="flex flex-col overflow-hidden bg-sf dark:bg-dk-sf border-r border-bdr dark:border-dk-bdr">
