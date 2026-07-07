@@ -119,18 +119,22 @@ export default function MapInner({
   const located = devices.filter((d) => d.lat != null && d.lng != null);
 
   return (
-    <MapContainer
-      center={CENTER}
-      zoom={14}
-      minZoom={12}
-      maxZoom={18}
-      zoomControl={true}
-      style={{ height: "100%", width: "100%" }}
-      attributionControl={false}
-    >
+  <MapContainer
+        center={CENTER}
+        zoom={14}
+        minZoom={5}
+        maxZoom={19}
+        zoomControl={true}
+        style={{ height: "100%", width: "100%" }}
+        attributionControl={false}
+      >
       <InvalidateOnResize active={active} sizeKey={sizeKey} />
       <FitToZone focusZone={focusZone} devices={devices} />
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maxZoom={19}
+        maxNativeZoom={19}
+      />
       {located.map((d) => {
         const status = deviceStatus(d);
         const color = STATUS_COLOR[status];
