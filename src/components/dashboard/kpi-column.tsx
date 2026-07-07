@@ -1,6 +1,7 @@
 "use client";
 
 import type { Kpi, MaintenanceStatus } from "@/lib/types";
+
 // "18:42:00" → "18:42" · null/สั้นเกิน → null (null-safe)
 const hhmm = (t: string | null | undefined): string | null =>
   t && t.length >= 5 ? t.slice(0, 5) : null;
@@ -15,13 +16,13 @@ function StatBlock({
   pct,
   pctColorClass,
   rows,
-  footer,                              // ← เพิ่ม
+  footer,
 }: {
   title: string;
   pct: number | null;
   pctColorClass: string;
   rows: { label: string; value: number | null; color: string }[];
-  footer?: React.ReactNode;            // ← เพิ่ม
+  footer?: React.ReactNode;
 }) {
   return (
     <div className="bg-sf-2 dark:bg-dk-sf2 rounded-xl p-2.5 border border-bdr/60 dark:border-dk-bdr mb-2.5">
@@ -48,6 +49,13 @@ function StatBlock({
           ))}
         </div>
       </div>
+
+      {/* ── แถบล่าง (แสดงเฉพาะการ์ดที่ส่ง footer มา) ── */}
+      {footer && (
+        <div className="mt-2 pt-2 border-t border-bdr/50 dark:border-dk-bdr flex items-center justify-center gap-1 text-[9px] text-t3">
+          {footer}
+        </div>
+      )}
     </div>
   );
 }
