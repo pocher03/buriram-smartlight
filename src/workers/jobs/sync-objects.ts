@@ -80,6 +80,18 @@ export async function syncObjects(): Promise<{ scanned: number; lamps: number; s
   let snapshots = 0;
   for (const d of controllers) {
     const attrs = d.thingsAttributeList ?? [];
+
+        // ===== DEBUG ชั่วคราว: ดู SOC/solar attribute (ลบออกหลังทดสอบ) =====
+    if (snapshots === 0) {
+      console.log(`[DEBUG] ${d.name} categoryId=${d.categoryId}`);
+      console.log(`[DEBUG] attributes ทั้งหมด:`, attrs.map(a => a.identify).join(", "));
+      for (const key of ["batpt", "batvolt", "solarbdp", "slp", "batsta", "gnrtenergy"]) {
+        const found = attrs.find(a => a.identify === key);
+        console.log(`[DEBUG]   ${key} = ${found ? found.realValue : "(ไม่มี)"}`);
+      }
+    }
+    // ===== จบ DEBUG =====
+    
     // thingsObjectId: ใช้จาก attribute (ที่ค่าวัดอยู่จริง) ก่อน แล้วค่อย fallback ไป assoc
     const thingsObjectId =
       attrs.find((a) => a.thingsObjectId != null)?.thingsObjectId ??
