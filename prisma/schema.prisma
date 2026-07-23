@@ -36,6 +36,11 @@ enum HandleStatus {
   done
 }
 
+enum AlarmSource {
+  rulr   // ดึงจาก RULR (ข้อมูลเก่า — ซ่อนจาก UI)
+  smart  // ระบบวิเคราะห์เอง (แสดงใน UI)
+}
+
 enum EnergyType {
   daily
   monthly
@@ -141,18 +146,21 @@ model TelemetrySnapshot {
 // APPEND-ONLY (ห้าม UPDATE/DELETE — บังคับระดับ DB role)
 model AlarmLog {
   id           BigInt       @id @default(autoincrement())
-  rulrAlarmId  BigInt       @unique @map("rulr_alarm_id") // กัน insert ซ้ำ (delta sync)
+  rulrAlarmId  BigInt?      @unique @map("rulr_alarm_id") // null = smart alarm
+  source       AlarmSource  @default(rulr)
+  alarmType    String       @default("offline") @map("alarm_type")
   deviceName   String       @map("device_name")
-  name         String // เช่น "Offline"
+  name         String
   alarmLevel   AlarmLevel   @default(info) @map("alarm_level")
   handleStatus HandleStatus @default(pending) @map("handle_status")
   divisionName String?      @map("division_name")
   longitude    Float?
   latitude     Float?
-  createdAt    DateTime     @map("created_at") // createdAtStr จากต้นทาง (UTC)
+  createdAt    DateTime     @map("created_at")
   insertedAt   DateTime     @default(now()) @map("inserted_at")
 
   @@index([createdAt])
+  @@index([source, createdAt])
   @@map("alarm_logs")
 }
 
@@ -196,6 +204,20 @@ model WeatherCache {
 
   @@index([projectId])
   @@map("weather_cache")
+}
+
+// state ชั่วคราวระหว่างเช็ค 3 รอบ — UPDATE ได้ (ไม่ใช่ append-only)
+model PendingAlarm {
+  id         String   @id @default(uuid())
+  deviceId   String   @map("device_id")
+  deviceName String   @map("device_name")
+  alarmType  String   @default("offline") @map("alarm_type")
+  detectedAt DateTime @map("detected_at")
+  checkCount Int      @default(1) @map("check_count")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([deviceId, alarmType])
+  @@map("pending_alarms")
 }
 
 // APPEND-ONLY (ห้าม UPDATE/DELETE — TOR ๔.๗.๒–๔.๗.๓)
