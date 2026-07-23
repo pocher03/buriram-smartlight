@@ -72,7 +72,7 @@ function findAbnormal(devices: DeviceState[]): Map<string, string> {
     groups.set(d.deviceType, list);
   }
 
-  for (const [type, group] of groups) {
+  for (const [type, group] of Array.from(groups.entries())) {
     const profile = DEVICE_PROFILES[type];
     const offline = group.filter((d) => !d.isOnline);
 
@@ -130,7 +130,7 @@ export async function runSmartAlarm(): Promise<{
   }
 
   // 2) ต้นที่ยังผิดปกติ → นับรอบ / สร้าง alarm เมื่อครบ
-  for (const [deviceId, reason] of abnormal) {
+    for (const [deviceId, reason] of Array.from(abnormal.entries())) {
     const device = byId.get(deviceId);
     if (!device) continue;
 
