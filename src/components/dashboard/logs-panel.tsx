@@ -414,7 +414,7 @@ export function LogsPanel({ alarms }: { alarms: AlarmLog[] }) {
                 (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
               );
               return deduped.length === 0 ? (
-                <EmptyFeed text="ไม่พบรายการแจ้งเตือน" />
+                <EmptyFeed text="ไม่พบการแจ้งเตือน — ระบบทำงานปกติ" />
               ) : (
                 <div className="space-y-1.5">
                   {deduped.map((a) => {
