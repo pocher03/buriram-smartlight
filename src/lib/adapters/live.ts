@@ -104,15 +104,23 @@ const liveAdapter: DataAdapter = {
           },
         }),
         prisma.kpiSnapshot.findUnique({ where: { projectId } }),
-        prisma.alarmLog.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
-        prisma.alarmLog.groupBy({ by: ["handleStatus"], _count: { _all: true } }),
+        prisma.alarmLog.findMany({
+          where: { source: "smart" },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+        }),
+        prisma.alarmLog.groupBy({
+          by: ["handleStatus"],
+          where: { source: "smart" },
+          _count: { _all: true },
+        }),
         prisma.weatherCache.findFirst({
           where: { projectId },
           orderBy: { fetchedAt: "desc" },
         }),
         prisma.alarmLog.groupBy({
           by: ["divisionName"],
-          where: { alarmLevel: { not: "ok" } },
+          where: { source: "smart", alarmLevel: { not: "ok" } },
           _count: { _all: true },
         }),
       ]);

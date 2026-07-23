@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
   since.setDate(since.getDate() - days);
 
   const where: Prisma.AlarmLogWhereInput = {
+    source: "smart",
     createdAt: { gte: since },
     ...(search ? {
       OR: [
