@@ -9,7 +9,7 @@ import cron from "node-cron";
 import { ensureFreshToken } from "./token-service";
 import { syncKpi } from "./jobs/sync-kpi";
 import { syncObjects } from "./jobs/sync-objects";
-import { syncAlarms } from "./jobs/sync-alarms";
+import { runSmartAlarm } from "./jobs/smart-alarm";
 import { syncEnergy } from "./jobs/sync-energy";
 import { syncWeather } from "./jobs/sync-weather";
 import { SYNC_CRON, TOKEN_CRON } from "./lib/config";
@@ -45,7 +45,7 @@ async function runSync(reason: string) {
     await step("token", () => ensureFreshToken());
     await step("kpi", () => syncKpi());
     await step("objects", () => syncObjects());
-    await step("alarms", () => syncAlarms()); // รวม backfill พิกัด → devices
+    await step("smart-alarm", () => runSmartAlarm()); // วิเคราะห์เอง แทน alarm จาก RULR
     await step("energy", () => syncEnergy());
     await step("weather", () => syncWeather());
     await step("control-log", () => syncServiceControlLog()); // เพิ่มบรรทัดนี้
