@@ -1,6 +1,6 @@
 "use client";
 
-// Bottom Tab Bar (mobile only) — 4 แท็บ สลับ state activeTab เท่านั้น (ไม่มี logic คำนวณ)
+// Bottom Tab Bar (mobile only) — 4 แท็บ สลับ state activeTab เท่านั้น ไม่มี logic คำนวณ
 // อยู่ล่างสุดของจอ (flex-shrink-0 ในคอลัมน์เต็มจอ) + safe-area-inset สำหรับ iOS
 export type MobileTab = "overview" | "map" | "history" | "profile";
 
