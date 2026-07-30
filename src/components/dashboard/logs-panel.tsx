@@ -87,6 +87,9 @@ const POPUP_DAY_OPTIONS = [
 
 function AlarmAllPopup({ onClose }: { onClose: () => void }) {
   const [days, setDays] = useState(7);
+  const [useRange, setUseRange] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rows, setRows] = useState<AlarmRow[]>([]);
@@ -96,12 +99,12 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true);
 
   // ดึงจาก API เมื่อ days / page / search เปลี่ยน
-  useEffect(() => {
+useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams({
-      days: String(days),
       page: String(page),
       ...(search ? { search } : {}),
+      ...(useRange && from && to ? { from, to } : { days: String(days) }),
     });
     fetch(`/api/logs/alarms?${params}`)
       .then((r) => r.json())
@@ -117,12 +120,12 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
         setTotalPages(0);
       })
       .finally(() => setLoading(false));
-  }, [days, page, search]);
+  }, [days, page, search, useRange, from, to]);
 
   // เปลี่ยน days หรือ search → กลับหน้า 1
-  useEffect(() => {
+useEffect(() => {
     setPage(0);
-  }, [days, search]);
+  }, [days, search, useRange, from, to]);
 
   const startNo = total === 0 ? 0 : page * pageSize + 1;
   const endNo = Math.min((page + 1) * pageSize, total);
@@ -144,19 +147,66 @@ function AlarmAllPopup({ onClose }: { onClose: () => void }) {
               บันทึกการแจ้งเตือนทั้งหมด
             </div>
             <div className="text-[10px] text-t3">
-              ย้อนหลัง {days} วัน · ทั้งหมด {total} รายการ
+                {useRange && from && to
+                ? `${from} ถึง ${to} · ทั้งหมด ${total} รายการ`
+                : `ย้อนหลัง ${days} วัน · ทั้งหมด ${total} รายการ`}
             </div>
           </div>
-          {/* Dropdown เลือกวัน */}
-          <select
-            value={days}
-            onChange={(e) => setDays(Number(e.target.value))}
-            className="text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition"
-          >
-            {POPUP_DAY_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+          {/* เลือกช่วงเวลา — dropdown สำเร็จรูป หรือกำหนดวันที่เอง */}
+          {useRange ? (
+            <div className="flex items-center gap-1.5">
+              <input
+                type="date"
+                value={from}
+                max={to || undefined}
+                onChange={(e) => setFrom(e.target.value)}
+                className="text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-2 py-1.5 focus:outline-none focus:border-blu/50"
+              />
+              <span className="text-[10px] text-t3">ถึง</span>
+              <input
+                type="date"
+                value={to}
+                min={from || undefined}
+                onChange={(e) => setTo(e.target.value)}
+                className="text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-2 py-1.5 focus:outline-none focus:border-blu/50"
+              />
+              <button
+                onClick={() => { setUseRange(false); setFrom(""); setTo(""); }}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-t3 hover:text-blu hover:bg-sf-3 dark:hover:bg-dk-sf2 transition"
+                title="กลับไปเลือกแบบช่วงสำเร็จรูป"
+              >
+                <span className="ms" style={{ fontSize: 16 }}>close</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <select
+                value={days}
+                onChange={(e) => setDays(Number(e.target.value))}
+                className="text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-3 py-1.5 focus:outline-none transition"
+              >
+                {POPUP_DAY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  const ymd = (d: Date) =>
+                    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                  const ago = new Date();
+                  ago.setDate(ago.getDate() - 7);
+                  setFrom(ymd(ago));
+                  setTo(ymd(new Date()));
+                  setUseRange(true);
+                }}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr text-t2 dark:text-dk-t2 hover:text-blu hover:border-blu/40 transition text-[10px] font-medium whitespace-nowrap"
+                title="กำหนดช่วงวันที่เอง"
+              >
+                <span className="ms" style={{ fontSize: 14 }}>date_range</span>
+                กำหนดเอง
+              </button>
+            </div>
+          )}
           {/* Export CSV — เฉพาะหน้าปัจจุบัน */}
           <button
             onClick={() => exportCSV(rows, days)}
