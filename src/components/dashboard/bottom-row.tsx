@@ -15,6 +15,35 @@ import { useEffect, useState } from "react";
 import type { EnergyPeriod, EnergySeries, FaultArea } from "@/lib/types";
 import { calcSavings, display } from "@/lib/null-safe";
 
+interface EnergyApiPoint {
+  label: string;
+  period: string;
+  current: number | null;
+  previous: number | null;
+  carbon: number | null;
+}
+
+interface EnergyApiRes {
+  points: EnergyApiPoint[];
+  totalNow: number | null;
+  totalSave: number | null;
+  mode: string;
+}
+
+/** yyyy-MM-dd ตามเวลาไทย (ไม่ใช้ toISOString เพราะจะเพี้ยน timezone) */
+const toYmd = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+};
+
+const daysAgo = (n: number): Date => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
+};
+
 
 interface BottomRowProps {
   energy: EnergySeries;
@@ -151,77 +180,178 @@ export function BottomRow({ energy, faultAreas }: BottomRowProps) {
         </div>
       </div>
 
-      {/* Bottom Sheet — ขยายกราฟพลังงาน */}
-      {chartOpen && (
-        <div
-          className="fixed inset-0 z-[2000] flex items-end md:items-center justify-center bg-black/50"
-          onClick={() => setChartOpen(false)}
-        >
-          <div
-            className="sheet-in w-full md:max-w-4xl bg-sf dark:bg-dk-sf rounded-t-2xl md:rounded-2xl shadow-g3 overflow-hidden max-h-[90vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-bdr dark:border-dk-bdr flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="ms ms-f text-yel" style={{ fontSize: 18 }}>bolt</span>
-                <span className="text-sm font-bold text-t1 dark:text-dk-t1">รายละเอียดการใช้พลังงาน (kWh)</span>
-              </div>
-              <button
-                onClick={() => setChartOpen(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-t3 hover:bg-sf-3 dark:hover:bg-dk-sf2 transition"
-              >
-                <span className="ms" style={{ fontSize: 20 }}>close</span>
-              </button>
-            </div>
+      {/* Bottom Sheet — ขยายกราฟพลังงาน + เลือกช่วงวันที่ */}
+      {chartOpen && <EnergyDetailSheet onClose={() => setChartOpen(false)} />}
+    </>
+  );
+}
 
-            <div className="overflow-y-auto flex-1 p-5 space-y-5">
-              {/* กราฟขนาดใหญ่ */}
+type RangeMode = "daily" | "monthly";
+
+function EnergyDetailSheet({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<RangeMode>("daily");
+  const [from, setFrom] = useState(toYmd(daysAgo(29)));
+  const [to, setTo] = useState(toYmd(new Date()));
+  const [data, setData] = useState<EnergyApiRes | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const f = mode === "monthly" ? from.slice(0, 7) : from;
+    const t = mode === "monthly" ? to.slice(0, 7) : to;
+    fetch(`/api/energy?mode=${mode}&from=${f}&to=${t}`)
+      .then((r) => r.json())
+      .then((d: EnergyApiRes) => setData(d))
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  }, [mode, from, to]);
+
+  /** ปุ่มลัด — ตั้งช่วงวันที่ให้อัตโนมัติ */
+  const applyPreset = (preset: "week" | "month" | "year") => {
+    const today = new Date();
+    if (preset === "week") {
+      setMode("daily");
+      setFrom(toYmd(daysAgo(6)));
+      setTo(toYmd(today));
+    } else if (preset === "month") {
+      setMode("daily");
+      setFrom(toYmd(daysAgo(29)));
+      setTo(toYmd(today));
+    } else {
+      setMode("monthly");
+      setFrom(`${today.getFullYear()}-01-01`);
+      setTo(`${today.getFullYear()}-12-31`);
+    }
+  };
+
+  const points = data?.points ?? [];
+  const totalNow = points.reduce((s, p) => s + (p.current ?? 0), 0);
+  const totalSave = data?.totalSave ?? null;
+  const unitLabel = mode === "monthly" ? "รายเดือน" : "รายวัน";
+
+  const presetBtn = (active: boolean) =>
+    `px-3 py-1.5 rounded-lg text-[11px] font-medium transition border ${
+      active
+        ? "bg-blu text-white border-blu"
+        : "bg-sf-3 dark:bg-dk-sf2 text-t2 dark:text-dk-t2 border-bdr dark:border-dk-bdr hover:border-blu/40"
+    }`;
+
+  return (
+    <div
+      className="fixed inset-0 z-[2000] flex items-end md:items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="sheet-in w-full md:max-w-4xl bg-sf dark:bg-dk-sf rounded-t-2xl md:rounded-2xl shadow-g3 overflow-hidden max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-bdr dark:border-dk-bdr flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="ms ms-f text-yel" style={{ fontSize: 18 }}>bolt</span>
+            <div>
+              <div className="text-sm font-bold text-t1 dark:text-dk-t1">
+                รายละเอียดการใช้พลังงาน (kWh)
+              </div>
+              <div className="text-[10px] text-t3">
+                {unitLabel} · {points.length} รายการ
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-t3 hover:bg-sf-3 dark:hover:bg-dk-sf2 transition"
+          >
+            <span className="ms" style={{ fontSize: 20 }}>close</span>
+          </button>
+        </div>
+
+        {/* แถบเลือกช่วงเวลา */}
+        <div className="px-5 py-3 border-b border-bdr dark:border-dk-bdr flex-shrink-0 flex flex-wrap items-center gap-2">
+          <span className="ms text-t3" style={{ fontSize: 16 }}>date_range</span>
+          <input
+            type="date"
+            value={from}
+            max={to}
+            onChange={(e) => setFrom(e.target.value)}
+            className="text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blu/50 transition"
+          />
+          <span className="text-[11px] text-t3">ถึง</span>
+          <input
+            type="date"
+            value={to}
+            min={from}
+            onChange={(e) => setTo(e.target.value)}
+            className="text-[11px] text-t1 dark:text-dk-t1 bg-sf-3 dark:bg-dk-sf2 border border-bdr dark:border-dk-bdr rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blu/50 transition"
+          />
+          <div className="flex items-center gap-1.5 md:ml-auto">
+            <button onClick={() => applyPreset("week")} className={presetBtn(false)}>7 วัน</button>
+            <button onClick={() => applyPreset("month")} className={presetBtn(false)}>30 วัน</button>
+            <button onClick={() => applyPreset("year")} className={presetBtn(mode === "monthly")}>รายเดือน</button>
+          </div>
+        </div>
+
+        <div className="overflow-y-auto flex-1 p-5 space-y-5">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-20 text-t3">
+              <span className="ms animate-spin" style={{ fontSize: 28 }}>progress_activity</span>
+              <span className="text-[11px]">กำลังโหลด...</span>
+            </div>
+          ) : points.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-20 text-t3">
+              <span className="ms" style={{ fontSize: 32 }}>bar_chart</span>
+              <span className="text-[11px]">ไม่พบข้อมูลในช่วงเวลาที่เลือก</span>
+            </div>
+          ) : (
+            <>
+              {/* กราฟ */}
               <div className="h-[260px]">
-                <EnergyChart energy={energy} />
+                <EnergyChart energy={{ points, totalNow, totalSave }} />
               </div>
 
               {/* สรุปยอดรวม */}
               <div className="grid grid-cols-3 gap-3">
                 <SummaryCard
                   icon="bolt" iconColor="text-yel"
-                  label="พลังงานรวมปีนี้"
-                  value={energy.points.reduce((s, p) => s + (p.current ?? 0), 0).toLocaleString("th-TH", { maximumFractionDigits: 1 })}
+                  label="พลังงานรวมช่วงนี้"
+                  value={totalNow.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                   unit="kWh" bg="bg-yel-lt dark:bg-yel/10" border="border-yel/20"
                 />
                 <SummaryCard
                   icon="savings" iconColor="text-grn"
                   label="พลังงานประหยัดได้"
-                  value={display(energy.totalSave != null ? Math.round(energy.totalSave) : null)}
+                  value={totalSave != null ? Math.round(totalSave).toLocaleString("th-TH") : "--"}
                   unit="kWh" bg="bg-grn-lt dark:bg-grn/10" border="border-grn/20"
                 />
                 <SummaryCard
                   icon="co2" iconColor="text-blu"
                   label="ลด CO₂"
-                  value={energy.totalSave != null
-                    ? (energy.totalSave * 0.5).toLocaleString("th-TH", { maximumFractionDigits: 0 })
+                  value={totalSave != null
+                    ? (totalSave * 0.5).toLocaleString("th-TH", { maximumFractionDigits: 0 })
                     : "--"}
                   unit="kg" bg="bg-blu-lt dark:bg-blu/10" border="border-blu/20"
                 />
               </div>
 
-              {/* ตารางรายเดือน */}
+              {/* ตาราง */}
               <div>
                 <div className="text-[10px] font-bold text-t2 dark:text-dk-t2 uppercase tracking-wider mb-2">
-                  ตารางข้อมูลรายเดือน
+                  ตารางข้อมูล{unitLabel}
                 </div>
                 <div className="rounded-xl border border-bdr dark:border-dk-bdr overflow-hidden">
                   <table className="w-full text-[11px]">
-                    <thead>
+                    <thead className="sticky top-0">
                       <tr className="bg-sf-3 dark:bg-dk-sf2">
-                        <th className="text-left px-3 py-2 text-t2 dark:text-dk-t2 font-semibold">เดือน</th>
+                        <th className="text-left px-3 py-2 text-t2 dark:text-dk-t2 font-semibold">
+                          {mode === "monthly" ? "เดือน" : "วันที่"}
+                        </th>
                         <th className="text-right px-3 py-2 text-blu font-semibold">ปีนี้ (kWh)</th>
                         <th className="text-right px-3 py-2 text-grn font-semibold">ปีก่อน (kWh)</th>
                         <th className="text-right px-3 py-2 text-t2 dark:text-dk-t2 font-semibold">ผลต่าง</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {energy.points.map((p, i) => {
+                      {points.map((p, i) => {
                         const diff = (p.current ?? 0) - (p.previous ?? 0);
                         const isGood = diff <= 0;
                         return (
@@ -244,14 +374,18 @@ export function BottomRow({ energy, faultAreas }: BottomRowProps) {
                     </tbody>
                   </table>
                 </div>
+                <div className="text-[9px] text-t3 mt-2">
+                  * ข้อมูลปีก่อนเป็นค่าประมาณการจากอัตราการใช้พลังงานของโคมเดิม (250W)
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }
+
 
 function SummaryCard({ icon, iconColor, label, value, unit, bg, border }: {
   icon: string; iconColor: string; label: string; value: string; unit: string; bg: string; border: string;
