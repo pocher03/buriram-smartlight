@@ -353,7 +353,7 @@ await prisma.pendingAlarm.delete({ where: { id: prev.id } });
     `[smart-alarm] ตรวจ ${devices.length} ต้น (ออนไลน์ ${onlineCount}) · ` +
       `ช่วงตรวจระบบ ${label}${inside ? " ✓" : " ✗"} · ` +
       `ผิดปกติ ${abnormal.size} · รอยืนยัน ${stillPending} · ` +
-      `แจ้งเตือนใหม่ ${raised} · ยกเลิก ${cleared}`
+      `แจ้งเตือนใหม่ ${raised} · ยกเลิก ${cleared} · ปิดอัตโนมัติ ${resolved}`
   );
 
   return { checked: devices.length, pending: stillPending, raised, cleared };
