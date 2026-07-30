@@ -55,9 +55,16 @@ async function syncOne(type: 0 | 1, year: number): Promise<number> {
       return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
     };
 
+// RULR ส่ง format ไม่สม่ำเสมอ ("2026-06-01" บ้าง "2026-7-9" บ้าง)
+    // → normalize เป็น yyyy-MM-dd เสมอ ไม่งั้นเรียง/กรองช่วงวันที่ผิด + เกิด record ซ้ำ
     const period =
       type === 0
-        ? normalizeDay(String(row.time))
+        ? (() => {
+            const parts = String(row.time).split("-");
+            if (parts.length !== 3) return String(row.time);
+            const [y, m, d] = parts;
+            return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+          })()
         : `${year}-${String(row.time).padStart(2, "0")}`;
 
     const energyPrev = safeNum(row.firColumn); // ปีก่อน
