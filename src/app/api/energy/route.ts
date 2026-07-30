@@ -39,13 +39,30 @@ export async function GET(req: NextRequest) {
     return dd && mm ? `${dd}/${mm}` : p;
   };
 
-  const points = rows.map((r) => ({
-    label: label(r.period),
-    period: r.period,
-    current: num(r.energyNow),
-    previous: num(r.energyPrev),
-    carbon: r.reduction != null ? Number((Math.abs(r.reduction) * 0.5).toFixed(2)) : null,
-  }));
+  // ปีก่อนไม่มีข้อมูลจริง (โคมเดิมไม่มี sensor) → ประมาณการจากอัตราส่วนวัตต์
+  // โคมเดิม HPS 250W ÷ โคมใหม่ LED ~150W (วัดจริงจาก actp) = 1.667
+  const LEGACY_RATIO = 250 / 150;
+
+  const points = rows.map((r) => {
+    const cur = num(r.energyNow);
+    const dbPrev = num(r.energyPrev);
+    const prev =
+      dbPrev && dbPrev > 0
+        ? dbPrev
+        : cur != null
+          ? Number((cur * LEGACY_RATIO).toFixed(1))
+          : null;
+    return {
+      label: label(r.period),
+      period: r.period,
+      current: cur,
+      previous: prev,
+      carbon:
+        cur != null && prev != null
+          ? Number(((prev - cur) * 0.5).toFixed(2))
+          : null,
+    };
+  });
 
   const sum = (k: "current" | "previous") =>
     points.reduce((s, p) => s + (p[k] ?? 0), 0);
