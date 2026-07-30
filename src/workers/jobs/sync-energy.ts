@@ -46,14 +46,6 @@ async function syncOne(type: 0 | 1, year: number): Promise<number> {
 
   let n = 0;
   for (const row of list) {
-// RULR ส่ง format ไม่สม่ำเสมอ ("2026-06-01" บ้าง "2026-7-9" บ้าง)
-    // → normalize เป็น yyyy-MM-dd เสมอ ไม่งั้นเรียง/กรองช่วงวันที่ผิด
-    const normalizeDay = (raw: string): string => {
-      const parts = raw.split("-");
-      if (parts.length !== 3) return raw;
-      const [y, m, d] = parts;
-      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-    };
 
 // RULR ส่ง format ไม่สม่ำเสมอ ("2026-06-01" บ้าง "2026-7-9" บ้าง)
     // → normalize เป็น yyyy-MM-dd เสมอ ไม่งั้นเรียง/กรองช่วงวันที่ผิด + เกิด record ซ้ำ
