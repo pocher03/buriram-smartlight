@@ -4,18 +4,31 @@ import type { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const page = parseInt(searchParams.get("page") ?? "0");
-  const size = parseInt(searchParams.get("size") ?? "20");
-  const days = Math.min(parseInt(searchParams.get("days") ?? "7"), 90);
-
-  const since = new Date();
-  since.setDate(since.getDate() - days);
-
+  const page = Math.max(parseInt(searchParams.get("page") ?? "0"), 0);
+  const size = Math.min(parseInt(searchParams.get("size") ?? "20"), 100);
   const search = searchParams.get("search") ?? "";
+  const from = searchParams.get("from") ?? "";
+  const to = searchParams.get("to") ?? "";
+
+  // ระบุช่วงวันที่ → ใช้ช่วงนั้น | ไม่ระบุ → ย้อนหลังตาม days
+  let dateFilter: { gte: Date; lte?: Date };
+  let days: number | null = null;
+
+  if (from && to) {
+    dateFilter = {
+      gte: new Date(`${from}T00:00:00+07:00`),
+      lte: new Date(`${to}T23:59:59+07:00`),
+    };
+  } else {
+    days = Math.min(parseInt(searchParams.get("days") ?? "7"), 90);
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    dateFilter = { gte: since };
+  }
 
   // กรอง: ในช่วงเวลา + ไม่เอา account admin จีน (Impact202309)
   const where: Prisma.ServiceControlLogWhereInput = {
-    occurredAt: { gte: since },
+    occurredAt: dateFilter,
     NOT: { username: "Impact202309" },
     ...(search ? {
       OR: [
@@ -58,5 +71,14 @@ export async function GET(req: NextRequest) {
     occurred_at: r.occurredAt,
   }));
 
-  return NextResponse.json({ total, page, size, days, data });
+  return NextResponse.json({
+    data,
+    page,
+    size,
+    total,
+    totalPages: Math.ceil(total / size),
+    days,
+    from,
+    to,
+  });
 }
