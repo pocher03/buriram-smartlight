@@ -304,9 +304,47 @@ export async function runSmartAlarm(): Promise<{
       lng: device.lng,
       occurredAt: prev.detectedAt,
     });
-    await prisma.pendingAlarm.delete({ where: { id: prev.id } });
+await prisma.pendingAlarm.delete({ where: { id: prev.id } });
     raised++;
     console.log(`[smart-alarm] 🔴 ${device.name} — ${reason}`);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // [ชั้น 3] ปิด alarm อัตโนมัติเมื่ออุปกรณ์กลับมาปกติ
+  // (append-only ยังคงอยู่ — แก้แค่สถานะการจัดการ ไม่แตะข้อมูลเหตุการณ์)
+  // ══════════════════════════════════════════════════════════
+  let resolved = 0;
+
+  // รายต้น: กลับมาออนไลน์แล้ว
+  const onlineNames = devices.filter((d) => d.isOnline).map((d) => d.name);
+  if (onlineNames.length > 0) {
+    const r = await prisma.alarmLog.updateMany({
+      where: {
+        source: "smart",
+        alarmType: DEVICE_ALARM_TYPE,
+        handleStatus: "pending",
+        deviceName: { in: onlineNames },
+      },
+      data: { handleStatus: "done" },
+    });
+    resolved += r.count;
+  }
+
+  // ระดับระบบ: มีต้นใดกลับมาออนไลน์ = ไฟไม่ได้ดับทั้งระบบแล้ว
+  if (!allOffline) {
+    const r = await prisma.alarmLog.updateMany({
+      where: {
+        source: "smart",
+        alarmType: SYSTEM_ALARM_TYPE,
+        handleStatus: "pending",
+      },
+      data: { handleStatus: "done" },
+    });
+    resolved += r.count;
+  }
+
+  if (resolved > 0) {
+    console.log(`[smart-alarm] ✅ ปิด alarm อัตโนมัติ ${resolved} รายการ (อุปกรณ์กลับมาปกติ)`);
   }
 
   const stillPending = await prisma.pendingAlarm.count();
