@@ -29,14 +29,18 @@ export async function GET(req: NextRequest) {
     take: 400,
   });
 
+const THAI_DOW = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+
   const label = (p: string): string => {
     if (mode === "monthly") {
       const m = Number(p.split("-")[1]);
       return Number.isFinite(m) && m >= 1 && m <= 12 ? THAI_MONTHS[m - 1] : p;
     }
-    // daily → "01/06"
-    const [, mm, dd] = p.split("-");
-    return dd && mm ? `${dd}/${mm}` : p;
+    // daily → "จ. 15/07"
+    const [yy, mm, dd] = p.split("-");
+    if (!yy || !mm || !dd) return p;
+    const dow = THAI_DOW[new Date(`${p}T00:00:00`).getDay()];
+    return `${dow} ${dd}/${mm}`;
   };
 
   // ปีก่อนไม่มีข้อมูลจริง (โคมเดิมไม่มี sensor) → ประมาณการจากอัตราส่วนวัตต์
