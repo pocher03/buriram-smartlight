@@ -10,14 +10,24 @@ export const authConfig = {
   providers: [], // ใส่จริงใน auth.ts (แยกเพื่อให้ middleware ไม่ลาก Prisma เข้า Edge)
   callbacks: {
     // ป้องกัน route: ทุกหน้านอกจาก /login ต้อง login ก่อน
+    // ป้องกัน route: ทุกหน้าต้อง login ยกเว้นหน้าสาธารณะ (login / กู้รหัสผ่าน)
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const onLogin = nextUrl.pathname.startsWith("/login");
-      if (onLogin) {
-        // login แล้วเข้าหน้า login → เด้งเข้า dashboard
-        if (isLoggedIn) return Response.redirect(new URL("/", nextUrl));
+      const path = nextUrl.pathname;
+
+      // หน้าที่เข้าได้โดยไม่ต้อง login
+      const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password"];
+      const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
+
+      if (isPublic) {
+        // login อยู่แล้วเข้าหน้า login → เด้งเข้า dashboard
+        // (ยกเว้นหน้ากู้รหัสผ่าน — ให้เข้าได้แม้ login อยู่)
+        if (isLoggedIn && path.startsWith("/login")) {
+          return Response.redirect(new URL("/", nextUrl));
+        }
         return true;
       }
+
       return isLoggedIn; // ไม่ login → Auth.js เด้งไป /login เอง
     },
     jwt({ token, user }) {

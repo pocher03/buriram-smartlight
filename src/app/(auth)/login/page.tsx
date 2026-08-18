@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { loginAction, type LoginState } from "./actions";
+import Link from "next/link";
 
 const initialState: LoginState = { error: null };
 
@@ -145,7 +146,16 @@ export default function LoginPage() {
 
             <SubmitButton />
 
-            <p style={{ fontSize: 10, color: "#9aa0a6", textAlign: "center", marginTop: 14 }}>
+            <div style={{ textAlign: "center", marginTop: 14 }}>
+              <Link
+                href="/forgot-password"
+                style={{ fontSize: 12, color: "#1e8e3e", textDecoration: "none", fontWeight: 500 }}
+              >
+                ลืมรหัสผ่าน?
+              </Link>
+            </div>
+
+            <p style={{ fontSize: 10, color: "#9aa0a6", textAlign: "center", marginTop: 12 }}>
               ระบบยืนยันตัวตน บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด
             </p>
           </form>
@@ -172,6 +182,7 @@ function SubmitButton() {
       {pending ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
     </button>
   );
+  
 }
 
 function Field({
