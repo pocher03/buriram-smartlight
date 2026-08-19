@@ -1,36 +1,48 @@
 // src/workers/jobs/smart-alarm.ts
-// วิเคราะห์ alarm เองจาก telemetry แทนการดึง alarm จาก RULR
+// วิเคราะห์การแจ้งเตือนเองจาก telemetry แทนการดึง alarm จาก RULR
 //
-// ๒ ชั้นการตรวจจับ:
-//   [1] Time Window  — จับ "ไฟดับทั้งระบบผิดเวลา" (peer comparison ตาบอดกรณีนี้)
-//   [2] Peer Compare — จับ "ต้นที่ต่างจากพวก" (time window ตาบอดกรณีนี้)
+// ๔ ชั้นการตรวจจับ (แต่ละชั้นจับเคสที่ชั้นอื่นมองไม่เห็น):
+//   [1] ไฟดับทั้งระบบผิดเวลา  — peer comparison ตาบอดเมื่อทุกต้นดับพร้อมกัน
+//   [2] อุปกรณ์ออฟไลน์        — สายขาด / ถูกขโมย / ไฟดับเฉพาะจุด
+//   [3] ออนไลน์แต่ไฟไม่ติด    — controller ทำงาน แต่โคมไม่กินไฟ
+//   [4] กำลังไฟผิดปกติ        — โคมยังกินไฟ แต่น้อย/มากกว่าที่ควร (หลอดเสีย/driver เสื่อม)
 //
-// ทั้งสองชั้นต้องยืนยัน 3 รอบ (~90 นาที) ก่อนสร้าง alarm จริง — กัน false alarm
-// ช่วง transition (ไฟทยอยเปิด/ปิด) ข้ามการตรวจชั้น [1] เพราะ online% ไม่นิ่ง
+// ทุกชั้นยืนยัน 3 รอบ (~90 นาที) ก่อนสร้าง alarm จริง — กัน false alarm จาก
+// สัญญาณ NB-IoT ที่แกว่งเป็นปกติ และช่วง transition ที่ไฟทยอยติด/ดับ
+//
+// เมื่ออุปกรณ์กลับมาปกติ ระบบปิด alarm ให้อัตโนมัติ (แก้เฉพาะสถานะการจัดการ
+// ไม่แตะข้อมูลเหตุการณ์ — append-only ยังคงอยู่)
 
 import { prisma } from "../../lib/prisma";
 import { DEVICE_PROFILES, type DeviceType } from "../../lib/device-profiles";
 
-const REQUIRED_CHECKS = 3;  // ต้องผิดปกติต่อเนื่อง 3 รอบถึงจะ alarm
-const MIN_GROUP_SIZE = 2;   // กลุ่มที่มีต้นเดียว เทียบ peer ไม่ได้
+// ── ค่าคงที่ ────────────────────────────────────────────────
+const REQUIRED_CHECKS = 3; // ต้องผิดปกติต่อเนื่องกี่รอบถึงจะแจ้งเตือน
+const MIN_GROUP_SIZE = 2;  // กลุ่มที่มีต้นเดียว เทียบกับเพื่อนไม่ได้
 
-// buffer รอบเวลาเปิด/ปิดไฟ — จากข้อมูลจริง ไฟทยอยติด/ดับใช้เวลา ~1 ชม.
-const OPEN_BUFFER_MIN = 45;   // หลังเวลาเปิด รอ 45 นาทีค่อยเริ่มตรวจ
-const CLOSE_BUFFER_MIN = 15;  // ก่อนเวลาปิด หยุดตรวจ 15 นาที
+// buffer รอบเวลาเปิด/ปิดไฟ — ข้อมูลจริงพบว่าไฟทยอยติด/ดับใช้เวลาราว 1 ชม.
+const OPEN_BUFFER_MIN = 45;
+const CLOSE_BUFFER_MIN = 15;
 
-// fallback ถ้า RULR ไม่ส่งเวลาเปิด/ปิดมา
+// ใช้เมื่อ RULR ไม่ส่งเวลาเปิด/ปิดมา
 const FALLBACK_OPEN = "18:40:00";
 const FALLBACK_CLOSE = "05:48:00";
 
-const SYSTEM_ALARM_TYPE = "system_blackout";
-
-const LIGHT_ALARM_TYPE = "light_failure";
-
-// เกณฑ์ตัดสิน "ไฟติด" — จากข้อมูลจริง โคมที่ติดกินไฟต่ำสุด 44.4W
-// ตั้ง 20W เผื่อไว้กว้าง กันค่า standby/noise ของ driver
+// เกณฑ์ตัดสิน "ไฟติด" — ข้อมูลจริงพบว่าโคมที่ติดกินไฟต่ำสุด 44.4 W
+// ตั้ง 20 W ไว้กว้าง กันค่า standby/noise ของ driver
 const LAMP_ON_POWER_W = 20;
 
+// กำลังไฟอ้างอิงที่ความสว่างเต็ม 100% (ข้อมูลจริง 3 วัน เฉลี่ย 148.6 W)
+const RATED_POWER_W = 150;
+// เบี่ยงเบนที่ยอมรับได้ — ข้อมูลจริงกระจายไม่เกิน 11% ตั้ง 35% จึงห่างพอ
+const POWER_DEVIATION_LIMIT = 0.35;
+// ความสว่างต่ำกว่านี้ ค่าที่คาดจะน้อยจนเทียบเปอร์เซ็นต์ไม่มีความหมาย
+const MIN_BRIGHTNESS_FOR_CHECK = 20;
+
+const SYSTEM_ALARM_TYPE = "system_blackout";
 const DEVICE_ALARM_TYPE = "offline";
+const LIGHT_ALARM_TYPE = "light_failure";
+const POWER_ALARM_TYPE = "power_anomaly";
 
 interface DeviceState {
   id: string;
@@ -41,7 +53,10 @@ interface DeviceState {
   lng: number | null;
   isOnline: boolean;
   actp: number | null;
+  brightness: number | null;
 }
+
+// ── เวลา ────────────────────────────────────────────────────
 
 /** "18:40:00" → นาทีนับจากเที่ยงคืน */
 function toMinutes(hhmmss: string | null): number | null {
@@ -51,7 +66,7 @@ function toMinutes(hhmmss: string | null): number | null {
   return h * 60 + m;
 }
 
-/** นาทีปัจจุบันตามเวลาไทย (server อาจเป็น UTC) */
+/** นาทีปัจจุบันตามเวลาไทย (server อาจตั้งเป็น UTC) */
 function nowMinutesBangkok(): number {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Bangkok",
@@ -66,7 +81,7 @@ function nowMinutesBangkok(): number {
 
 /**
  * ตอนนี้อยู่ในช่วงที่ "ไฟควรติดครบแล้ว" หรือไม่
- * window ข้ามเที่ยงคืน (18:40 → 05:48) จึงต้องเช็คแบบคร่อมวัน
+ * window คร่อมเที่ยงคืน (18:40 → 05:48) จึงต้องเช็คแบบข้ามวัน
  */
 async function isInsideStableWindow(): Promise<{ inside: boolean; label: string }> {
   const snap = await prisma.kpiSnapshot.findFirst({
@@ -76,12 +91,11 @@ async function isInsideStableWindow(): Promise<{ inside: boolean; label: string 
   const open = toMinutes(snap?.openTime ?? null) ?? toMinutes(FALLBACK_OPEN)!;
   const close = toMinutes(snap?.closeTime ?? null) ?? toMinutes(FALLBACK_CLOSE)!;
 
-  // หดขอบเข้ามาเพื่อเลี่ยงช่วง transition ที่ online% แกว่ง
+  // หดขอบเข้ามาเพื่อเลี่ยงช่วง transition ที่สถานะยังไม่นิ่ง
   const start = (open + OPEN_BUFFER_MIN) % 1440;
   const end = (close - CLOSE_BUFFER_MIN + 1440) % 1440;
 
   const now = nowMinutesBangkok();
-  // window คร่อมเที่ยงคืน → อยู่ในช่วงถ้า now >= start หรือ now <= end
   const inside = start > end ? now >= start || now <= end : now >= start && now <= end;
 
   const fmt = (min: number) =>
@@ -89,7 +103,9 @@ async function isInsideStableWindow(): Promise<{ inside: boolean; label: string 
   return { inside, label: `${fmt(start)}-${fmt(end)}` };
 }
 
-/** ดึงสถานะล่าสุดของทุกอุปกรณ์ (telemetry แถวใหม่สุดของแต่ละต้น) */
+// ── ดึงข้อมูล ───────────────────────────────────────────────
+
+/** สถานะล่าสุดของทุกอุปกรณ์ (telemetry แถวใหม่สุดของแต่ละต้น) */
 async function loadDeviceStates(): Promise<DeviceState[]> {
   const rows = await prisma.device.findMany({
     select: {
@@ -102,7 +118,7 @@ async function loadDeviceStates(): Promise<DeviceState[]> {
       telemetry: {
         orderBy: { createdAt: "desc" },
         take: 1,
-        select: { onlineStatus: true, actp: true },
+        select: { onlineStatus: true, actp: true, brightness: true },
       },
     },
   });
@@ -118,17 +134,19 @@ async function loadDeviceStates(): Promise<DeviceState[]> {
       lng: d.lng,
       isOnline: d.telemetry[0].onlineStatus === 1,
       actp: d.telemetry[0].actp,
+      brightness: d.telemetry[0].brightness,
     }));
 }
 
+// ── ตรรกะตรวจจับ ───────────────────────────────────────────
+
 /**
- * [ชั้น 2] หาต้นที่ "ต่างจากพวก"
- * คืน Map<deviceId, เหตุผล> — ต้นที่ไม่อยู่ใน Map ถือว่าปกติ
+ * [ชั้น 2] อุปกรณ์ที่ออฟไลน์ต่างจากเพื่อนในกลุ่ม
+ * แยกกลุ่มตามชนิดอุปกรณ์ เพราะ AC กับ Solar มีพฤติกรรมต่างกันสิ้นเชิง
  */
-function findAbnormalDevices(devices: DeviceState[]): Map<string, string> {
+function findOfflineAnomalies(devices: DeviceState[]): Map<string, string> {
   const abnormal = new Map<string, string>();
 
-  // แยกกลุ่มตามชนิดอุปกรณ์ — AC กับ Solar พฤติกรรมต่างกันสิ้นเชิง
   const groups = new Map<DeviceType, DeviceState[]>();
   for (const d of devices) {
     const list = groups.get(d.deviceType) ?? [];
@@ -140,7 +158,7 @@ function findAbnormalDevices(devices: DeviceState[]): Map<string, string> {
     const profile = DEVICE_PROFILES[type];
     const offline = group.filter((d) => !d.isOnline);
 
-    // Solar: มีแบตเตอรี่ ควร online ตลอด → offline = ผิดปกติทันที
+    // Solar มีแบตเตอรี่ ควรออนไลน์ตลอด → ออฟไลน์เมื่อไหร่ก็ผิดปกติ
     if (profile.expectAlwaysOnline) {
       for (const d of offline) {
         abnormal.set(d.id, "ออฟไลน์ผิดปกติ (อุปกรณ์ควรออนไลน์ตลอดเวลา)");
@@ -148,10 +166,10 @@ function findAbnormalDevices(devices: DeviceState[]): Map<string, string> {
       continue;
     }
 
-    // AC: เทียบกับกลุ่ม
+    // AC เทียบกับกลุ่ม
     if (group.length < MIN_GROUP_SIZE) continue;
-    if (offline.length === 0) continue;                // ทุกต้นออนไลน์ = ปกติ
-    if (offline.length === group.length) continue;     // ทุกต้นออฟไลน์ = ชั้น 1 จัดการ
+    if (offline.length === 0) continue;            // ทุกต้นออนไลน์ → ปกติ
+    if (offline.length === group.length) continue; // ทุกต้นออฟไลน์ → ชั้น 1 จัดการ
 
     const ratio = offline.length / group.length;
     const reason =
@@ -166,11 +184,11 @@ function findAbnormalDevices(devices: DeviceState[]): Map<string, string> {
 }
 
 /**
- * [ชั้น 4] หาต้นที่ "ออนไลน์แต่ไฟไม่ติด"
+ * [ชั้น 3] ออนไลน์แต่ไฟไม่ติด
  *
  * เทียบเฉพาะในกลุ่มที่ออนไลน์ด้วยกัน — ไม่ต้องรู้เวลาเปิด/ปิดไฟ
- *   กลางวัน ทุกต้นไฟดับเหมือนกัน → ไม่มีใครต่าง → ไม่แจ้งเตือน
- *   กลางคืน ทุกต้นไฟติด → ต้นที่ไม่ติดจะต่างจากพวกทันที
+ *   กลางวัน  ทุกต้นไฟดับเหมือนกัน → ไม่มีใครต่าง → ไม่แจ้งเตือน
+ *   กลางคืน  ทุกต้นไฟติด → ต้นที่ไม่ติดต่างจากพวกทันที
  *   ฝนตกกลางวัน (ไฟติดเอง) → ครอบคลุมด้วย เพราะไม่ผูกกับเวลา
  */
 function findLightFailures(devices: DeviceState[]): Map<string, string> {
@@ -178,8 +196,8 @@ function findLightFailures(devices: DeviceState[]): Map<string, string> {
 
   const groups = new Map<DeviceType, DeviceState[]>();
   for (const d of devices) {
-    if (!d.isOnline) continue;              // ออฟไลน์ → ชั้น 2 รับผิดชอบ
-    if (d.actp == null) continue;           // ไม่มีค่าวัด → ตัดสินไม่ได้
+    if (!d.isOnline) continue;    // ออฟไลน์ → ชั้น 2 รับผิดชอบ
+    if (d.actp == null) continue; // ไม่มีค่าวัด → ตัดสินไม่ได้
     const list = groups.get(d.deviceType) ?? [];
     list.push(d);
     groups.set(d.deviceType, list);
@@ -191,8 +209,8 @@ function findLightFailures(devices: DeviceState[]): Map<string, string> {
     const lit = group.filter((d) => (d.actp ?? 0) > LAMP_ON_POWER_W);
     const unlit = group.filter((d) => (d.actp ?? 0) <= LAMP_ON_POWER_W);
 
-    if (unlit.length === 0) continue;       // ทุกต้นไฟติด → ปกติ
-    if (lit.length === 0) continue;         // ทุกต้นไฟดับ → ปกติ (นอกเวลาใช้งาน)
+    if (unlit.length === 0) continue; // ทุกต้นไฟติด → ปกติ
+    if (lit.length === 0) continue;   // ทุกต้นไฟดับ → ปกติ (นอกเวลาใช้งาน)
 
     for (const d of unlit) {
       failures.set(
@@ -206,7 +224,43 @@ function findLightFailures(devices: DeviceState[]): Map<string, string> {
   return failures;
 }
 
-/** สร้าง alarm ลง DB */
+/**
+ * [ชั้น 4] ไฟติดแต่กำลังไฟผิดปกติ
+ *
+ * จับเคสที่ชั้น 3 มองไม่เห็น — หลอดเสียบางส่วน / driver เสื่อม
+ * โคมยังกินไฟอยู่ (จึงนับว่า "ติด") แต่กินน้อย/มากกว่าที่ควรอย่างมีนัยสำคัญ
+ *
+ * ค่าที่คาด = 150 W × (ความสว่างที่สั่ง ÷ 100)
+ * ข้อมูลจริง 3 วัน: ที่ความสว่างเดียวกัน โคม 24-26 ต้นกินไฟต่างกันไม่เกิน 11%
+ */
+function findPowerAnomalies(devices: DeviceState[]): Map<string, string> {
+  const anomalies = new Map<string, string>();
+
+  for (const d of devices) {
+    if (!d.isOnline) continue;
+    if (d.actp == null || d.brightness == null) continue;
+    if (d.brightness < MIN_BRIGHTNESS_FOR_CHECK) continue; // หรี่ต่ำมาก เทียบไม่ได้
+    if (d.actp <= LAMP_ON_POWER_W) continue;               // ไฟไม่ติด → ชั้น 3 รับผิดชอบ
+
+    const expected = RATED_POWER_W * (d.brightness / 100);
+    const deviation = Math.abs(d.actp - expected) / expected;
+
+    if (deviation > POWER_DEVIATION_LIMIT) {
+      const pct = Math.round(deviation * 100);
+      const dir = d.actp < expected ? "ต่ำกว่า" : "สูงกว่า";
+      anomalies.set(
+        d.id,
+        `กำลังไฟ${dir}ค่าที่คาด ${pct}% ` +
+          `(วัดได้ ${d.actp} W · ที่ความสว่าง ${d.brightness}% ควรอยู่ราว ${expected.toFixed(0)} W)`
+      );
+    }
+  }
+
+  return anomalies;
+}
+
+// ── สร้าง alarm ─────────────────────────────────────────────
+
 async function raiseAlarm(opts: {
   deviceName: string;
   name: string;
@@ -227,10 +281,86 @@ async function raiseAlarm(opts: {
       divisionName: opts.divisionName,
       latitude: opts.lat,
       longitude: opts.lng,
-      createdAt: opts.occurredAt, // เวลาที่ตรวจพบครั้งแรก ไม่ใช่เวลายืนยัน
+      createdAt: opts.occurredAt, // เวลาที่ตรวจพบครั้งแรก ไม่ใช่เวลาที่ยืนยัน
     },
   });
 }
+
+/**
+ * นับรอบยืนยัน แล้วสร้าง alarm เมื่อครบ — ใช้ร่วมกันทุกชั้นที่ตรวจรายอุปกรณ์
+ * คืนจำนวน alarm ที่สร้าง และจำนวน pending ที่ยกเลิก
+ */
+async function processDeviceAnomalies(opts: {
+  found: Map<string, string>;
+  byId: Map<string, DeviceState>;
+  alarmType: string;
+  alarmName: string;
+  now: Date;
+}): Promise<{ raised: number; cleared: number }> {
+  const { found, byId, alarmType, alarmName, now } = opts;
+  let raised = 0;
+  let cleared = 0;
+
+  const pendings = await prisma.pendingAlarm.findMany({ where: { alarmType } });
+
+  // กลับมาปกติแล้ว → ยกเลิกการจับตา
+  for (const p of pendings) {
+    if (!found.has(p.deviceId)) {
+      await prisma.pendingAlarm.delete({ where: { id: p.id } });
+      cleared++;
+    }
+  }
+
+  for (const [deviceId, reason] of Array.from(found.entries())) {
+    const device = byId.get(deviceId);
+    if (!device) continue;
+
+    const prev = pendings.find((p) => p.deviceId === deviceId);
+
+    // รอบแรก — เริ่มจับตา
+    if (!prev) {
+      await prisma.pendingAlarm.create({
+        data: {
+          deviceId,
+          deviceName: device.name,
+          alarmType,
+          detectedAt: now,
+          checkCount: 1,
+        },
+      });
+      continue;
+    }
+
+    const count = prev.checkCount + 1;
+
+    // ยังไม่ครบรอบ — นับต่อ
+    if (count < REQUIRED_CHECKS) {
+      await prisma.pendingAlarm.update({
+        where: { id: prev.id },
+        data: { checkCount: count },
+      });
+      continue;
+    }
+
+    // ครบรอบ → ยืนยันว่าเป็นปัญหาจริง
+    await raiseAlarm({
+      deviceName: device.name,
+      name: alarmName,
+      alarmType,
+      divisionName: device.divisionName,
+      lat: device.lat,
+      lng: device.lng,
+      occurredAt: prev.detectedAt,
+    });
+    await prisma.pendingAlarm.delete({ where: { id: prev.id } });
+    raised++;
+    console.log(`[smart-alarm] 🔴 ${device.name} — ${reason}`);
+  }
+
+  return { raised, cleared };
+}
+
+// ── main ────────────────────────────────────────────────────
 
 export async function runSmartAlarm(): Promise<{
   checked: number;
@@ -245,6 +375,7 @@ export async function runSmartAlarm(): Promise<{
   }
 
   const now = new Date();
+  const byId = new Map(devices.map((d) => [d.id, d]));
   const { inside, label } = await isInsideStableWindow();
   const allOffline = devices.every((d) => !d.isOnline);
 
@@ -252,7 +383,7 @@ export async function runSmartAlarm(): Promise<{
   let cleared = 0;
 
   // ══════════════════════════════════════════════════════════
-  // [ชั้น 1] ไฟดับทั้งระบบในช่วงที่ควรติด → ปัญหาระดับระบบ
+  // [ชั้น 1] ไฟดับทั้งระบบในช่วงที่ควรติด
   // ══════════════════════════════════════════════════════════
   const sysPending = await prisma.pendingAlarm.findFirst({
     where: { alarmType: SYSTEM_ALARM_TYPE },
@@ -300,160 +431,86 @@ export async function runSmartAlarm(): Promise<{
   }
 
   // ══════════════════════════════════════════════════════════
-  // [ชั้น 2] ต้นที่ต่างจากพวก
+  // [ชั้น 2] อุปกรณ์ออฟไลน์ต่างจากเพื่อน
   // ══════════════════════════════════════════════════════════
-  const abnormal = findAbnormalDevices(devices);
-  const byId = new Map(devices.map((d) => [d.id, d]));
-  const existing = await prisma.pendingAlarm.findMany({
-    where: { alarmType: DEVICE_ALARM_TYPE },
+  const offlineFound = findOfflineAnomalies(devices);
+  const r2 = await processDeviceAnomalies({
+    found: offlineFound,
+    byId,
+    alarmType: DEVICE_ALARM_TYPE,
+    alarmName: "อุปกรณ์ออฟไลน์ผิดปกติ",
+    now,
   });
-
-  // ต้นที่กลับมาปกติแล้ว → ลบ pending
-  for (const p of existing) {
-    if (!abnormal.has(p.deviceId)) {
-      await prisma.pendingAlarm.delete({ where: { id: p.id } });
-      cleared++;
-    }
-  }
-
-  // ต้นที่ยังผิดปกติ → นับรอบ / สร้าง alarm เมื่อครบ
-  for (const [deviceId, reason] of Array.from(abnormal.entries())) {
-    const device = byId.get(deviceId);
-    if (!device) continue;
-
-    const prev = existing.find((p) => p.deviceId === deviceId);
-
-    if (!prev) {
-      await prisma.pendingAlarm.create({
-        data: {
-          deviceId,
-          deviceName: device.name,
-          alarmType: DEVICE_ALARM_TYPE,
-          detectedAt: now,
-          checkCount: 1,
-        },
-      });
-      continue;
-    }
-
-    const count = prev.checkCount + 1;
-    if (count < REQUIRED_CHECKS) {
-      await prisma.pendingAlarm.update({
-        where: { id: prev.id },
-        data: { checkCount: count },
-      });
-      continue;
-    }
-
-    await raiseAlarm({
-      deviceName: device.name,
-      name: "อุปกรณ์ออฟไลน์ผิดปกติ",
-      alarmType: DEVICE_ALARM_TYPE,
-      divisionName: device.divisionName,
-      lat: device.lat,
-      lng: device.lng,
-      occurredAt: prev.detectedAt,
-    });
-await prisma.pendingAlarm.delete({ where: { id: prev.id } });
-    raised++;
-    console.log(`[smart-alarm] 🔴 ${device.name} — ${reason}`);
-  }
-
+  raised += r2.raised;
+  cleared += r2.cleared;
 
   // ══════════════════════════════════════════════════════════
-  // [ชั้น 2.5] ออนไลน์แต่ไฟไม่ติด
+  // [ชั้น 3] ออนไลน์แต่ไฟไม่ติด
   // ══════════════════════════════════════════════════════════
-  const lightFail = findLightFailures(devices);
-  const lightPending = await prisma.pendingAlarm.findMany({
-    where: { alarmType: LIGHT_ALARM_TYPE },
+  const lightFound = findLightFailures(devices);
+  const r3 = await processDeviceAnomalies({
+    found: lightFound,
+    byId,
+    alarmType: LIGHT_ALARM_TYPE,
+    alarmName: "โคมไฟไม่ทำงานผิดปกติ",
+    now,
   });
+  raised += r3.raised;
+  cleared += r3.cleared;
 
-  // กลับมาปกติแล้ว → ลบ pending
-  for (const p of lightPending) {
-    if (!lightFail.has(p.deviceId)) {
-      await prisma.pendingAlarm.delete({ where: { id: p.id } });
-      cleared++;
-    }
-  }
-
-  for (const [deviceId, reason] of Array.from(lightFail.entries())) {
-    const device = byId.get(deviceId);
-    if (!device) continue;
-
-    const prev = lightPending.find((p) => p.deviceId === deviceId);
-
-    if (!prev) {
-      await prisma.pendingAlarm.create({
-        data: {
-          deviceId,
-          deviceName: device.name,
-          alarmType: LIGHT_ALARM_TYPE,
-          detectedAt: now,
-          checkCount: 1,
-        },
-      });
-      continue;
-    }
-
-    const count = prev.checkCount + 1;
-    if (count < REQUIRED_CHECKS) {
-      await prisma.pendingAlarm.update({
-        where: { id: prev.id },
-        data: { checkCount: count },
-      });
-      continue;
-    }
-
-    await raiseAlarm({
-      deviceName: device.name,
-      name: "โคมไฟไม่ทำงานผิดปกติ",
-      alarmType: LIGHT_ALARM_TYPE,
-      divisionName: device.divisionName,
-      lat: device.lat,
-      lng: device.lng,
-      occurredAt: prev.detectedAt,
-    });
-    await prisma.pendingAlarm.delete({ where: { id: prev.id } });
-    raised++;
-    console.log(`[smart-alarm] 🔴 ${device.name} — ${reason}`);
-  }
   // ══════════════════════════════════════════════════════════
-  // [ชั้น 3] ปิด alarm อัตโนมัติเมื่ออุปกรณ์กลับมาปกติ
-  // (append-only ยังคงอยู่ — แก้แค่สถานะการจัดการ ไม่แตะข้อมูลเหตุการณ์)
+  // [ชั้น 4] ไฟติดแต่กำลังไฟผิดปกติ
+  // ══════════════════════════════════════════════════════════
+  const powerFound = findPowerAnomalies(devices);
+  const r4 = await processDeviceAnomalies({
+    found: powerFound,
+    byId,
+    alarmType: POWER_ALARM_TYPE,
+    alarmName: "กำลังไฟโคมผิดปกติ",
+    now,
+  });
+  raised += r4.raised;
+  cleared += r4.cleared;
+
+  // ══════════════════════════════════════════════════════════
+  // [ปิดอัตโนมัติ] อุปกรณ์กลับมาปกติ → เปลี่ยนสถานะเป็น "แล้วเสร็จ"
+  // แก้เฉพาะสถานะการจัดการ ไม่แตะข้อมูลเหตุการณ์ (append-only ยังคงอยู่)
   // ══════════════════════════════════════════════════════════
   let resolved = 0;
 
-  // รายต้น: กลับมาออนไลน์แล้ว
-  const onlineNames = devices.filter((d) => d.isOnline).map((d) => d.name);
-  if (onlineNames.length > 0) {
+  const closeAlarms = async (alarmType: string, deviceNames: string[]) => {
+    if (deviceNames.length === 0) return;
     const r = await prisma.alarmLog.updateMany({
       where: {
         source: "smart",
-        alarmType: DEVICE_ALARM_TYPE,
+        alarmType,
         handleStatus: "pending",
-        deviceName: { in: onlineNames },
+        deviceName: { in: deviceNames },
       },
       data: { handleStatus: "done" },
     });
     resolved += r.count;
-    
-      // ไฟกลับมาติดแล้ว → ปิด alarm ไฟไม่ทำงาน
-  const litNames = devices
-    .filter((d) => d.isOnline && (d.actp ?? 0) > LAMP_ON_POWER_W)
-    .map((d) => d.name);
-  if (litNames.length > 0) {
-    const r = await prisma.alarmLog.updateMany({
-      where: {
-        source: "smart",
-        alarmType: LIGHT_ALARM_TYPE,
-        handleStatus: "pending",
-        deviceName: { in: litNames },
-      },
-      data: { handleStatus: "done" },
-    });
-    resolved += r.count;
-  }
-  }
+  };
+
+  // กลับมาออนไลน์
+  await closeAlarms(
+    DEVICE_ALARM_TYPE,
+    devices.filter((d) => d.isOnline).map((d) => d.name)
+  );
+
+  // ไฟกลับมาติด
+  await closeAlarms(
+    LIGHT_ALARM_TYPE,
+    devices.filter((d) => d.isOnline && (d.actp ?? 0) > LAMP_ON_POWER_W).map((d) => d.name)
+  );
+
+  // กำลังไฟกลับมาปกติ (ไฟติดอยู่ และไม่อยู่ในรายชื่อผิดปกติรอบนี้)
+  await closeAlarms(
+    POWER_ALARM_TYPE,
+    devices
+      .filter((d) => d.isOnline && (d.actp ?? 0) > LAMP_ON_POWER_W && !powerFound.has(d.id))
+      .map((d) => d.name)
+  );
 
   // ระดับระบบ: มีต้นใดกลับมาออนไลน์ = ไฟไม่ได้ดับทั้งระบบแล้ว
   if (!allOffline) {
@@ -472,13 +529,17 @@ await prisma.pendingAlarm.delete({ where: { id: prev.id } });
     console.log(`[smart-alarm] ✅ ปิด alarm อัตโนมัติ ${resolved} รายการ (อุปกรณ์กลับมาปกติ)`);
   }
 
+  // ── สรุปผลรอบนี้ ──
   const stillPending = await prisma.pendingAlarm.count();
   const onlineCount = devices.filter((d) => d.isOnline).length;
+  const litCount = devices.filter((d) => d.isOnline && (d.actp ?? 0) > LAMP_ON_POWER_W).length;
+  const totalFound = offlineFound.size + lightFound.size + powerFound.size;
+
   console.log(
-    `[smart-alarm] ตรวจ ${devices.length} ต้น (ออนไลน์ ${onlineCount}) · ` +
+    `[smart-alarm] ตรวจ ${devices.length} ต้น (ออนไลน์ ${onlineCount} · ไฟติด ${litCount}) · ` +
       `ช่วงตรวจระบบ ${label}${inside ? " ✓" : " ✗"} · ` +
-      `ผิดปกติ ${abnormal.size} · รอยืนยัน ${stillPending} · ` +
-      `แจ้งเตือนใหม่ ${raised} · ยกเลิก ${cleared} · ปิดอัตโนมัติ ${resolved}`
+      `ผิดปกติ ${totalFound} (ออฟไลน์ ${offlineFound.size} · ไฟไม่ติด ${lightFound.size} · กำลังไฟ ${powerFound.size}) · ` +
+      `รอยืนยัน ${stillPending} · แจ้งเตือนใหม่ ${raised} · ยกเลิก ${cleared} · ปิดอัตโนมัติ ${resolved}`
   );
 
   return { checked: devices.length, pending: stillPending, raised, cleared };
