@@ -146,12 +146,13 @@ export default function LoginPage() {
 
             <SubmitButton />
 
-            <div style={{ textAlign: "center", marginTop: 14 }}>
-              <Link
-                href="/forgot-password"
-                style={{ fontSize: 12, color: "#1e8e3e", textDecoration: "none", fontWeight: 500 }}
-              >
+            <div style={{ textAlign: "center", marginTop: 14, display: "flex", justifyContent: "center", gap: 16 }}>
+              <Link href="/forgot-password" style={{ fontSize: 12, color: "#1e8e3e", textDecoration: "none", fontWeight: 500 }}>
                 ลืมรหัสผ่าน?
+              </Link>
+              <span style={{ color: "#dadce0" }}>|</span>
+              <Link href="/contact" style={{ fontSize: 12, color: "#5f6368", textDecoration: "none", fontWeight: 500 }}>
+                ติดต่อเจ้าหน้าที่
               </Link>
             </div>
 

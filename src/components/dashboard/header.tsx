@@ -8,6 +8,7 @@ import type { DashboardUser } from "./dashboard";
 import { display } from "@/lib/null-safe";
 import { logoutAction } from "@/app/(dashboard)/actions";
 import { AccessLogModal } from "./access-log-modal";
+import { SupportModal } from "./support-modal";
 
 interface HeaderProps {
   zones: Zone[];
@@ -34,6 +35,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
   const [mounted, setMounted] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [logModal, setLogModal] = useState<"me" | "all" | null>(null);
+  const [supportOpen, setSupportOpen] = useState(false);
   const [placeholder, setPlaceholder] = useState<string | null>(null);
 
   const profileRef = useRef<HTMLDivElement>(null);

@@ -16,7 +16,7 @@ export const authConfig = {
       const path = nextUrl.pathname;
 
       // หน้าที่เข้าได้โดยไม่ต้อง login
-      const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password"];
+      const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password", "/contact"];
       const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
 
       if (isPublic) {
