@@ -165,15 +165,20 @@ export default function MapInner({
                   <PopupRow label="แรงดัน" value={display(d.telemetry.voltage, " V")} />
                   <PopupRow label="กระแส" value={display(d.telemetry.electricity, " A")} />
                   <PopupRow label="กำลังไฟฟ้า" value={display(d.telemetry.actp, " W")} />
+                                    {/* สถานะไฟ — ตัดสินจากกำลังไฟจริง เพราะ switchStatus จากต้นทางค้างที่ 0 เสมอ */}
                   <PopupRow
-                    label="สวิตช์ไฟ"
+                    label="สถานะไฟ"
                     value={
-                      d.telemetry.switchStatus == null
+                      d.telemetry.actp == null
                         ? "--"
-                        : d.telemetry.switchStatus === 1
-                          ? "เปิด"
-                          : "ปิด"
+                        : d.telemetry.actp > 20
+                          ? "ติด"
+                          : "ดับ"
                     }
+                  />
+                  <PopupRow
+                    label="ความสว่าง"
+                    value={display(d.telemetry.brightness, "%")}
                   />
                   {showSOC && (
                     <PopupRow label="แบตเตอรี่ (SOC)" value={display(d.telemetry.soc, "%")} />
