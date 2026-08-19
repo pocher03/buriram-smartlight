@@ -9,8 +9,10 @@ import { DEVICE_PROFILES } from "@/lib/device-profiles";
 import { deviceStatus, STATUS_COLOR, STATUS_LABEL } from "@/lib/device-status";
 import { display } from "@/lib/null-safe";
 
-
 const CENTER: [number, number] = [14.992892, 103.113694];
+
+// เกณฑ์ตัดสิน "ไฟติด" — ตรงกับ smart-alarm (ข้อมูลจริง โคมที่ติดกินไฟต่ำสุด 44.4 W)
+const LAMP_ON_POWER_W = 20;
 
 function createPulseIcon(color: string) {
   return L.divIcon({
@@ -119,15 +121,15 @@ export default function MapInner({
   const located = devices.filter((d) => d.lat != null && d.lng != null);
 
   return (
-  <MapContainer
-        center={CENTER}
-        zoom={14}
-        minZoom={5}
-        maxZoom={19}
-        zoomControl={true}
-        style={{ height: "100%", width: "100%" }}
-        attributionControl={false}
-      >
+    <MapContainer
+      center={CENTER}
+      zoom={14}
+      minZoom={5}
+      maxZoom={19}
+      zoomControl={true}
+      style={{ height: "100%", width: "100%" }}
+      attributionControl={false}
+    >
       <InvalidateOnResize active={active} sizeKey={sizeKey} />
       <FitToZone focusZone={focusZone} devices={devices} />
       <TileLayer
@@ -139,14 +141,17 @@ export default function MapInner({
         const status = deviceStatus(d);
         const color = STATUS_COLOR[status];
         const showSOC = DEVICE_PROFILES[d.deviceType].showSOC;
+        const isOnline = d.telemetry.onlineStatus === 1;
+
         return (
-            <Marker
-              key={d.deviceId}
-              position={[d.lat as number, d.lng as number]}
-              icon={createPulseIcon(color)}
+          <Marker
+            key={d.deviceId}
+            position={[d.lat as number, d.lng as number]}
+            icon={createPulseIcon(color)}
           >
             <Popup>
               <div style={{ fontSize: 12 }}>
+                {/* หัวเรื่อง — ชื่ออุปกรณ์ + สถานะ */}
                 <div
                   style={{
                     background: color,
@@ -161,27 +166,54 @@ export default function MapInner({
                     {d.zoneName} · {STATUS_LABEL[status]}
                   </div>
                 </div>
+
                 <div style={{ padding: "10px 14px" }} className="text-t1 dark:text-dk-t1">
-                  <PopupRow label="แรงดัน" value={display(d.telemetry.voltage, " V")} />
-                  <PopupRow label="กระแส" value={display(d.telemetry.electricity, " A")} />
-                  <PopupRow label="กำลังไฟฟ้า" value={display(d.telemetry.actp, " W")} />
-                                    {/* สถานะไฟ — ตัดสินจากกำลังไฟจริง เพราะ switchStatus จากต้นทางค้างที่ 0 เสมอ */}
-                  <PopupRow
-                    label="สถานะไฟ"
-                    value={
-                      d.telemetry.actp == null
-                        ? "--"
-                        : d.telemetry.actp > 20
-                          ? "ติด"
-                          : "ดับ"
-                    }
-                  />
-                  <PopupRow
-                    label="ความสว่าง"
-                    value={display(d.telemetry.brightness, "%")}
-                  />
-                  {showSOC && (
-                    <PopupRow label="แบตเตอรี่ (SOC)" value={display(d.telemetry.soc, "%")} />
+                  {isOnline ? (
+                    <>
+                      <PopupRow label="แรงดัน" value={display(d.telemetry.voltage, " V")} />
+                      <PopupRow label="กระแส" value={display(d.telemetry.electricity, " A")} />
+                      <PopupRow label="กำลังไฟฟ้า" value={display(d.telemetry.actp, " W")} />
+                      {/* สถานะไฟตัดสินจากกำลังไฟจริง — switchStatus จากต้นทางค้างที่ 0 เสมอ ใช้ไม่ได้ */}
+                      <PopupRow
+                        label="สถานะไฟ"
+                        value={
+                          d.telemetry.actp == null
+                            ? "--"
+                            : d.telemetry.actp > LAMP_ON_POWER_W
+                              ? "ติด"
+                              : "ดับ"
+                        }
+                      />
+                      <PopupRow label="ความสว่าง" value={display(d.telemetry.brightness, "%")} />
+                      {showSOC && (
+                        <PopupRow label="แบตเตอรี่ (SOC)" value={display(d.telemetry.soc, "%")} />
+                      )}
+                    </>
+                  ) : (
+                    /* ออฟไลน์ — ค่าที่เก็บไว้เป็นค่าค้างจากรอบสุดท้ายที่ติดต่อได้
+                       แสดง "--" เพื่อไม่ให้เข้าใจผิดว่าเป็นค่าปัจจุบัน (กฎเหล็ก #5) */
+                    <>
+                      <PopupRow label="แรงดัน" value="--" />
+                      <PopupRow label="กระแส" value="--" />
+                      <PopupRow label="กำลังไฟฟ้า" value="--" />
+                      <PopupRow label="สถานะไฟ" value="--" />
+                      <PopupRow label="ความสว่าง" value="--" />
+                      {showSOC && <PopupRow label="แบตเตอรี่ (SOC)" value="--" />}
+                      <div
+                        style={{
+                          marginTop: 8,
+                          paddingTop: 8,
+                          borderTop: "1px solid rgba(128,128,128,.25)",
+                          fontSize: 10,
+                          lineHeight: 1.6,
+                          opacity: 0.7,
+                        }}
+                      >
+                        อุปกรณ์ไม่ได้เชื่อมต่อ — ไม่มีข้อมูลปัจจุบัน
+                        <br />
+                        ติดต่อได้ล่าสุด {fmtLastSeen(d.telemetry.updatedAt)}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -191,6 +223,22 @@ export default function MapInner({
       })}
     </MapContainer>
   );
+}
+
+/** เวลาที่ติดต่ออุปกรณ์ได้ล่าสุด (แสดงเป็นเวลาไทย) */
+function fmtLastSeen(iso: string | null): string {
+  if (!iso) return "--";
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? "--"
+    : d.toLocaleString("th-TH", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Bangkok",
+      });
 }
 
 function PopupRow({ label, value }: { label: string; value: string }) {
@@ -203,8 +251,8 @@ function PopupRow({ label, value }: { label: string; value: string }) {
         padding: "2px 0",
       }}
     >
-      <span style={{ color: "#9aa0a6" }}>{label}</span>
-      <strong className="tabular-nums">{value}</strong>
+      <span style={{ opacity: 0.6 }}>{label}</span>
+      <span style={{ fontWeight: 600 }}>{value}</span>
     </div>
   );
 }
