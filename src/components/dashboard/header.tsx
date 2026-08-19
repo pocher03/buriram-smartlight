@@ -245,6 +245,14 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
                   บันทึกการเข้าใช้งานระบบ
                 </span>
               </button>
+              <button
+                type="button"
+                onClick={() => { setProfileOpen(false); setSupportOpen(true); }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-sf-3 dark:hover:bg-dk-sf2 transition text-left border-b border-bdr dark:border-dk-bdr"
+              >
+                <span className="ms ms-f text-grn" style={{ fontSize: 18 }}>support_agent</span>
+                <span className="text-[12px] font-semibold text-t1 dark:text-dk-t1">ติดต่อเจ้าหน้าที่</span>
+              </button>
               <form action={logoutAction}>
                 <button
                   type="submit"
@@ -263,7 +271,7 @@ export function Header({ zones, selectedZone, onZoneChange, weather, user }: Hea
       {logModal && (
         <AccessLogModal variant={logModal} onClose={() => setLogModal(null)} />
       )}
-
+      {supportOpen && <SupportModal onClose={() => setSupportOpen(false)} />}
       {placeholder && (
         <div
           className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4"
