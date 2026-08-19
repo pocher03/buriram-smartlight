@@ -23,6 +23,13 @@ const FALLBACK_OPEN = "18:40:00";
 const FALLBACK_CLOSE = "05:48:00";
 
 const SYSTEM_ALARM_TYPE = "system_blackout";
+
+const LIGHT_ALARM_TYPE = "light_failure";
+
+// เกณฑ์ตัดสิน "ไฟติด" — จากข้อมูลจริง โคมที่ติดกินไฟต่ำสุด 44.4W
+// ตั้ง 20W เผื่อไว้กว้าง กันค่า standby/noise ของ driver
+const LAMP_ON_POWER_W = 20;
+
 const DEVICE_ALARM_TYPE = "offline";
 
 interface DeviceState {
@@ -33,6 +40,7 @@ interface DeviceState {
   lat: number | null;
   lng: number | null;
   isOnline: boolean;
+  actp: number | null;
 }
 
 /** "18:40:00" → นาทีนับจากเที่ยงคืน */
@@ -94,7 +102,7 @@ async function loadDeviceStates(): Promise<DeviceState[]> {
       telemetry: {
         orderBy: { createdAt: "desc" },
         take: 1,
-        select: { onlineStatus: true },
+        select: { onlineStatus: true, actp: true },
       },
     },
   });
@@ -109,6 +117,7 @@ async function loadDeviceStates(): Promise<DeviceState[]> {
       lat: d.lat,
       lng: d.lng,
       isOnline: d.telemetry[0].onlineStatus === 1,
+      actp: d.telemetry[0].actp,
     }));
 }
 
@@ -154,6 +163,47 @@ function findAbnormalDevices(devices: DeviceState[]): Map<string, string> {
   }
 
   return abnormal;
+}
+
+/**
+ * [ชั้น 4] หาต้นที่ "ออนไลน์แต่ไฟไม่ติด"
+ *
+ * เทียบเฉพาะในกลุ่มที่ออนไลน์ด้วยกัน — ไม่ต้องรู้เวลาเปิด/ปิดไฟ
+ *   กลางวัน ทุกต้นไฟดับเหมือนกัน → ไม่มีใครต่าง → ไม่แจ้งเตือน
+ *   กลางคืน ทุกต้นไฟติด → ต้นที่ไม่ติดจะต่างจากพวกทันที
+ *   ฝนตกกลางวัน (ไฟติดเอง) → ครอบคลุมด้วย เพราะไม่ผูกกับเวลา
+ */
+function findLightFailures(devices: DeviceState[]): Map<string, string> {
+  const failures = new Map<string, string>();
+
+  const groups = new Map<DeviceType, DeviceState[]>();
+  for (const d of devices) {
+    if (!d.isOnline) continue;              // ออฟไลน์ → ชั้น 2 รับผิดชอบ
+    if (d.actp == null) continue;           // ไม่มีค่าวัด → ตัดสินไม่ได้
+    const list = groups.get(d.deviceType) ?? [];
+    list.push(d);
+    groups.set(d.deviceType, list);
+  }
+
+  for (const [, group] of Array.from(groups.entries())) {
+    if (group.length < MIN_GROUP_SIZE) continue;
+
+    const lit = group.filter((d) => (d.actp ?? 0) > LAMP_ON_POWER_W);
+    const unlit = group.filter((d) => (d.actp ?? 0) <= LAMP_ON_POWER_W);
+
+    if (unlit.length === 0) continue;       // ทุกต้นไฟติด → ปกติ
+    if (lit.length === 0) continue;         // ทุกต้นไฟดับ → ปกติ (นอกเวลาใช้งาน)
+
+    for (const d of unlit) {
+      failures.set(
+        d.id,
+        `ออนไลน์แต่ไฟไม่ติด (กำลังไฟ ${d.actp ?? 0} W) ` +
+          `ขณะที่อีก ${lit.length}/${group.length} ต้นทำงานปกติ`
+      );
+    }
+  }
+
+  return failures;
 }
 
 /** สร้าง alarm ลง DB */
@@ -309,6 +359,64 @@ await prisma.pendingAlarm.delete({ where: { id: prev.id } });
     console.log(`[smart-alarm] 🔴 ${device.name} — ${reason}`);
   }
 
+
+  // ══════════════════════════════════════════════════════════
+  // [ชั้น 2.5] ออนไลน์แต่ไฟไม่ติด
+  // ══════════════════════════════════════════════════════════
+  const lightFail = findLightFailures(devices);
+  const lightPending = await prisma.pendingAlarm.findMany({
+    where: { alarmType: LIGHT_ALARM_TYPE },
+  });
+
+  // กลับมาปกติแล้ว → ลบ pending
+  for (const p of lightPending) {
+    if (!lightFail.has(p.deviceId)) {
+      await prisma.pendingAlarm.delete({ where: { id: p.id } });
+      cleared++;
+    }
+  }
+
+  for (const [deviceId, reason] of Array.from(lightFail.entries())) {
+    const device = byId.get(deviceId);
+    if (!device) continue;
+
+    const prev = lightPending.find((p) => p.deviceId === deviceId);
+
+    if (!prev) {
+      await prisma.pendingAlarm.create({
+        data: {
+          deviceId,
+          deviceName: device.name,
+          alarmType: LIGHT_ALARM_TYPE,
+          detectedAt: now,
+          checkCount: 1,
+        },
+      });
+      continue;
+    }
+
+    const count = prev.checkCount + 1;
+    if (count < REQUIRED_CHECKS) {
+      await prisma.pendingAlarm.update({
+        where: { id: prev.id },
+        data: { checkCount: count },
+      });
+      continue;
+    }
+
+    await raiseAlarm({
+      deviceName: device.name,
+      name: "โคมไฟไม่ทำงานผิดปกติ",
+      alarmType: LIGHT_ALARM_TYPE,
+      divisionName: device.divisionName,
+      lat: device.lat,
+      lng: device.lng,
+      occurredAt: prev.detectedAt,
+    });
+    await prisma.pendingAlarm.delete({ where: { id: prev.id } });
+    raised++;
+    console.log(`[smart-alarm] 🔴 ${device.name} — ${reason}`);
+  }
   // ══════════════════════════════════════════════════════════
   // [ชั้น 3] ปิด alarm อัตโนมัติเมื่ออุปกรณ์กลับมาปกติ
   // (append-only ยังคงอยู่ — แก้แค่สถานะการจัดการ ไม่แตะข้อมูลเหตุการณ์)
@@ -328,6 +436,23 @@ await prisma.pendingAlarm.delete({ where: { id: prev.id } });
       data: { handleStatus: "done" },
     });
     resolved += r.count;
+    
+      // ไฟกลับมาติดแล้ว → ปิด alarm ไฟไม่ทำงาน
+  const litNames = devices
+    .filter((d) => d.isOnline && (d.actp ?? 0) > LAMP_ON_POWER_W)
+    .map((d) => d.name);
+  if (litNames.length > 0) {
+    const r = await prisma.alarmLog.updateMany({
+      where: {
+        source: "smart",
+        alarmType: LIGHT_ALARM_TYPE,
+        handleStatus: "pending",
+        deviceName: { in: litNames },
+      },
+      data: { handleStatus: "done" },
+    });
+    resolved += r.count;
+  }
   }
 
   // ระดับระบบ: มีต้นใดกลับมาออนไลน์ = ไฟไม่ได้ดับทั้งระบบแล้ว
