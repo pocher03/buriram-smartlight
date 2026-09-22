@@ -41,7 +41,7 @@ export interface Kpi {
 }
 
 /** สถานะที่ UI ใช้แสดงสี — คำนวณจาก online + device profile */
-export type DeviceStatus = "online" | "offline" | "alarm";
+export type DeviceStatus = "lit" | "online" | "offline" | "alarm";
 
 /** Log ฮาร์ดแวร์ (alarm) — APPEND-ONLY */
 export interface AlarmLog {

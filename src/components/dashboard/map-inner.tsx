@@ -6,13 +6,11 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import type { Device } from "@/lib/types";
 import { DEVICE_PROFILES } from "@/lib/device-profiles";
-import { deviceStatus, STATUS_COLOR, STATUS_LABEL } from "@/lib/device-status";
+import { deviceStatus, STATUS_COLOR, STATUS_LABEL, LAMP_ON_POWER_W } from "@/lib/device-status";
 import { display } from "@/lib/null-safe";
 
-const CENTER: [number, number] = [14.992892, 103.113694];
 
-// เกณฑ์ตัดสิน "ไฟติด" — ตรงกับ smart-alarm (ข้อมูลจริง โคมที่ติดกินไฟต่ำสุด 44.4 W)
-const LAMP_ON_POWER_W = 20;
+const CENTER: [number, number] = [14.992892, 103.113694];
 
 function createPulseIcon(color: string) {
   return L.divIcon({
@@ -155,7 +153,7 @@ export default function MapInner({
                 <div
                   style={{
                     background: color,
-                    color: "#fff",
+                    color: status === "lit" ? "#202124" : "#fff",
                     padding: "10px 14px",
                     fontWeight: 700,
                     fontSize: 13,

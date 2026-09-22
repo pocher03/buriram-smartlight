@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import type { Device } from "@/lib/types";
 import type { Zone } from "@/lib/mock-data";
+import { STATUS_COLOR } from "@/lib/device-status";
 
 // ระดับขนาดคอลัมน์แผนที่บน desktop (ปรับ grid-template-columns ใน dashboard.tsx)
 export type MapSize = "auto" | "sm" | "lg";
@@ -83,15 +84,21 @@ export function MapPanel({
             </div>
           )}
 
+          {/* legend — สีดึงจาก STATUS_COLOR ให้ตรงกับ marker เสมอ */}
           <div className="flex items-center gap-2.5 text-[10px] text-t2 dark:text-dk-t2">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-grn inline-block" />
-              ออนไลน์
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red inline-block" />
-              ออฟไลน์
-            </span>
+            {[
+              { key: "lit", label: "ไฟติด", hint: "ออนไลน์และไฟติด" },
+              { key: "online", label: "ไฟดับ", hint: "ออนไลน์ แต่ไฟดับ" },
+              { key: "offline", label: "ออฟไลน์", hint: "ติดต่ออุปกรณ์ไม่ได้" },
+            ].map((s) => (
+              <span key={s.key} className="flex items-center gap-1" title={s.hint}>
+                <span
+                  className="w-2 h-2 rounded-full inline-block"
+                  style={{ background: STATUS_COLOR[s.key as keyof typeof STATUS_COLOR] }}
+                />
+                {s.label}
+              </span>
+            ))}
           </div>
           <div className="hidden md:block text-[9px] text-t3 bg-sf-3 dark:bg-dk-sf2 px-2 py-1 rounded-full border border-bdr dark:border-dk-bdr">
             คลิก Marker เพื่อดูข้อมูล
