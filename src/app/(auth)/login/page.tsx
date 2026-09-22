@@ -155,10 +155,6 @@ export default function LoginPage() {
                 ติดต่อเจ้าหน้าที่
               </Link>
             </div>
-
-            <p style={{ fontSize: 10, color: "#9aa0a6", textAlign: "center", marginTop: 12 }}>
-              ระบบยืนยันตัวตน บริษัท จัมโบ้ อิเล็คทรอนิคส์ จำกัด
-            </p>
           </form>
 
           <div style={{ textAlign: "center", marginTop: 20, fontSize: 11, color: "#9aa0a6" }}>

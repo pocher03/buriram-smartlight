@@ -49,11 +49,13 @@ async function fetchAllObjects(divisionId: number): Promise<ObjectItem[]> {
   const size = 100;
   const all: ObjectItem[] = [];
   for (let page = 0; page < 20; page++) {
+    // หมายเหตุ (ก.ย. 2569): หลัง RULR อัปเดต API การส่ง filterRequest ทำให้ได้ HTTP 500
+    // และต้นทางส่ง thingsAttributeList มาให้เป็นค่าเริ่มต้นแล้ว จึงไม่ต้องส่ง
+    // (พิกัดไม่ได้มาจาก endpoint นี้ — backfill จาก alarm log จึงไม่กระทบ)
     const data = await rulrPost<ObjectPage>("/mm/api/things/object/page", {
       divisionId,
       page,
       size,
-      filterRequest: { fillThingsLocation: true, fillThingsAttribute: true },
     });
     const rows = data.pageData ?? [];
     all.push(...rows);
