@@ -1,14 +1,19 @@
 // src/workers/jobs/smart-alarm.ts
 // วิเคราะห์การแจ้งเตือนเองจาก telemetry แทนการดึง alarm จาก RULR
 //
-// ๔ ชั้นการตรวจจับ (แต่ละชั้นจับเคสที่ชั้นอื่นมองไม่เห็น):
-//   [1] ไฟดับทั้งระบบผิดเวลา  — peer comparison ตาบอดเมื่อทุกต้นดับพร้อมกัน
-//   [2] อุปกรณ์ออฟไลน์        — สายขาด / ถูกขโมย / ไฟดับเฉพาะจุด
-//   [3] ออนไลน์แต่ไฟไม่ติด    — controller ทำงาน แต่โคมไม่กินไฟ
-//   [4] กำลังไฟผิดปกติ        — โคมยังกินไฟ แต่น้อย/มากกว่าที่ควร (หลอดเสีย/driver เสื่อม)
+// ── ลำดับการตัดสิน (หยุดที่เงื่อนไขแรกที่เข้า) ──
+//   [0] ข้อมูลเก่าเกิน 60 นาที → ข้ามรอบทั้งหมด (ต้นทางน่าจะมีปัญหา)
+//   [1] ไฟดับทั้งระบบผิดเวลา   → peer comparison ตาบอดเมื่อทุกต้นดับพร้อมกัน
+//   [2] อุปกรณ์ออฟไลน์         → สายขาด / ถูกขโมย / ไฟดับเฉพาะจุด
+//   [3] ออนไลน์แต่ไฟไม่ติด     → controller ทำงาน แต่โคมไม่กินไฟ
+//   [4] กำลังไฟผิดปกติ         → โคมยังกินไฟ แต่ผิดสัดส่วนความสว่าง (หลอดเสีย/driver เสื่อม)
 //
-// ทุกชั้นยืนยัน 3 รอบ (~90 นาที) ก่อนสร้าง alarm จริง — กัน false alarm จาก
-// สัญญาณ NB-IoT ที่แกว่งเป็นปกติ และช่วง transition ที่ไฟทยอยติด/ดับ
+// หลักการกัน false alarm:
+//   - ทุกชั้นยืนยัน 3 รอบ (~90 นาที) ก่อนแจ้งจริง — กันสัญญาณ NB-IoT ที่แกว่งเป็นปกติ
+//     และช่วง transition ที่ไฟทยอยติด/ดับ
+//   - ไม่แจ้งซ้ำถ้ายังมี alarm ชนิดเดียวกันค้าง "รอดำเนินการ" อยู่ (เหตุการณ์เดียว = 1 รายการ)
+//   - ข้ามรอบเมื่อข้อมูลไม่สด — บทเรียนจาก ก.ย. 2569 ที่ RULR API พัง 7 วัน
+//     แล้วระบบอ่านข้อมูลค้างจนสร้าง alarm เท็จสะสม 51 รายการ
 //
 // เมื่ออุปกรณ์กลับมาปกติ ระบบปิด alarm ให้อัตโนมัติ (แก้เฉพาะสถานะการจัดการ
 // ไม่แตะข้อมูลเหตุการณ์ — append-only ยังคงอยู่)
@@ -19,6 +24,9 @@ import { DEVICE_PROFILES, type DeviceType } from "../../lib/device-profiles";
 // ── ค่าคงที่ ────────────────────────────────────────────────
 const REQUIRED_CHECKS = 3; // ต้องผิดปกติต่อเนื่องกี่รอบถึงจะแจ้งเตือน
 const MIN_GROUP_SIZE = 2;  // กลุ่มที่มีต้นเดียว เทียบกับเพื่อนไม่ได้
+
+// worker sync ทุก 30 นาที — ข้อมูลเก่ากว่านี้แปลว่าพลาดไปอย่างน้อย 1 รอบ
+const MAX_DATA_AGE_MIN = 60;
 
 // buffer รอบเวลาเปิด/ปิดไฟ — ข้อมูลจริงพบว่าไฟทยอยติด/ดับใช้เวลาราว 1 ชม.
 const OPEN_BUFFER_MIN = 45;
@@ -44,6 +52,8 @@ const DEVICE_ALARM_TYPE = "offline";
 const LIGHT_ALARM_TYPE = "light_failure";
 const POWER_ALARM_TYPE = "power_anomaly";
 
+const SYSTEM_DEVICE_NAME = "ระบบทั้งหมด";
+
 interface DeviceState {
   id: string;
   name: string;
@@ -54,6 +64,7 @@ interface DeviceState {
   isOnline: boolean;
   actp: number | null;
   brightness: number | null;
+  measuredAt: Date;
 }
 
 // ── เวลา ────────────────────────────────────────────────────
@@ -77,6 +88,15 @@ function nowMinutesBangkok(): number {
   const h = Number(parts.find((p) => p.type === "hour")?.value ?? 0);
   const m = Number(parts.find((p) => p.type === "minute")?.value ?? 0);
   return h * 60 + m;
+}
+
+/** เวลาไทยอ่านง่ายสำหรับ log */
+function fmtBangkok(d: Date): string {
+  return d.toLocaleString("th-TH", {
+    day: "2-digit", month: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+    hour12: false, timeZone: "Asia/Bangkok",
+  });
 }
 
 /**
@@ -118,7 +138,7 @@ async function loadDeviceStates(): Promise<DeviceState[]> {
       telemetry: {
         orderBy: { createdAt: "desc" },
         take: 1,
-        select: { onlineStatus: true, actp: true, brightness: true },
+        select: { onlineStatus: true, actp: true, brightness: true, createdAt: true },
       },
     },
   });
@@ -135,6 +155,7 @@ async function loadDeviceStates(): Promise<DeviceState[]> {
       isOnline: d.telemetry[0].onlineStatus === 1,
       actp: d.telemetry[0].actp,
       brightness: d.telemetry[0].brightness,
+      measuredAt: d.telemetry[0].createdAt,
     }));
 }
 
@@ -261,6 +282,15 @@ function findPowerAnomalies(devices: DeviceState[]): Map<string, string> {
 
 // ── สร้าง alarm ─────────────────────────────────────────────
 
+/** มี alarm ชนิดนี้ของอุปกรณ์นี้ค้าง "รอดำเนินการ" อยู่แล้วหรือไม่ */
+async function hasOpenAlarm(alarmType: string, deviceName: string): Promise<boolean> {
+  const existing = await prisma.alarmLog.findFirst({
+    where: { source: "smart", alarmType, deviceName, handleStatus: "pending" },
+    select: { id: true },
+  });
+  return existing !== null;
+}
+
 async function raiseAlarm(opts: {
   deviceName: string;
   name: string;
@@ -288,7 +318,7 @@ async function raiseAlarm(opts: {
 
 /**
  * นับรอบยืนยัน แล้วสร้าง alarm เมื่อครบ — ใช้ร่วมกันทุกชั้นที่ตรวจรายอุปกรณ์
- * คืนจำนวน alarm ที่สร้าง และจำนวน pending ที่ยกเลิก
+ * ถ้าอุปกรณ์นั้นมี alarm ชนิดเดียวกันค้างอยู่แล้ว จะไม่สร้างซ้ำ
  */
 async function processDeviceAnomalies(opts: {
   found: Map<string, string>;
@@ -342,7 +372,13 @@ async function processDeviceAnomalies(opts: {
       continue;
     }
 
-    // ครบรอบ → ยืนยันว่าเป็นปัญหาจริง
+    // ครบรอบแล้ว — แต่ถ้ายังมี alarm เดิมค้างอยู่ ไม่ต้องแจ้งซ้ำ
+    // (เหตุการณ์เดียวควรมี 1 รายการ จนกว่าอุปกรณ์จะกลับมาปกติ)
+    if (await hasOpenAlarm(alarmType, device.name)) {
+      await prisma.pendingAlarm.delete({ where: { id: prev.id } });
+      continue;
+    }
+
     await raiseAlarm({
       deviceName: device.name,
       name: alarmName,
@@ -375,6 +411,30 @@ export async function runSmartAlarm(): Promise<{
   }
 
   const now = new Date();
+
+  // ══════════════════════════════════════════════════════════
+  // [ชั้น 0] ข้อมูลสดพอจะตัดสินหรือไม่
+  //
+  // worker sync ทุก 30 นาที ถ้าข้อมูลใหม่สุดยังเก่ากว่า 60 นาที แปลว่า
+  // การ sync ล้มเหลว (ต้นทาง API พัง / token หมดอายุ / เครือข่ายมีปัญหา)
+  // การตัดสินจากข้อมูลค้างจะได้ผลลัพธ์เท็จ — จึงข้ามรอบและเตือนไว้ใน log
+  // ══════════════════════════════════════════════════════════
+  const latestAt = devices.reduce(
+    (max, d) => (d.measuredAt > max ? d.measuredAt : max),
+    devices[0].measuredAt
+  );
+  const ageMin = Math.round((now.getTime() - latestAt.getTime()) / 60000);
+
+  if (ageMin > MAX_DATA_AGE_MIN) {
+    console.warn(
+      `[smart-alarm] ⏸️  ข้ามรอบ — ข้อมูลล่าสุดเก่า ${ageMin} นาที ` +
+        `(วัดเมื่อ ${fmtBangkok(latestAt)}) เกินเกณฑ์ ${MAX_DATA_AGE_MIN} นาที · ` +
+        `ตรวจสอบว่า sync-objects ทำงานปกติหรือไม่`
+    );
+    const stillPending = await prisma.pendingAlarm.count();
+    return { checked: devices.length, pending: stillPending, raised: 0, cleared: 0 };
+  }
+
   const byId = new Map(devices.map((d) => [d.id, d]));
   const { inside, label } = await isInsideStableWindow();
   const allOffline = devices.every((d) => !d.isOnline);
@@ -394,7 +454,7 @@ export async function runSmartAlarm(): Promise<{
       await prisma.pendingAlarm.create({
         data: {
           deviceId: "__system__",
-          deviceName: "ระบบทั้งหมด",
+          deviceName: SYSTEM_DEVICE_NAME,
           alarmType: SYSTEM_ALARM_TYPE,
           detectedAt: now,
           checkCount: 1,
@@ -409,9 +469,12 @@ export async function runSmartAlarm(): Promise<{
           data: { checkCount: count },
         });
         console.log(`[smart-alarm] ⚠️  ทุกต้นยังออฟไลน์ (${count}/${REQUIRED_CHECKS})`);
+      } else if (await hasOpenAlarm(SYSTEM_ALARM_TYPE, SYSTEM_DEVICE_NAME)) {
+        // แจ้งไปแล้วและยังไม่ได้รับการแก้ไข — ไม่แจ้งซ้ำ
+        await prisma.pendingAlarm.delete({ where: { id: sysPending.id } });
       } else {
         await raiseAlarm({
-          deviceName: "ระบบทั้งหมด",
+          deviceName: SYSTEM_DEVICE_NAME,
           name: "ไฟดับทั้งระบบผิดปกติ",
           alarmType: SYSTEM_ALARM_TYPE,
           divisionName: devices[0]?.divisionName ?? null,
@@ -514,15 +577,7 @@ export async function runSmartAlarm(): Promise<{
 
   // ระดับระบบ: มีต้นใดกลับมาออนไลน์ = ไฟไม่ได้ดับทั้งระบบแล้ว
   if (!allOffline) {
-    const r = await prisma.alarmLog.updateMany({
-      where: {
-        source: "smart",
-        alarmType: SYSTEM_ALARM_TYPE,
-        handleStatus: "pending",
-      },
-      data: { handleStatus: "done" },
-    });
-    resolved += r.count;
+    await closeAlarms(SYSTEM_ALARM_TYPE, [SYSTEM_DEVICE_NAME]);
   }
 
   if (resolved > 0) {
@@ -537,7 +592,7 @@ export async function runSmartAlarm(): Promise<{
 
   console.log(
     `[smart-alarm] ตรวจ ${devices.length} ต้น (ออนไลน์ ${onlineCount} · ไฟติด ${litCount}) · ` +
-      `ช่วงตรวจระบบ ${label}${inside ? " ✓" : " ✗"} · ` +
+      `ข้อมูลอายุ ${ageMin} นาที · ช่วงตรวจระบบ ${label}${inside ? " ✓" : " ✗"} · ` +
       `ผิดปกติ ${totalFound} (ออฟไลน์ ${offlineFound.size} · ไฟไม่ติด ${lightFound.size} · กำลังไฟ ${powerFound.size}) · ` +
       `รอยืนยัน ${stillPending} · แจ้งเตือนใหม่ ${raised} · ยกเลิก ${cleared} · ปิดอัตโนมัติ ${resolved}`
   );
