@@ -118,9 +118,16 @@ const liveAdapter: DataAdapter = {
           where: { projectId },
           orderBy: { fetchedAt: "desc" },
         }),
+        // โซนปัญหา — นับเฉพาะที่ยังไม่ได้แก้ไข และต้องระบุโซนได้
+        // (alarm ระดับระบบ เช่น ไฟดับทั้งระบบ ไม่มี divisionName จึงไม่นับเป็นโซน)
         prisma.alarmLog.groupBy({
           by: ["divisionName"],
-          where: { source: "smart", alarmLevel: { not: "ok" } },
+          where: {
+            source: "smart",
+            alarmLevel: { not: "ok" },
+            handleStatus: "pending",
+            divisionName: { not: null },
+          },
           _count: { _all: true },
         }),
       ]);
@@ -173,7 +180,8 @@ const liveAdapter: DataAdapter = {
       : { temp: null, desc: null, humidity: null, pm25: null, co2: null };
 
     const faultAreas: FaultArea[] = faultGroups
-      .map((g: any) => ({ name: g.divisionName ?? "ไม่ระบุ", count: g._count._all }))
+      .filter((g: any) => g.divisionName) // กันกรณี null หลุดมา
+      .map((g: any) => ({ name: g.divisionName as string, count: g._count._all }))
       .sort((a: any, b: any) => b.count - a.count)
       .slice(0, 5);
 
